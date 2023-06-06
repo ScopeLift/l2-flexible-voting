@@ -2,17 +2,14 @@
 pragma solidity ^0.8.0;
 
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
-import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
+import {L1VotePool} from "src/L1VotePool.sol";
 
-contract L1ERC20Bridge {
+contract L1ERC20Bridge is L1VotePool {
   /// @notice L1 token used for deposits and voting.
   ERC20Votes public immutable L1_TOKEN;
 
   /// @notice Token address which is minted on L2.
   address public L2_TOKEN_ADDRESS;
-
-  /// @notice The core Wormhole contract used to send messages to L2.
-  IWormhole immutable CORE_BRIDGE;
 
   /// @notice A unique number used to send messages.
   uint32 public nonce;
@@ -25,9 +22,11 @@ contract L1ERC20Bridge {
 
   /// @param l1TokenAddress The address of the L1 token.
   /// @param _core The address of the core wormhole contract.
-  constructor(address l1TokenAddress, address _core) {
+  /// @param _governor The address of the L1 governor.
+  constructor(address l1TokenAddress, address _core, address _governor)
+    L1VotePool(_core, _governor)
+  {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
-    CORE_BRIDGE = IWormhole(_core);
   }
 
   /// @notice Must be called before bridging tokens to L2.
