@@ -6,7 +6,7 @@ import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
-contract L1VotePool is WormholeReceiver {
+abstract contract L1VotePool is WormholeReceiver {
   /// @notice The address of the L1 Governor contract.
   IGovernor public governor;
 
@@ -26,24 +26,28 @@ contract L1VotePool is WormholeReceiver {
   /// @notice A mapping of proposal id to the proposal vote distribution.
   mapping(uint256 => ProposalVote) public proposalVotes;
 
-  /// @param _core The address of the Wormhole Core contract.
+  /// @param _relayer The address of the Wormhole Relayer.
   /// @param _governor The address of the L1 Governor contract.
-  constructor(address _core, address _governor) WormholeReceiver(_core) {
+  constructor(address _relayer, address _governor) WormholeReceiver(_relayer) {
     governor = IGovernor(_governor);
   }
 
   /// @notice Receives a message from L2 and saves the proposal vote distribution.
-  /// @param encodedMsg The encoded message Wormhole VAA from the L2.
-  function receiveEncodedMsg(bytes memory encodedMsg) public override {
-    (IWormhole.VM memory vm,,) = _validateMessage(encodedMsg);
-
+  /// @param payload The payload that was sent to in the delivery request.
+  function _receiveCastVoteWormholeMessages(
+    bytes memory payload,
+    bytes[] memory,
+    bytes32,
+    uint16,
+    bytes32
+  ) internal {
     (uint256 proposalId, uint128 against, uint128 inFavor, uint128 abstain) =
-      abi.decode(vm.payload, (uint256, uint128, uint128, uint128));
+      abi.decode(payload, (uint256, uint128, uint128, uint128));
 
     ProposalVote memory existingProposalVote = proposalVotes[proposalId];
     if (
-      existingProposalVote.against < against || existingProposalVote.inFavor < inFavor
-        || existingProposalVote.abstain < abstain
+      existingProposalVote.against > against || existingProposalVote.inFavor > inFavor
+        || existingProposalVote.abstain > abstain
     ) revert InvalidProposalVote();
 
     // Save proposal vote

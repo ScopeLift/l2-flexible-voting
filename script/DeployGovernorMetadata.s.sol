@@ -36,7 +36,8 @@ contract DeployGovernorMetadata is Script, Constants {
 
     // Create L1 Governor metadata bridge
     vm.broadcast();
-    L1GovernorMetadataBridge bridge = new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji);
+    L1GovernorMetadataBridge bridge =
+    new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
 
     // Add L2 metadata contract to L1 Governor metadata bridge
     vm.broadcast();

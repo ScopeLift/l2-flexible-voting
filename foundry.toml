@@ -5,6 +5,7 @@
   remappings = [
     "wormhole/=lib/wormhole/ethereum/contracts",
     "openzeppelin/=lib/openzeppelin-contracts/contracts",
+    "openzeppelin-flexible-voting/=lib/flexible-voting/lib/openzeppelin-contracts/contracts/",
   ]
   solc_version = "0.8.16"
   verbosity = 3

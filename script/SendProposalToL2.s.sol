@@ -16,9 +16,11 @@ contract SendProposalToL2 is Script, Constants {
     string memory governorMetadataDeploy =
       "broadcast/multi/DeployGovernorMetadata.s.sol-latest/run.json";
     string memory json = vm.readFile(governorMetadataDeploy);
+    address governorMock = json.readAddress(".deployments[1].transactions[0].contractAddress");
 
-    address governorErc20 = json.readAddress(".deployments[1].transactions[0].contractAddress");
-    address governorMock = json.readAddress(".deployments[1].transactions[1].contractAddress");
+    string memory tokenFile = "broadcast/DeployFakeERC20.s.sol/43113/run-latest.json";
+    string memory tokenJson = vm.readFile(tokenFile);
+    address governorErc20 = tokenJson.readAddress(".transactions[0].contractAddress");
     address l1GovernorMetadataBridge =
       json.readAddress(".deployments[1].transactions[2].contractAddress");
 
@@ -43,8 +45,11 @@ contract SendProposalToL2 is Script, Constants {
       string.concat("Proposal: To inflate governance token", string(abi.encode(block.number)))
     );
 
+    IL1GovernorMetadataBridge metadataBridge = IL1GovernorMetadataBridge(l1GovernorMetadataBridge);
+    uint256 cost = metadataBridge.quoteDeliveryCost(wormholePolygonId);
+
     // Bridge proposal from the L1 to the L2
     vm.broadcast();
-    IL1GovernorMetadataBridge(l1GovernorMetadataBridge).bridge(proposalId);
+    metadataBridge.bridge{value: cost}(proposalId);
   }
 }
