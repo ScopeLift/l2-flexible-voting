@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
+import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
+
 import {L1VotePool} from "src/L1VotePool.sol";
 
 contract L1ERC20Bridge is L1VotePool {
@@ -49,5 +51,20 @@ contract L1ERC20Bridge is L1VotePool {
     sequence = CORE_BRIDGE.publishMessage(nonce, mintCalldata, 1);
     nonce = nonce + 1;
     return sequence;
+  }
+
+  /// @notice Receives an encoded withdrawal message from the L2
+  /// @param encodedMsg The encoded message from the L2 with the withdrawal information.
+  function receiveEncodedWithdrawalMsg(bytes memory encodedMsg) public {
+    (IWormhole.VM memory vm,,) = _validateMessage(encodedMsg);
+    (address account, uint256 amount) = abi.decode(vm.payload, (address, uint256));
+    _withdraw(account, amount);
+  }
+
+  /// @notice Withdraws deposited tokens to an account.
+  /// @param account The address of the user withdrawing tokens.
+  /// @param amount The amount of tokens to withdraw.
+  function _withdraw(address account, uint256 amount) internal {
+    L1_TOKEN.transferFrom(address(this), account, amount);
   }
 }
