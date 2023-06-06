@@ -19,25 +19,25 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   L2GovernorMetadata l2GovernorMetadata;
 
   constructor() {
-    setTestnetForkChains(6, 5);
+    setForkChains(TESTNET, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
 
   function setUpSource() public override {
     ERC20Votes erc20 = new FakeERC20("GovExample", "GOV");
     governorMock = new GovernorMock("Testington Dao", erc20);
     l1GovernorMetadataBridge =
-    new L1GovernorMetadataBridge(address(governorMock), wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
+    new L1GovernorMetadataBridge(address(governorMock), L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {
-    l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
+    l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
   }
 }
 
 contract Constructor is Test, Constants {
   function testFork_CorrectlySetAllArgs(address governorMock) public {
     L1GovernorMetadataBridge l1GovernorMetadataBridge =
-    new L1GovernorMetadataBridge(governorMock, wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
+    new L1GovernorMetadataBridge(governorMock, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
     assertEq(
       address(l1GovernorMetadataBridge.GOVERNOR()), governorMock, "Governor is not set correctly"
     );
@@ -68,7 +68,7 @@ contract Initialize is L1GovernorMetadataBridgeTest {
 contract BridgeProposalMetadata is L1GovernorMetadataBridgeTest {
   function testFork_CorrectlyBridgeProposal(uint224 _amount) public {
     l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
-    uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(wormholeFujiId);
+    uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
     vm.recordLogs();
 
     bytes memory proposalCalldata =
@@ -100,7 +100,7 @@ contract BridgeProposalMetadata is L1GovernorMetadataBridgeTest {
 
   function testFork_RevertWhen_ProposalIsMissing(uint256 _proposalId) public {
     l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
-    uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(wormholeFujiId);
+    uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
     vm.recordLogs();
 
     vm.expectRevert(L1GovernorMetadataBridge.InvalidProposalId.selector);

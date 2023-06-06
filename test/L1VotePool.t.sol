@@ -105,22 +105,22 @@ contract L1VotePoolTest is Constants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
 
   constructor() {
-    setTestnetForkChains(5, 6);
+    setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpSource() public override {
-    GovernorMetadataMock l2GovernorMetadata = new GovernorMetadataMock(wormholeCoreMumbai);
+    GovernorMetadataMock l2GovernorMetadata = new GovernorMetadataMock(L2_CHAIN.wormholeRelayer);
     L1Block l1Block = new L1Block();
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     l2VoteAggregator =
-    new L2VoteAggregatorHarness(address(l2Erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
+    new L2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {
     l1Erc20 = new FakeERC20("GovExample", "GOV");
     GovernorFlexibleVotingMock gov =
       new GovernorFlexibleVotingMock("Testington Dao", ERC20VotesComp(address(l1Erc20)));
-    l1VotePool = new L1VotePoolHarness(wormholeCoreFuji, address(gov));
+    l1VotePool = new L1VotePoolHarness(L1_CHAIN.wormholeRelayer, address(gov));
   }
 }
 
@@ -129,7 +129,7 @@ contract Constructor is L1VotePoolTest {
     l1Erc20 = new FakeERC20("GovExample", "GOV");
     GovernorFlexibleVotingMock gov =
       new GovernorFlexibleVotingMock("Testington Dao", ERC20VotesComp(address(l1Erc20)));
-    l1VotePool = new L1VotePoolHarness(wormholeCoreFuji, address(gov));
+    l1VotePool = new L1VotePoolHarness(L1_CHAIN.wormholeRelayer, address(gov));
 
     assertEq(address(l1VotePool.governor()), address(gov), "Governor is not set correctly");
   }
@@ -154,7 +154,7 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
 
     vm.selectFork(sourceFork);
     l2VoteAggregator.initialize(address(l1VotePool));
-    uint256 cost = l2VoteAggregator.quoteDeliveryCost(wormholeFujiId);
+    uint256 cost = l2VoteAggregator.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
     vm.recordLogs();
     vm.deal(address(this), 10 ether);
 
@@ -200,7 +200,7 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
 
     vm.selectFork(sourceFork);
     l2VoteAggregator.initialize(address(l1VotePool));
-    uint256 cost = l2VoteAggregator.quoteDeliveryCost(wormholeFujiId);
+    uint256 cost = l2VoteAggregator.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
     vm.recordLogs();
     vm.deal(address(this), 10 ether);
 
@@ -242,7 +242,7 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
     uint256 _proposalId =
       l1VotePool.createProposalVote(address(l1Erc20), _l2Against, _l2InFavor, _l2Abstain);
 
-    vm.prank(wormholeCoreFuji);
+    vm.prank(L1_CHAIN.wormholeRelayer);
     vm.expectRevert(L1VotePool.InvalidProposalVote.selector);
     l1VotePool.receiveWormholeMessages(
       abi.encode(_proposalId, _l2NewAgainst, _l2NewInFavor, _l2NewAbstain),

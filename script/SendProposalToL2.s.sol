@@ -25,7 +25,7 @@ contract SendProposalToL2 is Script, Constants {
       json.readAddress(".deployments[1].transactions[2].contractAddress");
 
     setFallbackToDefaultRpcUrls(false);
-    vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
+    vm.createSelectFork(L1_CHAIN.rpcUrl);
     bytes memory mintCalldata = abi.encode(FakeERC20.mint.selector, governorMock, 1 ether);
 
     address[] memory targets = new address[](1);
@@ -46,7 +46,7 @@ contract SendProposalToL2 is Script, Constants {
     );
 
     IL1GovernorMetadataBridge metadataBridge = IL1GovernorMetadataBridge(l1GovernorMetadataBridge);
-    uint256 cost = metadataBridge.quoteDeliveryCost(wormholePolygonId);
+    uint256 cost = metadataBridge.quoteDeliveryCost(L2_CHAIN.wormholeChainId);
 
     // Bridge proposal from the L1 to the L2
     vm.broadcast();

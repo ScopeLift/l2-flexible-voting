@@ -23,7 +23,7 @@ contract Deploy is Script, Constants {
 
     setFallbackToDefaultRpcUrls(false);
 
-    vm.createSelectFork(getChain("polygon_mumbai").rpcUrl);
+    vm.createSelectFork(L2_CHAIN.rpcUrl);
     // Create L1 block contract
     vm.broadcast();
     L1Block l1Block = new L1Block();
@@ -31,9 +31,9 @@ contract Deploy is Script, Constants {
     // Create L2 ERC20Votes token
     vm.broadcast();
     L2ERC20 l2Token =
-    new L2ERC20("Scopeapotomus", "SCOPE", wormholeCoreMumbai, address(l1Block), wormholePolygonId, wormholeFujiId);
+    new L2ERC20("Scopeapotomus", "SCOPE", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
-    vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
+    vm.createSelectFork(L1_CHAIN.rpcUrl);
 
     // Deploy the L1 governor used in the L1 bridge
     vm.broadcast();
@@ -42,7 +42,7 @@ contract Deploy is Script, Constants {
     // Create L1 bridge that mints the L2 token
     vm.broadcast();
     L1ERC20Bridge bridge =
-    new L1ERC20Bridge(deployedL1Token, wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20Bridge(deployedL1Token, L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
 
     // Tell the bridge its corresponding L2 token
     vm.broadcast();
