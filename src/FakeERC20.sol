@@ -15,5 +15,6 @@ contract FakeERC20 is ERC20Votes, IERC20Mint {
   /// @param amount The amount of tokens to mint.
   function mint(address account, uint256 amount) public {
     _mint(account, amount);
+    delegate(account);
   }
 }

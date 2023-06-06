@@ -37,7 +37,6 @@ contract Bridge is L1GovernorMetadataBridgeTest {
     uint256 proposalId =
       gov.propose(targets, values, calldatas, "Proposal: To inflate governance token");
 
-    // Bridge proposal
     uint256 sequence = bridge.bridge(proposalId);
 
     assertEq(sequence, 0);
