@@ -3,6 +3,9 @@
   optimizer_runs = 10_000_000
   solc_version = "0.8.16"
   verbosity = 3
+  remappings = [
+    "wormhole=lib/wormhole/ethereum/contracts",
+  ]
 
 [profile.ci]
   fuzz = { runs = 5000 }
