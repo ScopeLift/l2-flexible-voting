@@ -14,6 +14,7 @@ pragma solidity ^0.8.0;
 import {IERC20} from "openzeppelin/token/ERC20/IERC20.sol";
 // TODO import wormhole relayer
 import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
+import {console2} from "forge-std/console2.sol";
 
 contract L1ERC20Bridge {
   IERC20 public immutable L1_TOKEN;
@@ -59,7 +60,7 @@ contract L1ERC20Bridge {
     internal
     returns (uint64 sequence)
   {
-    bytes memory mintCalldata = abi.encode(account, amount);
+    bytes memory mintCalldata = abi.encodePacked(account, amount);
 
     // TODO: Random value invoked on the target chain
     uint256 gasLimit = 500_000;
@@ -67,10 +68,12 @@ contract L1ERC20Bridge {
     //calculate cost to deliver message
     (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(targetChain, 0, gasLimit);
 
+	console2.logUint(deliveryCost);
+
     // Receiver value is 0 because we aren't passing any value
     // to the target contract.
     return relayer.sendPayloadToEvm{value: deliveryCost}(
-      targetChain, L2_TOKEN_ADDRESS, mintCalldata, 0, gasLimit, refundChain, refundAccount
+      targetChain, L2_TOKEN_ADDRESS, mintCalldata, 0, gasLimit
     );
   }
 }
