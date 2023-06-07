@@ -27,3 +27,4 @@ Our initial architecture is shown in the diagram below. This provides a high lev
 This project is available under the [MIT](LICENSE.txt) license.
 
 Copyright (c) 2023 ScopeLift
+

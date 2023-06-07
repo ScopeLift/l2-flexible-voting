@@ -11,13 +11,13 @@ pragma solidity ^0.8.0;
 
 // Test from optimism Goerli to optimism goerli
 
-import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "openzeppelin/token/ERC20/IERC20.sol";
 // TODO import wormhole relayer
-import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol"
+import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
 
 contract L1ERC20Bridge {
   IERC20 public immutable L1_TOKEN;
-  address public immutable L2_TOKEN_ADDRESS;
+  address public L2_TOKEN_ADDRESS;
 
   // trusted relayer contract on this chain
   IWormholeRelayer immutable relayer;
@@ -25,26 +25,25 @@ contract L1ERC20Bridge {
   // Wormhole id for the target chain
   uint16 public immutable targetChain;
 
-  // Contract address on the target chain. We can probably use
-  // create2 for this.
-  address public immutable targetContract;
+  bool public INITIALIZED = false;
 
-  constructor(
-    address l1TokenAddress,
-    address l2TokenAddress,
-    address _coreRelayer,
-    uint16 targetChain,
-    address targetContract
-  ) {
+  constructor(address l1TokenAddress, address _coreRelayer, uint16 _targetChain) {
     L1_TOKEN = IERC20(l1TokenAddress);
-    L2_TOKEN_ADDRESS = l2TokenAddress;
     relayer = IWormholeRelayer(_coreRelayer);
-    targetChain = targetChain;
-    targetContract = targetContract;
+    targetChain = _targetChain;
+  }
+
+  function initialize(address l2TokenAddress) public {
+    if (!INITIALIZED) {
+      INITIALIZED = true;
+      L2_TOKEN_ADDRESS = l2TokenAddress;
+    }
   }
 
   function deposit(address account, uint256 amount, address refundAccount, uint16 refundChain)
-    external payable returns (uint64 sequence)
+    external
+    payable
+    returns (uint64 sequence)
   {
     // TODO keep track of deposit
     L1_TOKEN.transferFrom(msg.sender, address(this), amount);
@@ -56,19 +55,22 @@ contract L1ERC20Bridge {
   }
 
   // Can't really test because relayers not released yet
-  function _l2Mint(address account, uint256 amount, address refundAccount, uint16 refundChain) external payable returns (uint64 sequence) {
+  function _l2Mint(address account, uint256 amount, address refundAccount, uint16 refundChain)
+    internal
+    returns (uint64 sequence)
+  {
     bytes memory mintCalldata = abi.encode(account, amount);
 
     // TODO: Random value invoked on the target chain
     uint256 gasLimit = 500_000;
 
     //calculate cost to deliver message
-    (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(targetChain, receiverValue, gasLimit);
+    (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(targetChain, 0, gasLimit);
 
     // Receiver value is 0 because we aren't passing any value
     // to the target contract.
     return relayer.sendPayloadToEvm{value: deliveryCost}(
-      targetChain, targetContract, mintCalldata, 0, gasLimit, refundChain, refundAccount
+      targetChain, L2_TOKEN_ADDRESS, mintCalldata, 0, gasLimit, refundChain, refundAccount
     );
   }
 }

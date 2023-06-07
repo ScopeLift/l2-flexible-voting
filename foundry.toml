@@ -1,15 +1,20 @@
 [profile.default]
   optimizer = true
   optimizer_runs = 10_000_000
+  remappings = [
+    "wormhole/=lib/wormhole/ethereum/contracts",
+    "openzepplin/=lib/openzepplin-contracts/contracts",
+  ]
   solc_version = "0.8.16"
   verbosity = 3
-  remappings = [
-    "wormhole=lib/wormhole/ethereum/contracts",
-  ]
 
 [profile.ci]
   fuzz = { runs = 5000 }
   invariant = { runs = 1000 }
+
+[rpc_endpoints]
+  polygon_mumbai = "${MUMBAI_RPC_URL}"
+  avalanche_fuji = "${FUJI_RPC_URL}"
 
 [profile.lite]
   fuzz = { runs = 50 }
