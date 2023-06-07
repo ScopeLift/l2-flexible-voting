@@ -167,3 +167,8 @@ If you have a private repo and don't want to purchase a license, the best option
 FakeERC2:0x630567c26340da0700e6572e0ffa72e10e002b35 on Avalanche testnet (Fuji)
 L2TOken: 0x630567c26340da0700e6572e0ffa72e10e002b35
 L1Bridge: 0xf11d8878b388b2456a9fe9f6bb979e920f340a52
+
+forge verify-contract 0x01d000ba996f4184794efb0beecd666db1df51a3 src/UmbraGrantNFT.sol:UmbraGrantNFT --chain-id 1i37 --watch --flatten --compiler-version  0.8.15+commit.e14f2714 --constructor-args $(cast abi-encode "constructor(string,string,uint256)" "Umbra OG Supporters" "UMBRAOG" 1694815366)
+
+
+forge verify-contract 0x630567C26340Da0700E6572E0FFa72e10e002B35 script/FakeERC20.sol:FakeERC20 --chain-id 43113 --watch --flatten --compiler-version  0.8.16 --constructor-args $(cast abi-encode "constructor(string,string)" "Governance" "GOV")
