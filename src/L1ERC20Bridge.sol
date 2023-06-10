@@ -13,8 +13,10 @@ pragma solidity ^0.8.0;
 
 import {IERC20} from "openzeppelin/token/ERC20/IERC20.sol";
 // TODO import wormhole relayer
-import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
+import {IWormholeRelayer, VaaKey} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
 import {console2} from "forge-std/console2.sol";
+
+
 
 contract L1ERC20Bridge {
   IERC20 public immutable L1_TOKEN;
@@ -30,6 +32,10 @@ contract L1ERC20Bridge {
 
   constructor(address l1TokenAddress, address _coreRelayer, uint16 _targetChain) {
     L1_TOKEN = IERC20(l1TokenAddress);
+    // IWormhole core_bridge = IWormhole(_coreBridgeAddress);
+    // uint32 nonce = 0;
+
+	// Needed for generic relayer
     relayer = IWormholeRelayer(_coreRelayer);
     targetChain = _targetChain;
   }
@@ -61,19 +67,43 @@ contract L1ERC20Bridge {
     returns (uint64 sequence)
   {
     bytes memory mintCalldata = abi.encodePacked(account, amount);
+    // sequence = core_bridge.publishMessage(nonce, str, 1);
+	// nonce = nonce+1;
+	// return sequence;
 
+	
+
+	// Generic relayer code. Does not seem to be working
     // TODO: Random value invoked on the target chain
-    uint256 gasLimit = 500_000;
+    uint256 gasLimit = 1_000_000;
 
     //calculate cost to deliver message
     (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(targetChain, 0, gasLimit);
 
-	console2.logUint(deliveryCost);
+	// console2.logUint(deliveryCost);
+	// console2.logUint(targetChain);
+	// console2.logAddress(L2_TOKEN_ADDRESS);
+	// console2.logUint(gasLimit);
+	// console2.logAddress(address(relayer));
+
+	// return relayer.sendToEvm(
+    //         targetChain,
+    //         L2_TOKEN_ADDRESS,
+    //         mintCalldata,
+	// 		0,
+    //         0,
+    //         gasLimit,
+    //         targetChain,
+    //         0xBF684878906629E72079D4f07D75Ef7165238092,
+    //         relayer.getDefaultDeliveryProvider(),
+    //         new VaaKey[](0),
+    //        200 
+	// );
 
     // Receiver value is 0 because we aren't passing any value
     // to the target contract.
     return relayer.sendPayloadToEvm{value: deliveryCost}(
-      targetChain, L2_TOKEN_ADDRESS, mintCalldata, 0, gasLimit
+      5, L2_TOKEN_ADDRESS, mintCalldata, 0, gasLimit
     );
   }
 }
