@@ -13,5 +13,3 @@ contract FakeERC20 is ERC20Votes, IERC20Mint {
     _mint(account, amount);
   }
 }
-
-

@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 contract L1Contracts {
-    address wormholeRelayer = 0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB;
+    address wormholeCoreFuji = 0x7bbcE28e64B3F8b84d876Ab298393c38ad7aac4C;
+    address wormholeCoreMumbai = 0x0CBE91CF822c73C2315FB05100C2F714765d5c20;
 	uint16 wormholeFujiId = 6;
-    // address wormholeRelayer =0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0;
-	// uint16 wormholeFujiId = 5;
+	uint16 wormholePolygoniId = 5;
 }
