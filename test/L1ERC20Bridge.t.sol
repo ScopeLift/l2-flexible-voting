@@ -31,6 +31,7 @@ contract Deposit is L1ERC20BridgeTest {
 	console2.logAddress(address(bridge));
 	console2.logAddress(address(erc20));
 	console2.logUint(erc20.balanceOf(address(this)));
+	console2.logUint(address(this).balance);
 	vm.deal(address(this), 1 ether);
 
 	bridge.deposit(address(this), 100_000, address(this), 5);

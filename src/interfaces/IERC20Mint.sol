@@ -8,3 +8,13 @@ interface IERC20Mint is IERC20 {
 }
 
 
+interface IERC20Receive is IERC20Mint {
+
+  function receiveWormholeMessages(
+    bytes memory payload,
+    bytes[] memory additionalVaas,
+    bytes32 sourceAddress,
+    uint16 sourceChain,
+    bytes32 deliveryHash
+  ) external;
+}

@@ -80,30 +80,30 @@ contract L1ERC20Bridge {
     //calculate cost to deliver message
     (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(targetChain, 0, gasLimit);
 
-	// console2.logUint(deliveryCost);
-	// console2.logUint(targetChain);
-	// console2.logAddress(L2_TOKEN_ADDRESS);
-	// console2.logUint(gasLimit);
-	// console2.logAddress(address(relayer));
+	console2.logUint(deliveryCost);
+	console2.logUint(targetChain);
+	console2.logAddress(L2_TOKEN_ADDRESS);
+	console2.logUint(gasLimit);
+	console2.logAddress(address(relayer));
 
-	// return relayer.sendToEvm(
-    //         targetChain,
-    //         L2_TOKEN_ADDRESS,
-    //         mintCalldata,
-	// 		0,
-    //         0,
-    //         gasLimit,
-    //         targetChain,
-    //         0xBF684878906629E72079D4f07D75Ef7165238092,
-    //         relayer.getDefaultDeliveryProvider(),
-    //         new VaaKey[](0),
-    //        200 
-	// );
+	return relayer.sendToEvm{value: deliveryCost}(
+            targetChain,
+            L2_TOKEN_ADDRESS,
+            mintCalldata,
+			0,
+            0,
+            gasLimit,
+            targetChain,
+            0xBF684878906629E72079D4f07D75Ef7165238092,
+            relayer.getDefaultDeliveryProvider(),
+            new VaaKey[](0),
+           200 
+	);
 
     // Receiver value is 0 because we aren't passing any value
     // to the target contract.
-    return relayer.sendPayloadToEvm{value: deliveryCost}(
-      5, L2_TOKEN_ADDRESS, mintCalldata, 0, gasLimit
-    );
+    //return relayer.sendPayloadToEvm{value: deliveryCost}(
+    //  targetChain, L2_TOKEN_ADDRESS, mintCalldata, 0, gasLimit
+    //);
   }
 }
