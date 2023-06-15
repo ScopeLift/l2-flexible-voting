@@ -8,7 +8,7 @@ contract L1ERC20Bridge {
   IERC20 public immutable L1_TOKEN;
   address public L2_TOKEN_ADDRESS;
 
-  IWormhole immutable coreBridge;
+  IWormhole coreBridge;
 
   uint32 public nonce;
 
