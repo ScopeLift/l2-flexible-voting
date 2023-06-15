@@ -16,24 +16,22 @@ contract RegisterL1Bridge is Script {
     // then deploy the erc20Votes token
     //
     // Avalanche is mimicking the L1
-    address core =  0x7bbcE28e64B3F8b84d876Ab298393c38ad7aac4C;
+    address core = 0x7bbcE28e64B3F8b84d876Ab298393c38ad7aac4C;
     uint16 targetChain = 6;
     string memory file = "broadcast/multi/Deploy.s.sol-latest/run.json";
     string memory json = vm.readFile(file);
 
     address l2ERC20 = json.readAddress(".deployments[0].transactions[0].contractAddress");
     address l1Bridge = json.readAddress(".deployments[1].transactions[0].contractAddress");
-	console2.logAddress(l1Bridge);
-	console2.logAddress(l2ERC20);
+    console2.logAddress(l1Bridge);
+    console2.logAddress(l2ERC20);
     setFallbackToDefaultRpcUrls(false);
-
 
     vm.createSelectFork(getChain("polygon_mumbai").rpcUrl);
 
-
-
     vm.broadcast();
-	IERC20Receive(l2ERC20).registerApplicationContracts(targetChain, bytes32(uint256(uint160(l1Bridge))));
-
+    IERC20Receive(l2ERC20).registerApplicationContracts(
+      targetChain, bytes32(uint256(uint160(l1Bridge)))
+    );
   }
 }

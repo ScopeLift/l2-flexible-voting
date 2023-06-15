@@ -43,7 +43,7 @@ contract L1ERC20Bridge {
     internal
     returns (uint64 sequence)
   {
-		  // TODO optimize with encodePacked
+    // TODO optimize with encodePacked
     bytes memory mintCalldata = abi.encode(account, amount);
     sequence = coreBridge.publishMessage(nonce, mintCalldata, 1);
     nonce = nonce + 1;
