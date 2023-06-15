@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {ERC20} from "openzeppelin/token/ERC20/ERC20.sol";
 import {IERC20Mint} from "src/interfaces/IERC20Mint.sol";
 import {L2ERC20} from "src/L2ERC20.sol";
-import {L1Contracts} from "test/L1Contracts.sol";
+import {Constants} from "test/Constants.sol";
 
 // TODO Add the most basic tests
 contract L2ERC20Test is Test {

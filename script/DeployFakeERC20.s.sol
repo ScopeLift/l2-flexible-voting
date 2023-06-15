@@ -15,7 +15,6 @@ contract FakeERC20 is ERC20Votes {
 }
 
 contract DeployFakeERC20 is Script {
-  // open mint on the L1
   function run() public {
     vm.broadcast();
     new FakeERC20("Governance", "GOV");

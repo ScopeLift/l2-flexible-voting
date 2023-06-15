@@ -2,15 +2,13 @@
 pragma solidity ^0.8.0;
 
 import {Test} from "forge-std/Test.sol";
-import {ERC20} from "openzeppelin/token/ERC20/ERC20.sol";
-import {FakeERC20} from "src/FakeERC20.sol";
+
 import {IERC20Mint} from "src/interfaces/IERC20Mint.sol";
+import {FakeERC20} from "src/FakeERC20.sol";
 import {L1ERC20Bridge} from "src/L1ERC20Bridge.sol";
-import {L1Contracts} from "test/L1Contracts.sol";
+import {Constants} from "test/Constants.sol";
 
-import {console2} from "forge-std/console2.sol";
-
-contract L1ERC20BridgeTest is Test, L1Contracts {
+contract L1ERC20BridgeTest is Test, Constants {
   IERC20Mint erc20;
 
   function setUp() public {
@@ -21,7 +19,6 @@ contract L1ERC20BridgeTest is Test, L1Contracts {
 
 contract Deposit is L1ERC20BridgeTest {
   function testFork_CorrectlyDepositTokens() public {
-    console2.logUint(block.number);
     L1ERC20Bridge bridge = new L1ERC20Bridge(address(erc20), wormholeCoreFuji);
     bridge.initialize(0xBaA85b5C4c74f53c46872acfF2750f512bcBEC43);
 
@@ -29,6 +26,6 @@ contract Deposit is L1ERC20BridgeTest {
     erc20.mint(address(this), 100_000);
     vm.deal(address(this), 1 ether);
 
-    bridge.deposit(address(this), 100_000, address(this), 5);
+    bridge.deposit(address(this), 100_000);
   }
 }
