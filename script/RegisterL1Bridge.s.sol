@@ -17,7 +17,7 @@ contract RegisterL1Bridge is Script {
     //
     // Avalanche is mimicking the L1
     address core =  0x7bbcE28e64B3F8b84d876Ab298393c38ad7aac4C;
-    uint16 targetChain = 5;
+    uint16 targetChain = 6;
     string memory file = "broadcast/multi/Deploy.s.sol-latest/run.json";
     string memory json = vm.readFile(file);
 
