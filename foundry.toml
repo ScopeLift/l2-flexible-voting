@@ -7,7 +7,7 @@
     "openzepplin/=lib/openzepplin-contracts/contracts",
   ]
   solc_version = "0.8.16"
-  verbosity = 5
+  verbosity = 3
 
 [profile.ci]
   fuzz = { runs = 5000 }
