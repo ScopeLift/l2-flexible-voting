@@ -4,10 +4,10 @@ pragma solidity ^0.8.16;
 import {Script, stdJson} from "forge-std/Script.sol";
 import {L1ERC20Bridge} from "src/L1ERC20Bridge.sol";
 import {L2ERC20} from "src/L2ERC20.sol";
-import {L1Contracts} from "test/L1Contracts.sol";
+import {Constants} from "test/Constants.sol";
 
 /// @notice Deploy L1 bridge and corresponding token to be minted on L2
-contract Deploy is Script, L1Contracts {
+contract Deploy is Script, Constants {
   using stdJson for string;
 
   function run() public {
@@ -20,8 +20,7 @@ contract Deploy is Script, L1Contracts {
     vm.createSelectFork(getChain("polygon_mumbai").rpcUrl);
 
     vm.broadcast();
-    L2ERC20 l2Token =
-      new L2ERC20("Scopeapotomus", "SCOPE", wormholeCoreMumbai);
+    L2ERC20 l2Token = new L2ERC20("Scopeapotomus", "SCOPE", wormholeCoreMumbai);
 
     vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
 
