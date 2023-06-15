@@ -8,7 +8,7 @@ import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
 contract L2ERC20 is ERC20Votes {
-  IWormhole immutable coreBridge;
+  IWormhole coreBridge;
 
   mapping(uint16 => bytes32) _applicationContracts;
   mapping(bytes32 => bool) _completedMessages;
