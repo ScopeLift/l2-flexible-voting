@@ -31,23 +31,21 @@ contract Deploy is Script {
     // then deploy the erc20Votes token
     //
     // Avalanche is mimicking the L1
-    address core =  0x7bbcE28e64B3F8b84d876Ab298393c38ad7aac4C;
+    address core = 0x7bbcE28e64B3F8b84d876Ab298393c38ad7aac4C;
     string memory file = "broadcast/DeployFakeERC20.s.sol/43113/run-latest.json";
     string memory json = vm.readFile(file);
     address deployedL1Token = json.readAddress(".transactions[0].contractAddress");
-
-
 
     // Wormhole id for mumbai
     uint16 targetChain = 5;
 
     setFallbackToDefaultRpcUrls(false);
 
-
     vm.createSelectFork(getChain("polygon_mumbai").rpcUrl);
 
     vm.broadcast();
-    L2ERC20 l2Token = new L2ERC20("Scopeapotomus", "SCOPE", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20);
+    L2ERC20 l2Token =
+      new L2ERC20("Scopeapotomus", "SCOPE", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20);
 
     vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
 

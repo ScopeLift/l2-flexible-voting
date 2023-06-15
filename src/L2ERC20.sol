@@ -15,7 +15,10 @@ contract L2ERC20 is ERC20Votes {
   mapping(bytes32 => bool) _completedMessages;
   address owner;
 
-  constructor(string memory _name, string memory _symbol, address _core) ERC20(_name, _symbol) ERC20Permit(_name) {
+  constructor(string memory _name, string memory _symbol, address _core)
+    ERC20(_name, _symbol)
+    ERC20Permit(_name)
+  {
     coreBridge = IWormhole(_core);
     owner = msg.sender;
   }
@@ -28,8 +31,8 @@ contract L2ERC20 is ERC20Votes {
     //  If the VM is NOT valid, will return the reason it's not valid
     //  If the VM IS valid, reason will be blank
     require(valid, reason);
-	console2.logBytes32(vm.emitterAddress);
-	console2.logBytes32(_applicationContracts[vm.emitterChainId]);
+    console2.logBytes32(vm.emitterAddress);
+    console2.logBytes32(_applicationContracts[vm.emitterChainId]);
 
     //2. Check if the Emitter Chain contract is registered
     require(

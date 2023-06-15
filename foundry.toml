@@ -1,7 +1,7 @@
 [profile.default]
+  fs_permissions = [{ access = "read", path = "./broadcast" }]
   optimizer = true
   optimizer_runs = 10_000_000
-  fs_permissions = [{ access = "read", path = "./broadcast" }]
   remappings = [
     "wormhole/=lib/wormhole/ethereum/contracts",
     "openzepplin/=lib/openzepplin-contracts/contracts",

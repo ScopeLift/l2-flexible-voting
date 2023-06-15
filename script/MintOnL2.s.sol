@@ -34,17 +34,17 @@ contract MintOnL2 is Script {
     // mumbai
     // address l1Bridge = 0xBaA85b5C4c74f53c46872acfF2750f512bcBEC43;
     address l1Bridge = bridgeJson.readAddress(".deployments[1].transactions[0].contractAddress");
-	// register l1 address on L2 token
+    // register l1 address on L2 token
     // address l2Address = 0x274f91013435f3fe900aa980021f8241d51d7fd8;
     uint16 targetChain = 5;
-	address callingAddress = 0xEAC5F0d4A9a45E1f9FdD0e7e2882e9f60E301156;
+    address callingAddress = 0xEAC5F0d4A9a45E1f9FdD0e7e2882e9f60E301156;
 
-       // Wormhole id for mumbai
+    // Wormhole id for mumbai
     setFallbackToDefaultRpcUrls(false);
     vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
 
     IL1ERC20Bridge bridge = IL1ERC20Bridge(address(l1Bridge));
-	IERC20Mint erc20 = IERC20Mint(address(deployedL1Token));
+    IERC20Mint erc20 = IERC20Mint(address(deployedL1Token));
 
     vm.broadcast();
     erc20.mint(callingAddress, 100_000);
