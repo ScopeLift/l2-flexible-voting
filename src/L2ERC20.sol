@@ -6,6 +6,7 @@ import {ERC20} from "openzeppelin/token/ERC20/ERC20.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
+import {console2} from "forge-std/console2.sol";
 
 contract L2ERC20 is ERC20Votes {
   IWormhole immutable coreBridge;
@@ -27,6 +28,8 @@ contract L2ERC20 is ERC20Votes {
     //  If the VM is NOT valid, will return the reason it's not valid
     //  If the VM IS valid, reason will be blank
     require(valid, reason);
+	console2.logBytes32(vm.emitterAddress);
+	console2.logBytes32(_applicationContracts[vm.emitterChainId]);
 
     //2. Check if the Emitter Chain contract is registered
     require(

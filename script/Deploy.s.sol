@@ -47,7 +47,7 @@ contract Deploy is Script {
     vm.createSelectFork(getChain("polygon_mumbai").rpcUrl);
 
     vm.broadcast();
-    L2ERC20 l2Token = new L2ERC20("Scopeapotomus", "SCOPE", core);
+    L2ERC20 l2Token = new L2ERC20("Scopeapotomus", "SCOPE", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20);
 
     vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
 
