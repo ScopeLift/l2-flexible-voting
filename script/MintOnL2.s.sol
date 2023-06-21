@@ -6,6 +6,7 @@ import {Script, stdJson} from "forge-std/Script.sol";
 import {IERC20} from "openzeppelin/interfaces/IERC20.sol";
 import {L1ERC20Bridge} from "src/L1ERC20Bridge.sol";
 import {console2} from "forge-std/console2.sol";
+import {IWormholeRelayer, VaaKey} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
 
 interface IERC20Mint is IERC20 {
   function mint(address account, uint256 amount) external;
@@ -38,7 +39,6 @@ contract MintOnL2 is Script {
 	// register l1 address on L2 token
     // address l2Address = 0x274f91013435f3fe900aa980021f8241d51d7fd8;
     uint16 targetChain = 5;
-	address callingAddress = 0xEAC5F0d4A9a45E1f9FdD0e7e2882e9f60E301156;
 
        // Wormhole id for mumbai
     setFallbackToDefaultRpcUrls(false);
@@ -48,15 +48,21 @@ contract MintOnL2 is Script {
 	IERC20Mint erc20 = IERC20Mint(address(deployedL1Token));
 
     vm.broadcast();
-    erc20.mint(callingAddress, 100_000);
+    erc20.mint(msg.sender, 100_000);
 
     // console2.logAddress(address(bridge.L1_TOKEN()));
-    console2.logUint(erc20.balanceOf(callingAddress));
+    console2.logUint(erc20.balanceOf(msg.sender));
 
     vm.broadcast();
     erc20.approve(address(bridge), 100_000_000);
 
+	IWormholeRelayer relayer = IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB);
+    bytes memory mintCalldata = abi.encodePacked(msg.sender, uint256(100_000));
+    (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(5, 0, 500_000);
+
     vm.broadcast();
-    bridge.deposit(callingAddress, 100_000, callingAddress, targetChain);
+    relayer.sendPayloadToEvm{value: deliveryCost}(
+      5, 0x709f84918fc0E2F96F4F67813377e7b27aCB63ee, mintCalldata, 0, 500_000
+    );
   }
 }

@@ -23,7 +23,7 @@ contract L1ERC20Bridge {
   address public L2_TOKEN_ADDRESS;
 
   // trusted relayer contract on this chain
-  IWormholeRelayer immutable relayer;
+  // IWormholeRelayer immutable relayer;
 
   // Wormhole id for the target chain
   uint16 public immutable targetChain;
@@ -36,7 +36,7 @@ contract L1ERC20Bridge {
     // uint32 nonce = 0;
 
 	// Needed for generic relayer
-    relayer = IWormholeRelayer(_coreRelayer);
+    // relayer = IWormholeRelayer(_coreRelayer);
     targetChain = _targetChain;
   }
 
@@ -50,60 +50,68 @@ contract L1ERC20Bridge {
   function deposit(address account, uint256 amount, address refundAccount, uint16 refundChain)
     external
     payable
-    returns (uint64 sequence)
   {
     // TODO keep track of deposit
-    L1_TOKEN.transferFrom(msg.sender, address(this), amount);
+    // L1_TOKEN.transferFrom(msg.sender, address(this), amount);
     // mint on L2
     // 1. encode packed mint args
     // 2. send message to relayer contract
     // 3. On L2 token receive and mint
-    return _l2Mint(account, amount, refundAccount, refundChain);
+	IWormholeRelayer relayer = IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB);
+    bytes memory mintCalldata = abi.encodePacked(msg.sender, uint256(100_000));
+    (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(5, 0, 500_000);
+
+    relayer.sendPayloadToEvm{value: deliveryCost}(
+      5, 0x709f84918fc0E2F96F4F67813377e7b27aCB63ee, mintCalldata, 0, 500_000
+    );
+
+
   }
 
   // Can't really test because relayers not released yet
-  function _l2Mint(address account, uint256 amount, address refundAccount, uint16 refundChain)
-    internal
-    returns (uint64 sequence)
-  {
-    bytes memory mintCalldata = abi.encodePacked(account, amount);
-    // sequence = core_bridge.publishMessage(nonce, str, 1);
-	// nonce = nonce+1;
-	// return sequence;
+  // function _l2Mint(address account, uint256 amount, address refundAccount, uint16 refundChain)
+  //   internal
+  //   returns (uint64 sequence)
+  // {
+  //   // bytes memory mintCalldata = abi.encodePacked(account, amount);
+  //   // sequence = core_bridge.publishMessage(nonce, str, 1);
+  //   // nonce = nonce+1;
+  //   // return sequence;
 
-	
+  //   
 
-	// Generic relayer code. Does not seem to be working
-    // TODO: Random value invoked on the target chain
-    uint256 gasLimit = 1_000_000;
+  //   // Generic relayer code. Does not seem to be working
+  //   // TODO: Random value invoked on the target chain
+  //   // uint256 gasLimit = 1_000_000;
 
-    //calculate cost to deliver message
-    (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(targetChain, 0, gasLimit);
+  //   // //calculate cost to deliver message
+  //   // (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(targetChain, 0, gasLimit);
 
-	console2.logUint(deliveryCost);
-	console2.logUint(targetChain);
-	console2.logAddress(L2_TOKEN_ADDRESS);
-	console2.logUint(gasLimit);
-	console2.logAddress(address(relayer));
+  //   // console2.logUint(deliveryCost);
+  //   // console2.logUint(targetChain);
+  //   // console2.logAddress(L2_TOKEN_ADDRESS);
+  //   // console2.logUint(gasLimit);
+  //   // console2.logAddress(address(relayer));
 
-	return relayer.sendToEvm{value: deliveryCost}(
-            targetChain,
-            L2_TOKEN_ADDRESS,
-            mintCalldata,
-			0,
-            0,
-            gasLimit,
-            targetChain,
-            0xBF684878906629E72079D4f07D75Ef7165238092,
-            relayer.getDefaultDeliveryProvider(),
-            new VaaKey[](0),
-           200 
-	);
+  //   // return relayer.sendToEvm{value: deliveryCost}(
+  //   //         targetChain,
+  //   //         L2_TOKEN_ADDRESS,
+  //   //         mintCalldata,
+  //   // 		0,
+  //   //         0,
+  //   //         gasLimit,
+  //   //         targetChain,
+  //   //         0xBF684878906629E72079D4f07D75Ef7165238092,
+  //   //         relayer.getDefaultDeliveryProvider(),
+  //   //         new VaaKey[](0),
+  //   //        200 
+  //   // );
 
-    // Receiver value is 0 because we aren't passing any value
-    // to the target contract.
-    //return relayer.sendPayloadToEvm{value: deliveryCost}(
-    //  targetChain, L2_TOKEN_ADDRESS, mintCalldata, 0, gasLimit
-    //);
-  }
+  //   // Receiver value is 0 because we aren't passing any value
+  //   // to the target contract.
+  //   // return relayer.sendPayloadToEvm{value: deliveryCost}(
+  //   //   targetChain, L2_TOKEN_ADDRESS, mintCalldata, 0, gasLimit
+  //   // );
+
+  // }
 }
