@@ -10,7 +10,7 @@ contract MintOnL2 is Script {
   using stdJson for string;
 
   function run() public {
-    // Get L1 bridge tokken address
+    // Get L1 bridge token address
     string memory tokenFile = "broadcast/DeployFakeERC20.s.sol/43113/run-latest.json";
     string memory tokenJson = vm.readFile(tokenFile);
 
