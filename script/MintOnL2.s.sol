@@ -16,13 +16,14 @@ interface IL1ERC20Bridge {
   function L1_TOKEN() external returns (IERC20);
   function deposit(address account, uint256 amount, address refundAccount, uint16 refundChain)
     external
+	payable
     returns (uint16);
 }
 
 contract MintOnL2 is Script {
   using stdJson for string;
 
-  function run() public {
+  function run() payable public {
     // Deploy the bridge
     // then deploy the erc20Votes token
     //
@@ -39,6 +40,7 @@ contract MintOnL2 is Script {
 	// register l1 address on L2 token
     // address l2Address = 0x274f91013435f3fe900aa980021f8241d51d7fd8;
     uint16 targetChain = 5;
+    address wormholeRelayer = 0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB;
 
        // Wormhole id for mumbai
     setFallbackToDefaultRpcUrls(false);
@@ -56,13 +58,17 @@ contract MintOnL2 is Script {
     vm.broadcast();
     erc20.approve(address(bridge), 100_000_000);
 
-	IWormholeRelayer relayer = IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB);
-    bytes memory mintCalldata = abi.encodePacked(msg.sender, uint256(100_000));
-    (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(5, 0, 500_000);
+	// Gas estimation causing issues
+	// Hardcoding everything works for some reason
+    (uint256 deliveryCost,) = IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB).quoteEVMDeliveryPrice(5, 0, 500_000);
 
-    vm.broadcast();
-    relayer.sendPayloadToEvm{value: deliveryCost}(
-      5, 0x709f84918fc0E2F96F4F67813377e7b27aCB63ee, mintCalldata, 0, 500_000
+    // bridge.deposit{value: deliveryCost}(msg.sender, 100_000, msg.sender, targetChain);
+
+    bytes memory mintCalldata = abi.encodePacked(msg.sender, uint256(100_000));
+
+	vm.broadcast();
+    IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB).sendPayloadToEvm{value: deliveryCost}(
+      5,0x04Ece61784F0fFB50595389b59c9c6aa9E2EcD0b, mintCalldata, 0, 500_000
     );
   }
 }

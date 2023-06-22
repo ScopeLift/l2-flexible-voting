@@ -35,8 +35,9 @@ contract Deposit is L1ERC20BridgeTest {
 	// console2.logUint(address(this).balance);
 	vm.deal(address(this), 100 ether);
 	// Bridge needs money lol
-	vm.deal(address(bridge), 100 ether);
+	// vm.deal(address(bridge), 100 ether);
 
-	bridge.deposit(address(this), 100_000, address(this), 5);
+    (uint256 deliveryCost,) = IWormholeRelayer(wormholeRelayer).quoteEVMDeliveryPrice(5, 0, 500_000);
+	bridge.deposit{value: deliveryCost}(address(this), 100_000, address(this), 5);
   }
 }

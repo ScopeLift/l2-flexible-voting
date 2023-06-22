@@ -28,6 +28,7 @@ contract Deploy is Script {
 
     vm.broadcast();
     L1ERC20Bridge bridge = new L1ERC20Bridge(deployedL1Token, core, 5);
+
     vm.broadcast();
     bridge.initialize(address(l2Token));
   }
