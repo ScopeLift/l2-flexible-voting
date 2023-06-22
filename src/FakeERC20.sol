@@ -10,7 +10,7 @@ import {IERC20Mint} from "src/interfaces/IERC20Mint.sol";
 contract FakeERC20 is ERC20Votes, IERC20Mint {
   constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) ERC20Permit(_name) {}
 
-  /// @dev Mints tokens to address to help test bridging and voting.
+  /// @dev Mints tokens to an address to help test bridging and voting.
   /// @param account The address of where to mint the tokens.
   /// @param amount The amount of tokens to mint.
   function mint(address account, uint256 amount) public {

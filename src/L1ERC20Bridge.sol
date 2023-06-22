@@ -11,7 +11,7 @@ contract L1ERC20Bridge {
   /// @notice Token address which is minted on L2.
   address public L2_TOKEN_ADDRESS;
 
-  /// @notice The core wormhole contract used to send messages to L2.
+  /// @notice The core Wormhole contract used to send messages to L2.
   IWormhole coreBridge;
 
   /// @notice A unique number used to send messages.
