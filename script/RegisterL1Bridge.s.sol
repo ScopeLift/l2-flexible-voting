@@ -9,6 +9,7 @@ contract RegisterL1Bridge is Script, Constants {
   using stdJson for string;
 
   function run() public {
+    // Get address for the L1 bridge and the L2 ERC20
     string memory file = "broadcast/multi/Deploy.s.sol-latest/run.json";
     string memory json = vm.readFile(file);
 
@@ -18,6 +19,7 @@ contract RegisterL1Bridge is Script, Constants {
 
     vm.createSelectFork(getChain("polygon_mumbai").rpcUrl);
 
+    // Register the L1 bridge on the L2 token
     vm.broadcast();
     IERC20Receive(l2ERC20).registerApplicationContracts(
       wormholeFujiId, bytes32(uint256(uint160(l1Bridge)))
