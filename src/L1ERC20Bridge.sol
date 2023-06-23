@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IERC20} from "openzeppelin/token/ERC20/IERC20.sol";
+import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
 contract L1ERC20Bridge {
   /// @notice L1 token used for deposits and voting.
-  IERC20 public immutable L1_TOKEN;
+  ERC20Votes public immutable L1_TOKEN;
 
   /// @notice Token address which is minted on L2.
   address public L2_TOKEN_ADDRESS;
@@ -26,7 +26,7 @@ contract L1ERC20Bridge {
   /// @param l1TokenAddress The address of the L1 token.
   /// @param _core The address of the core wormhole contract.
   constructor(address l1TokenAddress, address _core) {
-    L1_TOKEN = IERC20(l1TokenAddress);
+    L1_TOKEN = ERC20Votes(l1TokenAddress);
     coreBridge = IWormhole(_core);
     nonce = 0;
   }
