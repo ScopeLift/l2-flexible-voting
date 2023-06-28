@@ -19,7 +19,7 @@ In this repo, we are building a production ready proof of concept for Layer 2 fl
 Our initial architecture is shown in the diagram below. This provides a high level overview of what we plan to build and is subject to change.
 
 <div align="center">
-  <img width="150" src="./img/l2_flexible_voting_diagram.png" alt="Initial L2 Diagram">
+  <img width="600" src="./img/l2_flexible_voting_diagram.png" alt="Initial L2 Diagram">
 </div>
 
 ## License
