@@ -45,6 +45,7 @@ contract L1ERC20Bridge {
   /// @notice Deposits L1 tokens into bridge and publishes a message using Wormhole to the L2 token.
   /// @param account The address of the user on L2 where to mint the token.
   /// @param amount The amount of tokens to deposit and mint on the L2.
+  /// @return sequence An identifier for the message published to L2. 
   function deposit(address account, uint256 amount) external payable returns (uint64 sequence) {
     L1_TOKEN.transferFrom(msg.sender, address(this), amount);
     depositAmount[account] += amount;
