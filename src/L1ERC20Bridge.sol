@@ -12,7 +12,7 @@ contract L1ERC20Bridge {
   address public L2_TOKEN_ADDRESS;
 
   /// @notice The core Wormhole contract used to send messages to L2.
-  IWormhole coreBridge;
+  IWormhole immutable coreBridge;
 
   /// @notice A unique number used to send messages.
   uint32 public nonce;
