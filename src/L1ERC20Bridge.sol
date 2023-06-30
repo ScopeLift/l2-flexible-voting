@@ -20,6 +20,9 @@ contract L1ERC20Bridge {
   /// @notice Used to indicate whether the contract has been intialized with the L2 token address.
   bool public INITIALIZED = false;
 
+  /// @dev Contract is already initialized with an L2 token.
+  error AlreadyInitialized();
+
   /// @notice A mapping of users to amount they have deposited into the bridge.
   mapping(address => uint256) public depositAmount;
 
@@ -34,10 +37,11 @@ contract L1ERC20Bridge {
   /// @notice Must be called before bridging tokens to L2.
   /// @param l2TokenAddress The address of the L2 token.
   function initialize(address l2TokenAddress) public {
-    if (!INITIALIZED) {
+    if (INITIALIZED) {
+			revert AlreadyInitialized();
+    }
       INITIALIZED = true;
       L2_TOKEN_ADDRESS = l2TokenAddress;
-    }
   }
 
   /// @notice Deposits L1 tokens into bridge and publishes a message using Wormhole to the L2 token.
