@@ -49,7 +49,6 @@ contract L1ERC20Bridge {
   /// @param amount The amount of tokens to deposit and mint on the L2.
   function deposit(address account, uint256 amount) external payable returns (uint64 sequence) {
     L1_TOKEN.transferFrom(msg.sender, address(this), amount);
-    L1_TOKEN.delegate(account);
     depositAmount[account] += amount;
 
     // TODO optimize with encodePacked
