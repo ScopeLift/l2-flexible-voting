@@ -46,3 +46,9 @@ spy --nodeKey /node.key --spyRPC "[::]:7073" --network /wormhole/testnet/2/1 --b
 Once those are running you will need to setup the L2 relayer. Follow the instructions 
 [here](https://github.com/ScopeLift/l2-wormhole-relayer-engine). Now, you should be able to run 
 the `MintOnL2` script demonstrating passing a  message cross-chain.
+
+## License
+
+This project is available under the [MIT](LICENSE.txt) license.
+
+Copyright (c) 2023 ScopeLift
