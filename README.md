@@ -8,7 +8,6 @@
 - [License](#license)
 
 
-<<<<<<< HEAD
 ## About
 
 [Flexible voting](https://www.scopelift.co/blog/introducing-flexible-voting) is a Governor extension that allows arbitrary delegate contracts to be developed. Allowing token holders to maintain their voting rights even when they choose to use their tokens in Defi or any other contract that supports flexible voting.
@@ -44,7 +43,6 @@ spy --nodeKey /node.key --spyRPC "[::]:7073" --network /wormhole/testnet/2/1 --b
 97LBUp8RXdhzS5uHgAfdTquJbrbN7i
 
 ```
-
 
 Once those are running you will need to setup the L2 relayer. Follow the instructions 
 [here](https://github.com/ScopeLift/l2-wormhole-relayer-engine). Now, you should be able to run 
