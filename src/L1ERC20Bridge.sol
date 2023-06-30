@@ -37,11 +37,9 @@ contract L1ERC20Bridge {
   /// @notice Must be called before bridging tokens to L2.
   /// @param l2TokenAddress The address of the L2 token.
   function initialize(address l2TokenAddress) public {
-    if (INITIALIZED) {
-			revert AlreadyInitialized();
-    }
-      INITIALIZED = true;
-      L2_TOKEN_ADDRESS = l2TokenAddress;
+    if (INITIALIZED) revert AlreadyInitialized();
+    INITIALIZED = true;
+    L2_TOKEN_ADDRESS = l2TokenAddress;
   }
 
   /// @notice Deposits L1 tokens into bridge and publishes a message using Wormhole to the L2 token.
