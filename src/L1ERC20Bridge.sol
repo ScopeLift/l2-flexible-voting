@@ -12,7 +12,7 @@ contract L1ERC20Bridge {
   address public L2_TOKEN_ADDRESS;
 
   /// @notice The core Wormhole contract used to send messages to L2.
-  IWormhole immutable coreBridge;
+  IWormhole coreBridge;
 
   /// @notice A unique number used to send messages.
   uint32 public nonce;
@@ -45,7 +45,7 @@ contract L1ERC20Bridge {
   /// @notice Deposits L1 tokens into bridge and publishes a message using Wormhole to the L2 token.
   /// @param account The address of the user on L2 where to mint the token.
   /// @param amount The amount of tokens to deposit and mint on the L2.
-  /// @return sequence An identifier for the message published to L2. 
+  /// @return sequence An identifier for the message published to L2.
   function deposit(address account, uint256 amount) external payable returns (uint64 sequence) {
     L1_TOKEN.transferFrom(msg.sender, address(this), amount);
     depositAmount[account] += amount;
