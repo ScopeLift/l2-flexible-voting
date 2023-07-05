@@ -12,7 +12,7 @@ contract L1ERC20Bridge {
   address public L2_TOKEN_ADDRESS;
 
   /// @notice The core Wormhole contract used to send messages to L2.
-  IWormhole coreBridge;
+  IWormhole immutable CORE_BRIDGE;
 
   /// @notice A unique number used to send messages.
   uint32 public nonce;
@@ -30,7 +30,7 @@ contract L1ERC20Bridge {
   /// @param _core The address of the core wormhole contract.
   constructor(address l1TokenAddress, address _core) {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
-    coreBridge = IWormhole(_core);
+    CORE_BRIDGE = IWormhole(_core);
     nonce = 0;
   }
 
@@ -52,7 +52,7 @@ contract L1ERC20Bridge {
 
     // TODO optimize with encodePacked
     bytes memory mintCalldata = abi.encode(account, amount);
-    sequence = coreBridge.publishMessage(nonce, mintCalldata, 1);
+    sequence = CORE_BRIDGE.publishMessage(nonce, mintCalldata, 1);
     nonce = nonce + 1;
     return sequence;
   }
