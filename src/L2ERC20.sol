@@ -4,9 +4,10 @@ pragma solidity ^0.8.16;
 import {ERC20} from "openzeppelin/token/ERC20/ERC20.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
+import {Ownable} from "openzeppelin/access/Ownable.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
-contract L2ERC20 is ERC20Votes {
+contract L2ERC20 is ERC20Votes, Ownable {
   /// @notice The core bridge used to verify messages.
   IWormhole coreBridge;
 
@@ -17,9 +18,6 @@ contract L2ERC20 is ERC20Votes {
   /// completed or not.
   mapping(bytes32 => bool) _completedMessages;
 
-  // @notice The address of the owner of the contract.
-  address owner;
-
   /// @param _name The name of the ERC20 token.
   /// @param _symbol The symbol of the ERC20 token.
   /// @param _core The address of the Wormhole core contracts.
@@ -28,7 +26,6 @@ contract L2ERC20 is ERC20Votes {
     ERC20Permit(_name)
   {
     coreBridge = IWormhole(_core);
-    owner = msg.sender;
   }
 
   /// @param encodedMsg An encoded message payload sent from a specialized relayer.
@@ -57,8 +54,7 @@ contract L2ERC20 is ERC20Votes {
   /// @notice Registers a new destination chain contract address.
   /// @param chainId The Wormhole chain id of the destination chain.
   /// @param applicationAddr The address of the destination chain contract.
-  function registerApplicationContracts(uint16 chainId, bytes32 applicationAddr) public {
-    require(msg.sender == owner, "Only owner can register new chains!");
+  function registerApplicationContracts(uint16 chainId, bytes32 applicationAddr) public onlyOwner {
     _applicationContracts[chainId] = applicationAddr;
   }
 }
