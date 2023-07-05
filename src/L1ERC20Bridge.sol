@@ -23,7 +23,6 @@ contract L1ERC20Bridge {
   /// @dev Contract is already initialized with an L2 token.
   error AlreadyInitialized();
 
-
   /// @param l1TokenAddress The address of the L1 token.
   /// @param _core The address of the core wormhole contract.
   constructor(address l1TokenAddress, address _core) {
