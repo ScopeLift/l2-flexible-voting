@@ -9,7 +9,7 @@ import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
 contract L2ERC20 is ERC20Votes, Ownable {
   /// @notice The core bridge used to verify messages.
-  IWormhole coreBridge;
+  IWormhole immutable CORE_BRIDGE;
 
   /// @notice The mapping of Wormhole chain id to cross chain contract address.
   mapping(uint16 => bytes32) _applicationContracts;
@@ -25,13 +25,13 @@ contract L2ERC20 is ERC20Votes, Ownable {
     ERC20(_name, _symbol)
     ERC20Permit(_name)
   {
-    coreBridge = IWormhole(_core);
+    CORE_BRIDGE = IWormhole(_core);
   }
 
   /// @param encodedMsg An encoded message payload sent from a specialized relayer.
   function receiveEncodedMsg(bytes memory encodedMsg) public {
     (IWormhole.VM memory vm, bool valid, string memory reason) =
-      coreBridge.parseAndVerifyVM(encodedMsg);
+      CORE_BRIDGE.parseAndVerifyVM(encodedMsg);
 
     //1. Check Wormhole Guardian Signatures
     //  If the VM is NOT valid, will return the reason it's not valid
