@@ -23,8 +23,6 @@ contract L1ERC20Bridge {
   /// @dev Contract is already initialized with an L2 token.
   error AlreadyInitialized();
 
-  /// @notice A mapping of users to amount they have deposited into the bridge.
-  mapping(address => uint256) public depositAmount;
 
   /// @param l1TokenAddress The address of the L1 token.
   /// @param _core The address of the core wormhole contract.
@@ -48,7 +46,6 @@ contract L1ERC20Bridge {
   /// @return sequence An identifier for the message published to L2.
   function deposit(address account, uint256 amount) external payable returns (uint64 sequence) {
     L1_TOKEN.transferFrom(msg.sender, address(this), amount);
-    depositAmount[account] += amount;
 
     // TODO optimize with encodePacked
     bytes memory mintCalldata = abi.encode(account, amount);
