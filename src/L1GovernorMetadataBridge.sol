@@ -26,6 +26,9 @@ contract L1GovernorMetadataBridge {
   /// @notice The proposal id is an invalid proposal id.
   error InvalidProposalId();
 
+  /// @dev Contract is already initialized with an L2 token.
+  error AlreadyInitialized();
+
   /// @param _governor The address of the L1 governor contract.
   /// @param _core The address of the L1 core wormhole contract.
   constructor(address _governor, address _core) {
@@ -36,6 +39,7 @@ contract L1GovernorMetadataBridge {
   /// @param l2GovernorMetadata The address of the L2 governor metadata contract.
   function initialize(address l2GovernorMetadata) public {
     if (!INITIALIZED) {
+      if (INITIALIZED) revert AlreadyInitialized();
       INITIALIZED = true;
       L2_GOVERNOR_ADDRESS = l2GovernorMetadata;
     }

@@ -17,7 +17,7 @@ contract L1ERC20Bridge {
   /// @notice A unique number used to send messages.
   uint32 public nonce;
 
-  /// @notice Used to indicate whether the contract has been intialized with the L2 token address.
+  /// @notice Used to indicate whether the contract has been initialized with the L2 token address.
   bool public INITIALIZED = false;
 
   /// @dev Contract is already initialized with an L2 token.
