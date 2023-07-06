@@ -11,7 +11,7 @@ contract L1GovernorMetadataBridge {
   IGovernor public immutable GOVERNOR;
 
   /// @notice The Wormhole core contract used to relay messages.
-  IWormhole public coreBridge;
+  IWormhole public immutable CORE_BRIDGE;
 
   /// @notice The L2 governor metadata address where the message is sent on L2.
   address public L2_GOVERNOR_ADDRESS;
@@ -30,7 +30,7 @@ contract L1GovernorMetadataBridge {
   /// @param _core The address of the L1 core wormhole contract.
   constructor(address _governor, address _core) {
     GOVERNOR = IGovernor(_governor);
-    coreBridge = IWormhole(_core);
+    CORE_BRIDGE = IWormhole(_core);
     nonce = 0;
   }
 
@@ -50,7 +50,7 @@ contract L1GovernorMetadataBridge {
     uint256 voteEnd = GOVERNOR.proposalDeadline(proposalId);
 
     bytes memory proposalCalldata = abi.encodePacked(proposalId, voteStart, voteEnd);
-    sequence = coreBridge.publishMessage(nonce, proposalCalldata, 1);
+    sequence = CORE_BRIDGE.publishMessage(nonce, proposalCalldata, 1);
     nonce = nonce + 1;
     return sequence;
   }
