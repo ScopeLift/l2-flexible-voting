@@ -28,7 +28,6 @@ contract L1ERC20Bridge {
   constructor(address l1TokenAddress, address _core) {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
     CORE_BRIDGE = IWormhole(_core);
-    nonce = 0;
   }
 
   /// @notice Must be called before bridging tokens to L2.

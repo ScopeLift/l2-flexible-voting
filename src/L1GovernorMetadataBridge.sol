@@ -31,7 +31,6 @@ contract L1GovernorMetadataBridge {
   constructor(address _governor, address _core) {
     GOVERNOR = IGovernor(_governor);
     CORE_BRIDGE = IWormhole(_core);
-    nonce = 0;
   }
 
   /// @param l2GovernorMetadata The address of the L2 governor metadata contract.
