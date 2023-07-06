@@ -8,7 +8,7 @@ import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 /// to L2.
 contract L1GovernorMetadataBridge {
   /// @notice The governor where proposals are fetched and bridged.
-  IGovernor public governor;
+  IGovernor public immutable GOVERNOR;
 
   /// @notice The Wormhole core contract used to relay messages.
   IWormhole public coreBridge;
@@ -29,7 +29,7 @@ contract L1GovernorMetadataBridge {
   /// @param _governor The address of the L1 governor contract.
   /// @param _core The address of the L1 core wormhole contract.
   constructor(address _governor, address _core) {
-    governor = IGovernor(_governor);
+    GOVERNOR = IGovernor(_governor);
     coreBridge = IWormhole(_core);
     nonce = 0;
   }
@@ -42,12 +42,12 @@ contract L1GovernorMetadataBridge {
     }
   }
 
-  /// @notice Publishes a messges with the proposal id, start block and end block
+  /// @notice Publishes a messages with the proposal id, start block and end block
   /// @param proposalId The id of the proposal to bridge.
   function bridge(uint256 proposalId) external payable returns (uint64 sequence) {
-    uint256 voteStart = governor.proposalSnapshot(proposalId);
+    uint256 voteStart = GOVERNOR.proposalSnapshot(proposalId);
     if (voteStart == 0) revert InvalidProposalId();
-    uint256 voteEnd = governor.proposalDeadline(proposalId);
+    uint256 voteEnd = GOVERNOR.proposalDeadline(proposalId);
 
     bytes memory proposalCalldata = abi.encodePacked(proposalId, voteStart, voteEnd);
     sequence = coreBridge.publishMessage(nonce, proposalCalldata, 1);
