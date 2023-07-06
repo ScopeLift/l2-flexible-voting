@@ -5,7 +5,7 @@ import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
 abstract contract WormholeReceive {
   /// @notice The core bridge used to verify messages.
-  IWormhole coreBridge;
+  IWormhole immutable CORE_BRIDGE;
 
   // @notice The address of the owner of the contract.
   address owner;
@@ -17,13 +17,17 @@ abstract contract WormholeReceive {
   /// completed or not.
   mapping(bytes32 => bool) _completedMessages;
 
+  constructor(address _core) {
+    CORE_BRIDGE = IWormhole(_core);
+  }
+
   /// @dev Validates an encoded Wormhole VAA is valid.
   /// @param encodedMsg The encoded Wormhole VAA.
   function _validateMessage(bytes memory encodedMsg)
     internal
     returns (IWormhole.VM memory vm, bool valid, string memory reason)
   {
-    (vm, valid, reason) = coreBridge.parseAndVerifyVM(encodedMsg);
+    (vm, valid, reason) = CORE_BRIDGE.parseAndVerifyVM(encodedMsg);
     //1. Check Wormhole Guardian Signatures
     //  If the VM is NOT valid, will return the reason it's not valid
     //  If the VM IS valid, reason will be blank

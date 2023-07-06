@@ -16,9 +16,8 @@ contract L2GovernorMetadata is WormholeReceive {
   mapping(uint256 => Proposal) _proposals;
 
   /// @param _core The address of the Wormhole core contract.
-  constructor(address _core) {
+  constructor(address _core) WormholeReceive(_core) {
     owner = msg.sender;
-    coreBridge = IWormhole(_core);
   }
 
   /// @notice Receives a message from L1 and saves the proposal metadata.
