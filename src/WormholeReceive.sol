@@ -2,13 +2,11 @@
 pragma solidity ^0.8.16;
 
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
+import {Ownable} from "openzeppelin/access/Ownable.sol";
 
-abstract contract WormholeReceive {
+abstract contract WormholeReceive is Ownable {
   /// @notice The core bridge used to verify messages.
   IWormhole immutable CORE_BRIDGE;
-
-  // @notice The address of the owner of the contract.
-  address owner;
 
   /// @notice The mapping of Wormhole chain id to cross chain contract address.
   mapping(uint16 => bytes32) _applicationContracts;
@@ -49,8 +47,7 @@ abstract contract WormholeReceive {
   /// @notice Registers a new destination chain contract address.
   /// @param chainId The Wormhole chain id of the destination chain.
   /// @param applicationAddr The address of the destination chain contract.
-  function registerApplicationContracts(uint16 chainId, bytes32 applicationAddr) public {
-    require(msg.sender == owner, "Only owner can register new chains!");
+  function registerApplicationContracts(uint16 chainId, bytes32 applicationAddr) public onlyOwner {
     _applicationContracts[chainId] = applicationAddr;
   }
 }
