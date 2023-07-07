@@ -6,14 +6,14 @@ import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
 import {Ownable} from "openzeppelin/access/Ownable.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
-import {WormholeReceive} from "src/WormholeReceive.sol";
+import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
-contract L2ERC20 is ERC20Votes, WormholeReceive {
+contract L2ERC20 is ERC20Votes, WormholeReceiver {
   /// @param _name The name of the ERC20 token.
   /// @param _symbol The symbol of the ERC20 token.
   /// @param _core The address of the Wormhole core contracts.
   constructor(string memory _name, string memory _symbol, address _core)
-    WormholeReceive(_core)
+    WormholeReceiver(_core)
     ERC20(_name, _symbol)
     ERC20Permit(_name)
   {}

@@ -4,7 +4,7 @@ pragma solidity ^0.8.16;
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {Ownable} from "openzeppelin/access/Ownable.sol";
 
-abstract contract WormholeReceive is Ownable {
+abstract contract WormholeReceiver is Ownable {
   /// @notice The core bridge used to verify messages.
   IWormhole immutable CORE_BRIDGE;
 
