@@ -7,6 +7,7 @@ import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {Constants} from "test/Constants.sol";
 
+/// @dev This script will create an L1 and L2 governor metadata contract, and have the L1 contract pass a proposal to the L2 metadata contract.
 contract SendProposalToL2 is Script, Constants {
   using stdJson for string;
 
