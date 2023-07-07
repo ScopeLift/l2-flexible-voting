@@ -6,7 +6,8 @@ import {IERC20Mint} from "src/interfaces/IERC20Mint.sol";
 import {IL1ERC20Bridge} from "src/interfaces/IL1ERC20Bridge.sol";
 import {Constants} from "test/Constants.sol";
 
-/// @dev A script to test that the L1 bridging functionality works. It will call the bridge on L1 which will call the mint function on the L2 token.
+/// @dev A script to test that the L1 bridging functionality works. It will call the bridge on L1
+/// which will call the mint function on the L2 token.
 contract MintOnL2 is Script {
   using stdJson for string;
 
