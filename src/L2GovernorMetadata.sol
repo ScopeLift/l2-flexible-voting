@@ -3,9 +3,6 @@ pragma solidity ^0.8.16;
 
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
-/// @dev Contract is already initialized with an L2 token.
-
-error AlreadyInitialized();
 
 /// @notice Receives L1 messages with proposal metadata.
 contract L2GovernorMetadata is WormholeReceiver {
