@@ -16,19 +16,19 @@ contract L2VoteAggregator {
   uint32 public constant CAST_VOTE_WINDOW = 2400;
 
   /// @notice The Wormhole contract to bridge messages to L1.
-  IWormhole coreBridge;
+  IWormhole immutable CORE_BRIDGE;
 
   /// @notice A unique number used to send messages.
   uint32 public nonce;
 
   /// @notice The token used to vote on proposals provided by the `GovernorMetadata`.
-  ERC20Votes votingToken;
+  ERC20Votes immutable VOTING_TOKEN;
 
   /// @notice The `GovernorMetadata` contract that provides proposal information.
-  L2GovernorMetadata governorMetadata;
+  L2GovernorMetadata immutable GOVERNOR_METADATA;
 
   /// @notice The contract that handles fetch the L1 block on the L2.
-  IL1Block l1Block;
+  IL1Block immutable L1_BLOCK;
 
   /// @dev Thrown when an address has no voting weight on a proposal.
   error NoWeight();
@@ -74,11 +74,10 @@ contract L2VoteAggregator {
     address _governorMetadata,
     address l1BlockAddress
   ) {
-    votingToken = ERC20Votes(_votingToken);
-    coreBridge = IWormhole(_core);
-    governorMetadata = L2GovernorMetadata(_governorMetadata);
-    nonce = 0;
-    l1Block = IL1Block(l1BlockAddress);
+    VOTING_TOKEN = ERC20Votes(_votingToken);
+    CORE_BRIDGE = IWormhole(_core);
+    GOVERNOR_METADATA = L2GovernorMetadata(_governorMetadata);
+    L1_BLOCK = IL1Block(l1BlockAddress);
   }
 
   /// @notice Where a user can express their vote based on their L2 token voting power.
@@ -88,8 +87,8 @@ contract L2VoteAggregator {
     bool proposalActive = proposalVoteActive(proposalId);
     if (!proposalActive) revert ProposalInactive();
 
-    L2GovernorMetadata.Proposal memory proposal = governorMetadata.getProposal(proposalId);
-    uint256 weight = votingToken.getPastVotes(msg.sender, proposal.voteStart);
+    L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
+    uint256 weight = VOTING_TOKEN.getPastVotes(msg.sender, proposal.voteStart);
     if (weight == 0) revert NoWeight();
 
     if (_proposalVotersHasVoted[proposalId][msg.sender]) revert AlreadyVoted();
@@ -116,7 +115,7 @@ contract L2VoteAggregator {
 
     bytes memory proposalCalldata =
       abi.encodePacked(proposalId, vote.against, vote.inFavor, vote.abstain);
-    sequence = coreBridge.publishMessage(nonce, proposalCalldata, 1);
+    sequence = CORE_BRIDGE.publishMessage(nonce, proposalCalldata, 1);
     nonce = nonce + 1;
     return sequence;
   }
@@ -130,15 +129,15 @@ contract L2VoteAggregator {
     view
     returns (uint256 _lastVotingBlock)
   {
-    L2GovernorMetadata.Proposal memory proposal = governorMetadata.getProposal(proposalId);
+    L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
     _lastVotingBlock = proposal.voteEnd - CAST_VOTE_WINDOW;
   }
 
   function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
-    L2GovernorMetadata.Proposal memory proposal = governorMetadata.getProposal(proposalId);
+    L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
 
     // TODO: Check if this is inclusive
-    return l1Block.number() <= internalVotingPeriodEnd(proposalId)
-      && l1Block.number() >= proposal.voteStart;
+    return L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId)
+      && L1_BLOCK.number() >= proposal.voteStart;
   }
 }
