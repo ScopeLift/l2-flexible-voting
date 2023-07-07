@@ -6,6 +6,8 @@ import {Script, stdJson} from "forge-std/Script.sol";
 import {L1ERC20Bridge} from "src/L1ERC20Bridge.sol";
 import {Constants} from "test/Constants.sol";
 
+/// @dev Registers the L2VoteAggregator address and chain id on the L1ERC20Bridge so the it can
+/// receive vote messages.
 contract RegisterL2VoteAggregator is Script, Constants {
   using stdJson for string;
 

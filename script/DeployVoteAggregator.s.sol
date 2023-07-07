@@ -8,6 +8,8 @@ import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {L1VotePool} from "src/L1VotePool.sol";
 import {L1Block} from "src/L1Block.sol";
 
+/// @dev Reads the L2 governor metadata contract address and deploys an L2 vote aggregator contract
+/// to test collecting votes on L2.
 contract DeployVoteAggregator is Script, Constants {
   using stdJson for string;
 
