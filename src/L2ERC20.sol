@@ -48,9 +48,9 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver {
     return "mode=blocknumber&from=eip155:1";
   }
 
-  function l1Unlock(uint256 amount) external returns (uint256 sequence) {
-    _burn(msg.sender, amount);
-    bytes memory withdrawCalldata = abi.encode(msg.sender, amount);
+  function l1Unlock(address account, uint256 amount) external returns (uint256 sequence) {
+    _burn(account, amount);
+    bytes memory withdrawCalldata = abi.encode(account, amount);
     CORE_BRIDGE.publishMessage(nonce, withdrawCalldata, 1);
     nonce = nonce + 1;
     return sequence;
