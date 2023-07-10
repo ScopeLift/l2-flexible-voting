@@ -48,6 +48,9 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver {
     return "mode=blocknumber&from=eip155:1";
   }
 
+  /// @notice Burn L2 tokens and unlock tokens on the L1.
+  /// @param account The account where the tokens will be transferred.
+  /// @param amount The amount of tokens to be unlocked.
   function l1Unlock(address account, uint256 amount) external returns (uint256 sequence) {
     _burn(account, amount);
     bytes memory withdrawCalldata = abi.encode(account, amount);
