@@ -12,7 +12,7 @@ import {IL1Block} from "src/interfaces/IL1Block.sol";
 
 contract L2ERC20 is ERC20Votes, WormholeReceiver {
   /// @notice The contract that handles fetch the L1 block on the L2.
-  IL1Block l1Block;
+  IL1Block immutable L1_BLOCK;
 
   /// @param _name The name of the ERC20 token.
   /// @param _symbol The symbol of the ERC20 token.
@@ -22,7 +22,7 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver {
     ERC20(_name, _symbol)
     ERC20Permit(_name)
   {
-    l1Block = IL1Block(_l1Block);
+    L1_BLOCK = IL1Block(_l1Block);
   }
 
   /// @param encodedMsg An encoded message payload sent from a specialized relayer.
@@ -35,13 +35,13 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver {
 
   /// @dev Clock used for flagging checkpoints.
   function clock() public view override returns (uint48) {
-    return SafeCast.toUint48(l1Block.number());
+    return SafeCast.toUint48(L1_BLOCK.number());
   }
 
   /// @dev Description of the clock
   function CLOCK_MODE() public view virtual override returns (string memory) {
     // Check that the clock was not modified
-    require(clock() == l1Block.number(), "ERC20Votes: broken clock mode");
+    require(clock() == L1_BLOCK.number(), "ERC20Votes: broken clock mode");
     return "mode=l1blocknumber&from=default";
   }
 }
