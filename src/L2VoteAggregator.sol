@@ -107,6 +107,7 @@ contract L2VoteAggregator {
 
   /// @notice Bridges a vote to the L1.
   /// @param proposalId The id of the proposal to bridge.
+  /// @return sequence The id of the of the message sent through Wormhole.
   function bridgeVote(uint256 proposalId) external payable returns (uint64 sequence) {
     bool proposalActive = proposalVoteActive(proposalId);
     if (!proposalActive) revert ProposalInactive();
@@ -124,6 +125,7 @@ contract L2VoteAggregator {
   /// preferences to this Aggregator contract. Will always be before the Governor's corresponding
   /// proposal deadline.
   /// @param proposalId The ID of the proposal.
+  /// @return _lastVotingBlock the voting block where L2 voting ends.
   function internalVotingPeriodEnd(uint256 proposalId)
     public
     view
