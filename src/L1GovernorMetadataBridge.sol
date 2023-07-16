@@ -38,11 +38,9 @@ contract L1GovernorMetadataBridge {
 
   /// @param l2GovernorMetadata The address of the L2 governor metadata contract.
   function initialize(address l2GovernorMetadata) public {
-    if (!INITIALIZED) {
-      if (INITIALIZED) revert AlreadyInitialized();
-      INITIALIZED = true;
-      L2_GOVERNOR_ADDRESS = l2GovernorMetadata;
-    }
+    if (INITIALIZED) revert AlreadyInitialized();
+    INITIALIZED = true;
+    L2_GOVERNOR_ADDRESS = l2GovernorMetadata;
   }
 
   /// @notice Publishes a messages with the proposal id, start block and end block
