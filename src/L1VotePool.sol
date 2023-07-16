@@ -58,17 +58,25 @@ contract L1VotePool is WormholeReceiver {
 
     // Save proposal vote
     proposalVotes[proposalId] = ProposalVote(inFavor, against, abstain);
+
+    _castVote(
+      proposalId,
+      ProposalVote(
+        inFavor - existingProposalVote.inFavor,
+        against - existingProposalVote.against,
+        abstain - existingProposalVote.abstain
+      )
+    );
   }
 
   /// @notice Casts vote to the L1 Governor.
   /// @param proposalId The id of the proposal being cast.
-  function castVote(uint256 proposalId) public {
+  function _castVote(uint256 proposalId, ProposalVote memory vote) internal {
     uint256 voteEnd = governor.proposalDeadline(proposalId);
     uint256 internalEnd = internalVotingPeriodEnd(proposalId);
     // TODO: Does a vote on on the block or the block after
     if (block.number <= internalEnd || block.number >= voteEnd) revert OutsideOfWindow();
 
-    ProposalVote memory vote = proposalVotes[proposalId];
     if ((vote.against + vote.inFavor + vote.abstain) <= 0) revert MissingProposal();
 
     bytes memory votes = abi.encodePacked(vote.against, vote.inFavor, vote.abstain);
