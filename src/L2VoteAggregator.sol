@@ -11,9 +11,8 @@ import {IL1Block} from "src/interfaces/IL1Block.sol";
 /// @notice A contract to collect votes on L2 to be bridged to L1.
 contract L2VoteAggregator {
   /// @notice The number of blocks before L2 voting closes. We close voting 1200 blocks before the
-  /// end of the proposal to cast the vote. We will allow another 1200 blocks to allow for the final
-  /// vote total to be sent to the L1.
-  uint32 public constant CAST_VOTE_WINDOW = 2400;
+  /// end of the proposal to cast the vote.
+  uint32 public constant CAST_VOTE_WINDOW = 1200;
 
   /// @notice The Wormhole contract to bridge messages to L1.
   IWormhole immutable CORE_BRIDGE;
