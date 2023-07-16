@@ -5,7 +5,8 @@ import {Script, stdJson} from "forge-std/Script.sol";
 import {IERC20Receive} from "src/interfaces/IERC20Mint.sol";
 import {Constants} from "test/Constants.sol";
 
-/// @dev This script will register the chain and address of the L1 bridge on the L2 token.
+/// @dev This script will register the chain and address of the L1 bridge on the L2 token. This will
+/// be run by the owner address.
 contract RegisterL1Bridge is Script, Constants {
   using stdJson for string;
 

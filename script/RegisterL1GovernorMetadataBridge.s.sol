@@ -7,7 +7,7 @@ import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {Constants} from "test/Constants.sol";
 
 /// @dev This script will register the chain and address of the L1 metadata contract on the L2
-/// governor metadata contract.
+/// governor metadata contract. This will be run by the owner address.
 contract RegisterL1GovernorMetadataBridge is Script, Constants {
   using stdJson for string;
 
