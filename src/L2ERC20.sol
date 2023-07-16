@@ -42,6 +42,6 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver {
   function CLOCK_MODE() public view virtual override returns (string memory) {
     // Check that the clock was not modified
     require(clock() == L1_BLOCK.number(), "ERC20Votes: broken clock mode");
-    return "mode=l1blocknumber&from=default";
+    return "mode=blocknumber&from=eip155:1";
   }
 }
