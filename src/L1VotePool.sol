@@ -7,10 +7,6 @@ import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
 contract L1VotePool is WormholeReceiver {
-  /// @notice Must call castVote within this many blocks of the proposal deadline, so-as to allow
-  /// ample time for all depositors to express their vote preferences.
-  uint32 public constant CAST_VOTE_WINDOW = 1200;
-
   /// @notice The address of the L1 Governor contract.
   IGovernor public governor;
 
@@ -73,9 +69,8 @@ contract L1VotePool is WormholeReceiver {
   /// @param proposalId The id of the proposal being cast.
   function _castVote(uint256 proposalId, ProposalVote memory vote) internal {
     uint256 voteEnd = governor.proposalDeadline(proposalId);
-    uint256 internalEnd = internalVotingPeriodEnd(proposalId);
     // TODO: Does a vote on on the block or the block after
-    if (block.number <= internalEnd || block.number >= voteEnd) revert OutsideOfWindow();
+    if (block.number <= voteEnd || block.number >= voteEnd) revert OutsideOfWindow();
 
     if ((vote.against + vote.inFavor + vote.abstain) <= 0) revert MissingProposal();
 
@@ -91,22 +86,11 @@ contract L1VotePool is WormholeReceiver {
     );
   }
 
-  /// @notice Method which returns the deadline for depositors to express their voting preferences
-  /// to this Bridge contract. Will always be before the Governor's corresponding proposal deadline.
-  /// @param proposalId The ID of the proposal.
-  function internalVotingPeriodEnd(uint256 proposalId)
-    public
-    view
-    returns (uint256 _lastVotingBlock)
-  {
-    _lastVotingBlock = governor.proposalDeadline(proposalId) - CAST_VOTE_WINDOW;
-  }
-
   /// @notice Whether a proposal is still active to receive a vote from the L1Pool.
   /// @notice proposalId The id of the proposal.
   function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
-    uint256 internalEnd = internalVotingPeriodEnd(proposalId);
+    uint256 voteEnd = governor.proposalDeadline(proposalId);
     uint256 votingStart = governor.proposalSnapshot(proposalId);
-    return block.number < internalEnd && block.number >= votingStart;
+    return block.number < voteEnd && block.number >= votingStart;
   }
 }
