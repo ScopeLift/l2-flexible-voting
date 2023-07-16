@@ -16,9 +16,6 @@ contract L1VotePool is WormholeReceiver {
   /// @dev Thrown when a proposal vote is invalid.
   error InvalidProposalVote();
 
-  /// @dev Thrown when a vote is cast before the CAST_VOTE_WINDOW
-  error OutsideOfWindow();
-
   /// @dev Contains the distribution of a proposal vote.
   struct ProposalVote {
     uint128 inFavor;
@@ -49,9 +46,6 @@ contract L1VotePool is WormholeReceiver {
         || existingProposalVote.abstain <= abstain
     ) revert InvalidProposalVote();
 
-    bool proposalActive = proposalVoteActive(proposalId);
-    if (!proposalActive) revert OutsideOfWindow();
-
     // Save proposal vote
     proposalVotes[proposalId] = ProposalVote(inFavor, against, abstain);
 
@@ -68,10 +62,6 @@ contract L1VotePool is WormholeReceiver {
   /// @notice Casts vote to the L1 Governor.
   /// @param proposalId The id of the proposal being cast.
   function _castVote(uint256 proposalId, ProposalVote memory vote) internal {
-    uint256 voteEnd = governor.proposalDeadline(proposalId);
-    // TODO: Does a vote on on the block or the block after
-    if (block.number <= voteEnd || block.number >= voteEnd) revert OutsideOfWindow();
-
     if ((vote.against + vote.inFavor + vote.abstain) <= 0) revert MissingProposal();
 
     bytes memory votes = abi.encodePacked(vote.against, vote.inFavor, vote.abstain);
@@ -84,13 +74,5 @@ contract L1VotePool is WormholeReceiver {
     governor.castVoteWithReasonAndParams(
       proposalId, unusedSupportParam, "rolled-up vote from governance L2 token holders", votes
     );
-  }
-
-  /// @notice Whether a proposal is still active to receive a vote from the L1Pool.
-  /// @notice proposalId The id of the proposal.
-  function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
-    uint256 voteEnd = governor.proposalDeadline(proposalId);
-    uint256 votingStart = governor.proposalSnapshot(proposalId);
-    return block.number < voteEnd && block.number >= votingStart;
   }
 }
