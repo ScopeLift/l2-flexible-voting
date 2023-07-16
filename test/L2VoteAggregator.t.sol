@@ -37,7 +37,7 @@ contract BridgeVote is L2VoteAggregatorTest {
     new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block));
 
     vm.roll(block.number + 5);
-    l2VoteAggregator.expressVote(1, 1);
+    l2VoteAggregator.castVote(1, 1);
 
     uint64 sequence = l2VoteAggregator.bridgeVote(1);
     assertEq(sequence, 0);

@@ -82,7 +82,7 @@ contract L2VoteAggregator {
   /// @notice Where a user can express their vote based on their L2 token voting power.
   /// @param proposalId The id of the proposal to vote on.
   /// @param support The type of vote to cast.
-  function expressVote(uint256 proposalId, uint8 support) external {
+  function castVote(uint256 proposalId, uint8 support) public returns (uint256 balance) {
     bool proposalActive = proposalVoteActive(proposalId);
     if (!proposalActive) revert ProposalInactive();
 
@@ -102,6 +102,7 @@ contract L2VoteAggregator {
     } else {
       revert InvalidVoteType();
     }
+    return weight;
   }
 
   /// @notice Bridges a vote to the L1.
