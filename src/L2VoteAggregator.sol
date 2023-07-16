@@ -84,14 +84,13 @@ contract L2VoteAggregator {
   /// @param support The type of vote to cast.
   function castVote(uint256 proposalId, uint8 support) public returns (uint256 balance) {
     if (!proposalVoteActive(proposalId)) revert ProposalInactive();
+    if (_proposalVotersHasVoted[proposalId][msg.sender]) revert AlreadyVoted();
+    _proposalVotersHasVoted[proposalId][msg.sender] = true;
 
     L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
     uint256 weight = VOTING_TOKEN.getPastVotes(msg.sender, proposal.voteStart);
     if (weight == 0) revert NoWeight();
 
-    if (_proposalVotersHasVoted[proposalId][msg.sender]) revert AlreadyVoted();
-
-    _proposalVotersHasVoted[proposalId][msg.sender] = true;
     if (support == uint8(VoteType.Against)) {
       proposalVotes[proposalId].against += SafeCast.toUint128(weight);
     } else if (support == uint8(VoteType.For)) {
