@@ -83,8 +83,7 @@ contract L2VoteAggregator {
   /// @param proposalId The id of the proposal to vote on.
   /// @param support The type of vote to cast.
   function castVote(uint256 proposalId, uint8 support) public returns (uint256 balance) {
-    bool proposalActive = proposalVoteActive(proposalId);
-    if (!proposalActive) revert ProposalInactive();
+    if (!proposalVoteActive(proposalId)) revert ProposalInactive();
 
     L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
     uint256 weight = VOTING_TOKEN.getPastVotes(msg.sender, proposal.voteStart);
@@ -109,8 +108,7 @@ contract L2VoteAggregator {
   /// @param proposalId The id of the proposal to bridge.
   /// @return sequence The id of the of the message sent through Wormhole.
   function bridgeVote(uint256 proposalId) external payable returns (uint64 sequence) {
-    bool proposalActive = proposalVoteActive(proposalId);
-    if (!proposalActive) revert ProposalInactive();
+    if (!proposalVoteActive(proposalId)) revert ProposalInactive();
 
     ProposalVote memory vote = proposalVotes[proposalId];
 
