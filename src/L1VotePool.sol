@@ -26,14 +26,14 @@ contract L1VotePool is WormholeReceiver {
   /// @notice A mapping of proposal id to the proposal vote distribution.
   mapping(uint256 => ProposalVote) public proposalVotes;
 
-  /// @param _core The address of the Wormhole Core contract.
+  /// @param _relayer The address of the Wormhole Relayer.
   /// @param _governor The address of the L1 Governor contract.
   constructor(address _relayer, address _governor) WormholeReceiver(_relayer) {
     governor = IGovernor(_governor);
   }
 
   /// @notice Receives a message from L2 and saves the proposal vote distribution.
-  /// @param encodedMsg The encoded message Wormhole VAA from the L2.
+  /// @param payload The payload that was sent to in the delivery request.
   function receiveEncodedMsg(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32)
     public
     override

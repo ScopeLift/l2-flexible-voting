@@ -23,7 +23,8 @@ contract Deposit is L1ERC20BridgeTest {
   function testFork_CorrectlyDepositTokens() public {
     FakeERC20 erc20 = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", erc20);
-    L1ERC20Bridge bridge = new L1ERC20Bridge(address(erc20), wormholeCoreFuji, address(gov));
+    L1ERC20Bridge bridge =
+      new L1ERC20Bridge(address(erc20), wormholeCoreFuji, address(gov), wormholePolygonId);
     bridge.initialize(0xBaA85b5C4c74f53c46872acfF2750f512bcBEC43);
 
     erc20.approve(address(bridge), 100_000);

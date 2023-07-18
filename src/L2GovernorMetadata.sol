@@ -12,14 +12,14 @@ contract L2GovernorMetadata is WormholeReceiver {
     uint256 voteEnd;
   }
 
-  /// @notice The id of the proposal mapped to the proposal metadata.
+  ///@notice The id of the proposal mapped to the proposal metadata.
   mapping(uint256 => Proposal) _proposals;
 
-  /// @param _core The address of the Wormhole core contract.
+  /// @param _relayer The address of the Wormhole relayer contract.
   constructor(address _relayer) WormholeReceiver(_relayer) {}
 
   /// @notice Receives a message from L1 and saves the proposal metadata.
-  /// @param encodedMsg The encoded message Wormhole VAA from the L1.
+  /// @param payload The payload that was sent to in the delivery request.
   function receiveEncodedMsg(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32)
     public
     override

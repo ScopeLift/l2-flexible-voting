@@ -24,11 +24,12 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   error AlreadyInitialized();
 
   /// @param l1TokenAddress The address of the L1 token.
-  /// @param _core The address of the core wormhole contract.
+  /// @param _relayer The adddress of the Wormhole relayer.
   /// @param _governor The address of the L1 governor.
-  constructor(address l1TokenAddress, address _relayer, address _governor)
+  /// @param _targetChain The Wormhole id of the chain to send the message.
+  constructor(address l1TokenAddress, address _relayer, address _governor, uint16 _targetChain)
     L1VotePool(_relayer, _governor)
-    WormholeSender(_relayer)
+    WormholeSender(_relayer, _targetChain)
   {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
   }
@@ -44,7 +45,6 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @notice Deposits L1 tokens into bridge and publishes a message using Wormhole to the L2 token.
   /// @param account The address of the user on L2 where to mint the token.
   /// @param amount The amount of tokens to deposit and mint on the L2.
-  /// @return sequence An identifier for the message published to L2.
   function deposit(address account, uint256 amount) external payable {
     L1_TOKEN.transferFrom(msg.sender, address(this), amount);
 
@@ -61,7 +61,7 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   }
 
   /// @notice Receives an encoded withdrawal message from the L2
-  /// @param encodedMsg The encoded message from the L2 with the withdrawal information.
+  /// @param payload The payload that was sent to in the delivery request.
   function receiveEncodedWithdrawalMsg(
     bytes memory payload,
     bytes[] memory,

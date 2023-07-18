@@ -26,25 +26,34 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
 
   /// @param _name The name of the ERC20 token.
   /// @param _symbol The symbol of the ERC20 token.
-  /// @param _core The address of the Wormhole core contracts.
-  constructor(string memory _name, string memory _symbol, address _relayer, address _l1Block)
+  /// @param _relayer The address of the Wormhole relayer.
+  /// @param _l1Block The contract that manages the clock for the ERC20.
+  /// @param _targetChain The chain to send wormhole messages.
+  constructor(
+    string memory _name,
+    string memory _symbol,
+    address _relayer,
+    address _l1Block,
+    uint16 _targetChain
+  )
     WormholeReceiver(_relayer)
     ERC20(_name, _symbol)
     ERC20Permit(_name)
-    WormholeSender(_relayer)
+    WormholeSender(_relayer, _targetChain)
   {
     L1_BLOCK = IL1Block(_l1Block);
   }
 
   /// @notice Must be called before bridging tokens to L2.
-  /// @param l2TokenAddress The address of the L2 token.
+  /// @param l1TokenAddress The address of the L1 token for this L2 token.
   function initialize(address l1TokenAddress) public {
     if (INITIALIZED) revert AlreadyInitialized();
     INITIALIZED = true;
     L1_TOKEN_ADDRESS = l1TokenAddress;
   }
 
-  /// @param encodedMsg An encoded message payload sent from a specialized relayer.
+  /// @notice Receives a message from L1 and mints L2 tokens.
+  /// @param payload The payload that was sent to in the delivery request.
   function receiveEncodedMsg(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32)
     public
     override

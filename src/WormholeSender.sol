@@ -10,11 +10,12 @@ contract WormholeSender {
 
   uint256 constant GAS_LIMIT = 500_000;
 
-  constructor(address _relayer) {
+  constructor(address _relayer, uint16 targetChain) {
     WORMHOLE_RELAYER = IWormholeRelayer(_relayer);
+    TARGET_CHAIN = targetChain;
   }
 
-  function quoteDeliveryCost(uint16 targetChain) public returns (uint256 cost) {
+  function quoteDeliveryCost(uint16 targetChain) public virtual returns (uint256 cost) {
     (cost,) = WORMHOLE_RELAYER.quoteEVMDeliveryPrice(targetChain, 0, GAS_LIMIT);
   }
 }

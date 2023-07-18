@@ -14,7 +14,7 @@ contract L2ERC20Test is Test, Constants {
     vm.createSelectFork(vm.rpcUrl("polygon_mumbai"));
     L1Block l1Block = new L1Block();
     erc20 =
-      new L2ERC20("Hello", "WRLD", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20, address(l1Block));
+    new L2ERC20("Hello", "WRLD", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20, address(l1Block), wormholeFujiId);
     // erc20.registerApplicationContracts(
     //   6, bytes32(uint256(uint160(0x76763243e202BB4153DDe5a7CE4013a9564f06Ad)))
     // );
