@@ -41,7 +41,6 @@ docker run \
 spy --nodeKey /node.key --spyRPC "[::]:7073" --network /wormhole/testnet/2/1 --bootstrap
  /dns4/wormhole-testnet-v2-bootstrap.certus.one/udp/8999/quic/p2p/12D3KooWAkB9ynDur1Jtoa
 97LBUp8RXdhzS5uHgAfdTquJbrbN7i
-
 ```
 
 Once those are running you will need to setup the L2 relayer. Follow the instructions 
@@ -53,5 +52,3 @@ the `MintOnL2` script demonstrating passing a  message cross-chain.
 This project is available under the [MIT](LICENSE.txt) license.
 
 Copyright (c) 2023 ScopeLift
-
-
