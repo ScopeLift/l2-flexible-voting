@@ -29,6 +29,7 @@ contract L1ERC20Bridge {
   uint16 public immutable targetChain;
 
   bool public INITIALIZED = false;
+ IWormholeRelayer public immutable relayer = IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB);
 
 
   constructor(address l1TokenAddress, address _coreRelayer, uint16 _targetChain) {
@@ -48,6 +49,10 @@ contract L1ERC20Bridge {
     }
   }
 
+  function quoteDeliveryPrice(uint16 targeChain) public view returns (uint256 cost) {
+		  (cost,) = relayer.quoteEVMDeliveryPrice(targetChain, 0, 500_000);
+    }
+
 
   function deposit(address account, uint256 amount, address refundAccount, uint16 refundChain)
     public 
@@ -59,13 +64,13 @@ contract L1ERC20Bridge {
     // 1. encode packed mint args
     // 2. send message to relayer contract
     // 3. On L2 token receive and mint
-	IWormholeRelayer relayer = IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB);
     bytes memory mintCalldata = abi.encodePacked(msg.sender, uint256(100_000));
-    (uint256 deliveryCost,) = relayer.quoteEVMDeliveryPrice(5, 0, 500_000);
-	console2.logUint(deliveryCost);
+        uint256 cost = quoteDeliveryPrice(5);
+	require(msg.value == cost);
+	console2.logUint(cost);
 	// require(msg.value >= deliveryCost, "Not enough value to cover delivery cost");
-    relayer.sendPayloadToEvm{value: msg.value}(
-      5, L2_TOKEN_ADDRESS, mintCalldata, 0, 500_000
+    relayer.sendPayloadToEvm{value: cost}(
+      5, 0x04Ece61784F0fFB50595389b59c9c6aa9E2EcD0b, mintCalldata, 0, 500_000
     );
 
 

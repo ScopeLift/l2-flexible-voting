@@ -18,6 +18,7 @@ interface IL1ERC20Bridge {
     external
 	payable
     returns (uint16);
+  function quoteDeliveryPrice(uint16) external returns (uint256); 
 }
 
 contract MintOnL2 is Script {
@@ -55,20 +56,25 @@ contract MintOnL2 is Script {
     // console2.logAddress(address(bridge.L1_TOKEN()));
     console2.logUint(erc20.balanceOf(msg.sender));
 
-    vm.broadcast();
-    erc20.approve(address(bridge), 100_000_000);
+    // vm.broadcast();
+    // erc20.approve(address(bridge), 100_000_000);
 
 	// Gas estimation causing issues
 	// Hardcoding everything works for some reason
-    (uint256 deliveryCost,) = IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB).quoteEVMDeliveryPrice(5, 0, 500_000);
-
-    // bridge.deposit{value: deliveryCost}(msg.sender, 100_000, msg.sender, targetChain);
+    // (uint256 deliveryCost,) = IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB).quoteEVMDeliveryPrice(5, 0, 500_000);
 
     bytes memory mintCalldata = abi.encodePacked(msg.sender, uint256(100_000));
 
 	vm.broadcast();
-    IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB).sendPayloadToEvm{value: deliveryCost}(
-      5,0x04Ece61784F0fFB50595389b59c9c6aa9E2EcD0b, mintCalldata, 0, 500_000
-    );
+	uint256 cost = bridge.quoteDeliveryPrice(5);
+	console2.logUint(cost);
+
+	// vm.broadcast();
+    // bridge.deposit{value: cost}(msg.sender, 100_000, msg.sender, targetChain);
+
+	// vm.broadcast();
+    // IWormholeRelayer(0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB).sendPayloadToEvm{value: deliveryCost}(
+    //   5,0x04Ece61784F0fFB50595389b59c9c6aa9E2EcD0b, mintCalldata, 0, 500_000
+    // );
   }
 }
