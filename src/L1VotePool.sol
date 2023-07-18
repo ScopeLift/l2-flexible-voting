@@ -28,17 +28,19 @@ contract L1VotePool is WormholeReceiver {
 
   /// @param _core The address of the Wormhole Core contract.
   /// @param _governor The address of the L1 Governor contract.
-  constructor(address _core, address _governor) WormholeReceiver(_core) {
+  constructor(address _relayer, address _governor) WormholeReceiver(_relayer) {
     governor = IGovernor(_governor);
   }
 
   /// @notice Receives a message from L2 and saves the proposal vote distribution.
   /// @param encodedMsg The encoded message Wormhole VAA from the L2.
-  function receiveEncodedMsg(bytes memory encodedMsg) public override {
-    (IWormhole.VM memory vm,,) = _validateMessage(encodedMsg);
-
+  function receiveEncodedMsg(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32)
+    public
+    override
+    onlyRelayer
+  {
     (uint256 proposalId, uint128 against, uint128 inFavor, uint128 abstain) =
-      abi.decode(vm.payload, (uint256, uint128, uint128, uint128));
+      abi.decode(payload, (uint256, uint128, uint128, uint128));
 
     ProposalVote memory existingProposalVote = proposalVotes[proposalId];
     if (

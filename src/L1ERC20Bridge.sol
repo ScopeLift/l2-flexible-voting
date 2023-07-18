@@ -5,8 +5,9 @@ import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
 import {L1VotePool} from "src/L1VotePool.sol";
+import {WormholeSender} from "src/WormholeSender.sol";
 
-contract L1ERC20Bridge is L1VotePool {
+contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @notice L1 token used for deposits and voting.
   ERC20Votes public immutable L1_TOKEN;
 
@@ -25,8 +26,9 @@ contract L1ERC20Bridge is L1VotePool {
   /// @param l1TokenAddress The address of the L1 token.
   /// @param _core The address of the core wormhole contract.
   /// @param _governor The address of the L1 governor.
-  constructor(address l1TokenAddress, address _core, address _governor)
-    L1VotePool(_core, _governor)
+  constructor(address l1TokenAddress, address _relayer, address _governor)
+    L1VotePool(_relayer, _governor)
+    WormholeSender(_relayer)
   {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
   }
@@ -43,21 +45,31 @@ contract L1ERC20Bridge is L1VotePool {
   /// @param account The address of the user on L2 where to mint the token.
   /// @param amount The amount of tokens to deposit and mint on the L2.
   /// @return sequence An identifier for the message published to L2.
-  function deposit(address account, uint256 amount) external payable returns (uint64 sequence) {
+  function deposit(address account, uint256 amount) external payable {
     L1_TOKEN.transferFrom(msg.sender, address(this), amount);
 
     // TODO optimize with encodePacked
     bytes memory mintCalldata = abi.encode(account, amount);
-    sequence = CORE_BRIDGE.publishMessage(nonce, mintCalldata, 1);
-    nonce = nonce + 1;
-    return sequence;
+    uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
+    WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
+      TARGET_CHAIN,
+      L2_TOKEN_ADDRESS,
+      mintCalldata,
+      0, // no receiver value needed since we're just passing a message
+      GAS_LIMIT
+    );
   }
 
   /// @notice Receives an encoded withdrawal message from the L2
   /// @param encodedMsg The encoded message from the L2 with the withdrawal information.
-  function receiveEncodedWithdrawalMsg(bytes memory encodedMsg) public {
-    (IWormhole.VM memory vm,,) = _validateMessage(encodedMsg);
-    (address account, uint256 amount) = abi.decode(vm.payload, (address, uint256));
+  function receiveEncodedWithdrawalMsg(
+    bytes memory payload,
+    bytes[] memory,
+    bytes32,
+    uint16,
+    bytes32
+  ) public onlyRelayer {
+    (address account, uint256 amount) = abi.decode(payload, (address, uint256));
     _withdraw(account, amount);
   }
 
