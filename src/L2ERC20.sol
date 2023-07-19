@@ -52,6 +52,7 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver {
   /// @param account The account where the tokens will be transferred.
   /// @param amount The amount of tokens to be unlocked.
   function l1Unlock(address account, uint256 amount) external returns (uint256 sequence) {
+    require(msg.sender == account, "Withdrawing account must be msg.sender");
     _burn(account, amount);
     bytes memory withdrawCalldata = abi.encode(account, amount);
     CORE_BRIDGE.publishMessage(nonce, withdrawCalldata, 1);
