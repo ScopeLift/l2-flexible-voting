@@ -10,7 +10,8 @@ import {IL1Block} from "src/interfaces/IL1Block.sol";
 /// have an L1 block contract.
 ///
 /// Arbitrum L1 block reference: https://developer.arbitrum.io/time
-/// Optimism L1 block reference: https://github.com/ethereum-optimism/optimism/blob/65ec61dde94ffa93342728d324fecf474d228e1f/packages/contracts-bedrock/contracts/L2/L1Block.sol
+/// Optimism L1 block reference:
+/// https://github.com/ethereum-optimism/optimism/blob/65ec61dde94ffa93342728d324fecf474d228e1f/packages/contracts-bedrock/contracts/L2/L1Block.sol
 contract L1Block is IL1Block {
   // We could keep as uint64
   // https://github.com/sherlock-audit/2023-01-optimism-judging/issues/278
