@@ -8,7 +8,7 @@ contract WormholeSender {
   IWormholeRelayer internal immutable WORMHOLE_RELAYER;
   uint16 public immutable TARGET_CHAIN;
 
-  uint256 constant GAS_LIMIT = 1_000_000;
+  uint256 constant GAS_LIMIT = 500_000;
 
   constructor(address _relayer, uint16 targetChain) {
     WORMHOLE_RELAYER = IWormholeRelayer(_relayer);

@@ -50,7 +50,10 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
 
     // TODO optimize with encodePacked
     bytes memory mintCalldata = abi.encode(account, amount);
+
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
+	require(cost == msg.value, "Cost should be msg.Value");
+
     WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,
       L2_TOKEN_ADDRESS,
