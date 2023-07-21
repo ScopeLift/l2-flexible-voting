@@ -63,6 +63,9 @@ contract L2VoteAggregator {
   /// @notice A mapping of proposal id to proposal vote totals.
   mapping(uint256 => ProposalVote) public proposalVotes;
 
+  /// @dev Emitted when a vote is cast on L2.
+  event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight);
+
   /// @param _votingToken The token used to vote on proposals.
   /// @param _core The Wormhole contract to bridge messages to L1.
   /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
@@ -100,6 +103,7 @@ contract L2VoteAggregator {
     } else {
       revert InvalidVoteType();
     }
+    emit VoteCast(msg.sender, proposalId, support, weight);
     return weight;
   }
 
