@@ -42,8 +42,8 @@ contract L1VotePool is WormholeReceiver {
 
     ProposalVote memory existingProposalVote = proposalVotes[proposalId];
     if (
-      existingProposalVote.against <= against || existingProposalVote.inFavor <= inFavor
-        || existingProposalVote.abstain <= abstain
+      existingProposalVote.against < against || existingProposalVote.inFavor < inFavor
+        || existingProposalVote.abstain < abstain
     ) revert InvalidProposalVote();
 
     // Save proposal vote
