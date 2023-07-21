@@ -11,7 +11,7 @@ import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
 
 contract L2ERC20 is ERC20Votes, WormholeReceiver {
-  /// @notice The contract that handles fetch the L1 block on the L2.
+  /// @notice The contract that handles fetching the L1 block on the L2.
   IL1Block immutable L1_BLOCK;
 
   /// @param _name The name of the ERC20 token.
