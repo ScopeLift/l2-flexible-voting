@@ -37,6 +37,6 @@ contract DeployVoteAggregator is Script, Constants {
 
     // Deploy the L2 vote aggregator
     vm.broadcast();
-    new L2VoteAggregator(deployedL2Token, wormholeCoreMumbai, l2GovernorMetadata, address(l1Block));
+    new L2VoteAggregator(deployedL2Token, wormholeCoreMumbai, l2GovernorMetadata, address(l1Block), wormholeFujiId);
   }
 }

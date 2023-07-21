@@ -7,7 +7,7 @@ import {Ownable} from "openzeppelin/access/Ownable.sol";
 
 abstract contract WormholeReceiver is Ownable {
   /// @notice The wormhole relayer used to trustlessly send messages.
-  IWormholeRelayer public immutable WORMHOLE_RELAYER;
+  IWormholeRelayer private immutable WORMHOLE_RELAYER;
 
   constructor(address _relayer) {
     WORMHOLE_RELAYER = IWormholeRelayer(_relayer);

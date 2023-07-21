@@ -34,12 +34,12 @@ contract BridgeVote is L2VoteAggregatorTest {
     GovernorMetadataMock l2GovernorMetadata = new GovernorMetadataMock(wormholeCoreMumbai);
     L1Block l1Block = new L1Block();
     L2VoteAggregator l2VoteAggregator =
-    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block));
+    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+    uint256 cost = l2VoteAggregator.quoteDeliveryCost(wormholeFujiId);
 
     vm.roll(block.number + 5);
     l2VoteAggregator.castVote(1, 1);
 
-    uint64 sequence = l2VoteAggregator.bridgeVote(1);
-    assertEq(sequence, 0);
+    l2VoteAggregator.bridgeVote{value: cost}(1);
   }
 }

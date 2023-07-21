@@ -26,11 +26,12 @@ contract Deposit is L1ERC20BridgeTest {
     L1ERC20Bridge bridge =
       new L1ERC20Bridge(address(erc20), wormholeCoreFuji, address(gov), wormholePolygonId);
     bridge.initialize(0xBaA85b5C4c74f53c46872acfF2750f512bcBEC43);
+    uint256 cost = bridge.quoteDeliveryCost(wormholeFujiId);
 
     erc20.approve(address(bridge), 100_000);
     erc20.mint(address(this), 100_000);
-    vm.deal(address(this), 1 ether);
+    vm.deal(address(this), 100 ether);
 
-    bridge.deposit(address(this), 100_000);
+    bridge.deposit{value: cost}(address(this), 100_000);
   }
 }

@@ -5,7 +5,7 @@ import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol
 
 contract WormholeSender {
   /// @notice The wormhole relayer used to trustlessly send messages.
-  IWormholeRelayer private immutable WORMHOLE_RELAYER;
+  IWormholeRelayer internal immutable WORMHOLE_RELAYER;
   uint16 public immutable TARGET_CHAIN;
 
   uint256 constant GAS_LIMIT = 500_000;

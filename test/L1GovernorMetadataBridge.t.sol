@@ -20,8 +20,10 @@ contract Bridge is L1GovernorMetadataBridgeTest {
   function testFork_CorrectlyBridgeMetadata() public {
     ERC20Votes erc20 = new FakeERC20("GovExample", "GOV");
     IGovernor gov = new GovernorMock("Testington Dao", erc20);
-    L1GovernorMetadataBridge bridge = new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji);
+    L1GovernorMetadataBridge bridge =
+      new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji, wormholeFujiId);
     bridge.initialize(0xBaA85b5C4c74f53c46872acfF2750f512bcBEC43);
+    uint256 cost = bridge.quoteDeliveryCost(wormholeFujiId);
 
     bytes memory mintCalldata = abi.encode(FakeERC20.mint.selector, address(gov), 1 ether);
 
@@ -37,8 +39,6 @@ contract Bridge is L1GovernorMetadataBridgeTest {
     uint256 proposalId =
       gov.propose(targets, values, calldatas, "Proposal: To inflate governance token");
 
-    uint256 sequence = bridge.bridge(proposalId);
-
-    assertEq(sequence, 0);
+    bridge.bridge{value: cost}(proposalId);
   }
 }
