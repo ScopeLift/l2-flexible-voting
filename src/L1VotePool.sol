@@ -62,8 +62,6 @@ contract L1VotePool is WormholeReceiver {
   /// @notice Casts vote to the L1 Governor.
   /// @param proposalId The id of the proposal being cast.
   function _castVote(uint256 proposalId, ProposalVote memory vote) internal {
-    if ((vote.against + vote.inFavor + vote.abstain) <= 0) revert MissingProposal();
-
     bytes memory votes = abi.encodePacked(vote.against, vote.inFavor, vote.abstain);
 
     // This param is ignored by the governor when voting with fractional
