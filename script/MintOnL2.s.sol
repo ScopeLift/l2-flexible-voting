@@ -8,7 +8,7 @@ import {Constants} from "test/Constants.sol";
 
 /// @dev A script to test that the L1 bridging functionality works. It will call the bridge on L1
 /// which will call the mint function on the L2 token.
-contract MintOnL2 is Script {
+contract MintOnL2 is Script, Constants {
   using stdJson for string;
 
   function run() public {
@@ -22,7 +22,7 @@ contract MintOnL2 is Script {
     string memory bridgeFile = "broadcast/multi/Deploy.s.sol-latest/run.json";
     string memory bridgeJson = vm.readFile(bridgeFile);
 
-    address l1Bridge = bridgeJson.readAddress(".deployments[1].transactions[0].contractAddress");
+    address l1Bridge = bridgeJson.readAddress(".deployments[1].transactions[1].contractAddress");
 
     setFallbackToDefaultRpcUrls(false);
 
@@ -37,10 +37,12 @@ contract MintOnL2 is Script {
 
     // Approve L1 token to be sent to the bridge
     vm.broadcast();
-    erc20.approve(address(bridge), 100_000_000);
+    erc20.approve(address(bridge), 100_000);
 
+
+    uint256 cost = bridge.quoteDeliveryCost(wormholeFujiId);
     // Deposit minted L1 token into the bridge and mint send a token to L2
     vm.broadcast();
-    bridge.deposit(msg.sender, 100_000);
+    bridge.deposit{value: cost}(msg.sender, 100_000);
   }
 }
