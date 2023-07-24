@@ -34,7 +34,7 @@ contract L1VotePool is WormholeReceiver {
 
   /// @notice Receives a message from L2 and saves the proposal vote distribution.
   /// @param payload The payload that was sent to in the delivery request.
-  function receiveEncodedMsg(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32)
+  function receiveWormholeMessages(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32)
     public
     override
     onlyRelayer

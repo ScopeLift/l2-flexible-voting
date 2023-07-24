@@ -13,7 +13,7 @@ abstract contract WormholeReceiver is Ownable {
     WORMHOLE_RELAYER = IWormholeRelayer(_relayer);
   }
 
-  function receiveEncodedMsg(
+  function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,
     bytes32,

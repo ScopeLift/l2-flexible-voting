@@ -52,7 +52,7 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
     bytes memory mintCalldata = abi.encode(account, amount);
 
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
-	require(cost == msg.value, "Cost should be msg.Value");
+    require(cost == msg.value, "Cost should be msg.Value");
 
     WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,
@@ -65,6 +65,8 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
 
   /// @notice Receives an encoded withdrawal message from the L2
   /// @param payload The payload that was sent to in the delivery request.
+  //
+  // TODO test with when refactored with L1Vote
   function receiveEncodedWithdrawalMsg(
     bytes memory payload,
     bytes[] memory,
@@ -80,6 +82,6 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @param account The address of the user withdrawing tokens.
   /// @param amount The amount of tokens to withdraw.
   function _withdraw(address account, uint256 amount) internal {
-    L1_TOKEN.transferFrom(address(this), account, amount);
+    L1_TOKEN.transfer(account, amount);
   }
 }
