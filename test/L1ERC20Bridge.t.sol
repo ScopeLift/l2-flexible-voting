@@ -14,9 +14,12 @@ import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
 contract L1ERC20BridgeHarness is L1ERC20Bridge {
-  constructor(address _token, address _relayer, address _governor, uint16 _targetId) L1ERC20Bridge(_token, _relayer, _governor, _targetId) {}
+  constructor(address _token, address _relayer, address _governor, uint16 _targetId)
+    L1ERC20Bridge(_token, _relayer, _governor, _targetId)
+  {}
+
   function withdraw(address account, uint256 amount) public {
-		  _withdraw(account, amount);
+    _withdraw(account, amount);
   }
 }
 
@@ -46,17 +49,17 @@ contract Constructor is Test, Constants {
   function testFork_CorrectlySetAllArgs(address l1Erc) public {
     FakeERC20 fake = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", fake);
-    L1ERC20Bridge bridge = new L1ERC20Bridge(address(l1Erc), wormholeCoreFuji, address(gov), wormholePolygonId);
-	assertEq(address(bridge.L1_TOKEN()), l1Erc, "L1 token is not set correctly");
+    L1ERC20Bridge bridge =
+      new L1ERC20Bridge(address(l1Erc), wormholeCoreFuji, address(gov), wormholePolygonId);
+    assertEq(address(bridge.L1_TOKEN()), l1Erc, "L1 token is not set correctly");
   }
 }
-
 
 contract Initialize is L1ERC20BridgeTest {
   function testFork_CorrectlyInitializeL2Token(address l2Erc20) public {
     bridge.initialize(address(l2Erc20));
     assertEq(bridge.L2_TOKEN_ADDRESS(), l2Erc20, "L2 token address is not setup correctly");
-	assertEq(bridge.INITIALIZED(), true, "Bridge isn't initialized");
+    assertEq(bridge.INITIALIZED(), true, "Bridge isn't initialized");
   }
 
   function testFork_InitlializeL2AddressWhenAlreadyInitialized(address l2Erc20) public {
@@ -87,23 +90,25 @@ contract Deposit is L1ERC20BridgeTest {
 }
 
 contract _Withdraw is Test, Constants {
-  function testFork_CorrectlyWithdrawTokens(address _account, uint224 _amount, address l2Erc20) public {
+  function testFork_CorrectlyWithdrawTokens(address _account, uint224 _amount, address l2Erc20)
+    public
+  {
     vm.assume(_account != address(0));
 
     FakeERC20 fake = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", fake);
-    L1ERC20BridgeHarness bridge = new L1ERC20BridgeHarness(address(fake), wormholeCoreFuji, address(gov), wormholePolygonId);
+    L1ERC20BridgeHarness bridge =
+      new L1ERC20BridgeHarness(address(fake), wormholeCoreFuji, address(gov), wormholePolygonId);
     bridge.initialize(address(l2Erc20));
 
     fake.approve(address(this), _amount);
     fake.mint(address(this), _amount);
     vm.deal(address(this), 1 ether);
 
-	fake.transfer(address(bridge), _amount);
-	assertEq(fake.balanceOf(address(bridge)), _amount, "The Bridge balance is incorrect");
+    fake.transfer(address(bridge), _amount);
+    assertEq(fake.balanceOf(address(bridge)), _amount, "The Bridge balance is incorrect");
 
-	bridge.withdraw(_account, _amount);
-	assertEq(fake.balanceOf(address(_account)), _amount, "The account balance is incorrect");
-
+    bridge.withdraw(_account, _amount);
+    assertEq(fake.balanceOf(address(_account)), _amount, "The account balance is incorrect");
   }
 }
