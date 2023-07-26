@@ -31,7 +31,7 @@ contract L2GovernorMetadata is WormholeReceiver {
 
   /// @notice Returns the proposal metadata for a given proposal id.
   /// @param proposalId The id of the proposal.
-  function getProposal(uint256 proposalId) public view returns (Proposal memory) {
+  function getProposal(uint256 proposalId) public view virtual returns (Proposal memory) {
     return _proposals[proposalId];
   }
 }
