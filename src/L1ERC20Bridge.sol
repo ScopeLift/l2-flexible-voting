@@ -63,17 +63,33 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
     );
   }
 
+  // TODO test with when refactored with L1Vote
+  function receiveWormholeMessages(
+    bytes memory payload,
+    bytes[] memory additionalVaas,
+    bytes32 callerAddr,
+    uint16 sourceChain,
+    bytes32 deliveryHash
+  ) public override onlyRelayer {
+    if (callerAddr == bytes32(uint256(uint160(L2_TOKEN_ADDRESS)))) {
+      return _receiveWithdrawalWormholeMessages(
+        payload, additionalVaas, callerAddr, sourceChain, deliveryHash
+      );
+    }
+    return _receiveCastVoteWormholeMessages(
+      payload, additionalVaas, callerAddr, sourceChain, deliveryHash
+    );
+  }
+
   /// @notice Receives an encoded withdrawal message from the L2
   /// @param payload The payload that was sent to in the delivery request.
-  //
-  // TODO test with when refactored with L1Vote
-  function receiveEncodedWithdrawalMsg(
+  function _receiveWithdrawalWormholeMessages(
     bytes memory payload,
     bytes[] memory,
     bytes32,
     uint16,
     bytes32
-  ) public onlyRelayer {
+  ) internal {
     (address account, uint256 amount) = abi.decode(payload, (address, uint256));
     _withdraw(account, amount);
   }

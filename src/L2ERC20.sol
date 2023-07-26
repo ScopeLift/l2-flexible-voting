@@ -81,7 +81,7 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
     _burn(msg.sender, amount);
     bytes memory withdrawCalldata = abi.encode(account, amount);
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
-    WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
+    return WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,
       L1_TOKEN_ADDRESS,
       withdrawCalldata,

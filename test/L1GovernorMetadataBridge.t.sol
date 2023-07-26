@@ -25,8 +25,7 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   function setUpSource() public override {
     ERC20Votes erc20 = new FakeERC20("GovExample", "GOV");
     gov = new GovernorMock("Testington Dao", erc20);
-    bridge =
-      new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji, wormholePolygonId);
+    bridge = new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji, wormholePolygonId);
   }
 
   function setUpTarget() public override {
@@ -36,19 +35,24 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
 
 contract Constructor is Test, Constants {
   function testFork_CorrectlySetAllArgs(address gov) public {
-    L1GovernorMetadataBridge bridge = new L1GovernorMetadataBridge(gov, wormholeCoreFuji, wormholePolygonId);
+    L1GovernorMetadataBridge bridge =
+      new L1GovernorMetadataBridge(gov, wormholeCoreFuji, wormholePolygonId);
     assertEq(address(bridge.GOVERNOR()), gov, "Governor is not set correctly");
   }
 }
 
-contract Initialize is L1GovernorMetadataBridgeTest  {
+contract Initialize is L1GovernorMetadataBridgeTest {
   function testFork_CorrectlyInitializeL2GovernorMetadata(address l2GovernorMetadata) public {
     bridge.initialize(address(l2GovernorMetadata));
-    assertEq(bridge.L2_GOVERNOR_ADDRESS(), l2GovernorMetadata, "L2 governor address is not setup correctly");
+    assertEq(
+      bridge.L2_GOVERNOR_ADDRESS(), l2GovernorMetadata, "L2 governor address is not setup correctly"
+    );
     assertEq(bridge.INITIALIZED(), true, "Bridge isn't initialized");
   }
 
-  function testFork_InitlializeL2GovernorMetadataWhenAlreadyInitialized(address l2GovernorMetadata) public {
+  function testFork_InitlializeL2GovernorMetadataWhenAlreadyInitialized(address l2GovernorMetadata)
+    public
+  {
     bridge.initialize(address(l2GovernorMetadata));
 
     vm.expectRevert(L1GovernorMetadataBridge.AlreadyInitialized.selector);
@@ -77,13 +81,13 @@ contract Bridge is L1GovernorMetadataBridgeTest {
       gov.propose(targets, values, calldatas, "Proposal: To inflate governance token");
 
     bridge.bridge{value: cost}(proposalId);
-	uint256 voteStart = gov.proposalSnapshot(proposalId);
-	uint256 voteEnd = gov.proposalDeadline(proposalId);
+    uint256 voteStart = gov.proposalSnapshot(proposalId);
+    uint256 voteEnd = gov.proposalDeadline(proposalId);
 
     performDelivery();
 
     vm.selectFork(targetFork);
-	L2GovernorMetadata.Proposal memory proposal  = l2GovernorMetadata.getProposal(proposalId);
+    L2GovernorMetadata.Proposal memory proposal = l2GovernorMetadata.getProposal(proposalId);
     assertEq(proposal.voteStart, voteStart, "voteStart is incorrect");
     assertEq(proposal.voteEnd, voteEnd, "voteEnd is incorrect");
   }
@@ -95,6 +99,5 @@ contract Bridge is L1GovernorMetadataBridgeTest {
 
     vm.expectRevert(L1GovernorMetadataBridge.InvalidProposalId.selector);
     bridge.bridge{value: cost}(_proposalId);
- }
-
+  }
 }
