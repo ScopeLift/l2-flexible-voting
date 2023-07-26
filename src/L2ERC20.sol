@@ -14,6 +14,9 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver {
   /// @notice The contract that handles fetching the L1 block on the L2.
   IL1Block immutable L1_BLOCK;
 
+  /// @notice A unique number used to send messages.
+  uint32 public nonce;
+
   /// @param _name The name of the ERC20 token.
   /// @param _symbol The symbol of the ERC20 token.
   /// @param _core The address of the Wormhole core contracts.
@@ -43,5 +46,16 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver {
     // Check that the clock was not modified
     require(clock() == L1_BLOCK.number(), "ERC20Votes: broken clock mode");
     return "mode=blocknumber&from=eip155:1";
+  }
+
+  /// @notice Burn L2 tokens and unlock tokens on the L1.
+  /// @param account The account where the tokens will be transferred.
+  /// @param amount The amount of tokens to be unlocked.
+  function l1Unlock(address account, uint256 amount) external returns (uint256 sequence) {
+    _burn(msg.sender, amount);
+    bytes memory withdrawCalldata = abi.encode(account, amount);
+    CORE_BRIDGE.publishMessage(nonce, withdrawCalldata, 1);
+    nonce = nonce + 1;
+    return sequence;
   }
 }
