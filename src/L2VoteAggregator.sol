@@ -8,7 +8,6 @@ import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
-import {console2} from "forge-std/console2.sol";
 
 /// @notice A contract to collect votes on L2 to be bridged to L1.
 contract L2VoteAggregator is WormholeSender {
@@ -126,13 +125,7 @@ contract L2VoteAggregator is WormholeSender {
 
     ProposalVote memory vote = proposalVotes[proposalId];
 
-	console2.logUint(14);
-	console2.logUint(proposalId);
-	console2.logUint(vote.against);
-	console2.logUint(vote.inFavor);
-	console2.logUint(vote.abstain);
-    bytes memory proposalCalldata =
-      abi.encode(proposalId, vote.against, vote.inFavor, vote.abstain);
+    bytes memory proposalCalldata = abi.encode(proposalId, vote.against, vote.inFavor, vote.abstain);
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
     WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,

@@ -71,7 +71,7 @@ contract Initialize is L1ERC20BridgeTest {
 }
 
 contract Deposit is L1ERC20BridgeTest {
-  function testFork_CorrectlyDepositTokens(uint224 _amount) public {
+  function testFork_CorrectlyDepositTokens(uint96 _amount) public {
     bridge.initialize(address(l2Erc20));
     uint256 cost = bridge.quoteDeliveryCost(wormholePolygonId);
     vm.recordLogs();
@@ -90,7 +90,7 @@ contract Deposit is L1ERC20BridgeTest {
 }
 
 contract _Withdraw is Test, Constants {
-  function testFork_CorrectlyWithdrawTokens(address _account, uint224 _amount, address l2Erc20)
+  function testFork_CorrectlyWithdrawTokens(address _account, uint96 _amount, address l2Erc20)
     public
   {
     vm.assume(_account != address(0));

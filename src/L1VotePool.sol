@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
-import {console2} from "forge-std/console2.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
 abstract contract L1VotePool is WormholeReceiver {
@@ -42,33 +41,18 @@ abstract contract L1VotePool is WormholeReceiver {
     uint16,
     bytes32
   ) internal {
-		  console2.logBytes(payload);
     (uint256 proposalId, uint128 against, uint128 inFavor, uint128 abstain) =
       abi.decode(payload, (uint256, uint128, uint128, uint128));
 
-		  console2.logUint(against);
-		  console2.logUint(inFavor);
-		  console2.logUint(abstain);
-		  console2.logBytes(payload);
     ProposalVote memory existingProposalVote = proposalVotes[proposalId];
     if (
       existingProposalVote.against > against || existingProposalVote.inFavor > inFavor
         || existingProposalVote.abstain > abstain
     ) revert InvalidProposalVote();
 
-		  console2.logBytes(payload);
-		  console2.logUint(proposalId);
-		  console2.logUint(existingProposalVote.against);
-		  console2.logUint(existingProposalVote.inFavor);
-		  console2.logUint(existingProposalVote.abstain);
-
     // Save proposal vote
-
     proposalVotes[proposalId] = ProposalVote(inFavor, against, abstain);
 
-		  console2.logBytes(payload);
-		  uint256 _snapshot = governor.proposalSnapshot(proposalId);
-		  console2.logUint(_snapshot);
     _castVote(
       proposalId,
       ProposalVote(
