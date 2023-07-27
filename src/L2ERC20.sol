@@ -14,7 +14,7 @@ import {IL1Block} from "src/interfaces/IL1Block.sol";
 
 contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @notice The contract that handles fetching the L1 block on the L2.
-  IL1Block immutable L1_BLOCK;
+  IL1Block immutable public L1_BLOCK;
 
   /// @notice Used to indicate whether the contract has been initialized with the L2 token address.
   bool public INITIALIZED = false;
@@ -77,7 +77,7 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @notice Burn L2 tokens and unlock tokens on the L1.
   /// @param account The account where the tokens will be transferred.
   /// @param amount The amount of tokens to be unlocked.
-  function l1Unlock(address account, uint256 amount) external returns (uint256 sequence) {
+  function l1Unlock(address account, uint256 amount) external payable returns (uint256 sequence) {
     _burn(msg.sender, amount);
     bytes memory withdrawCalldata = abi.encode(account, amount);
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
