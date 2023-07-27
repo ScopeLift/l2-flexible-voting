@@ -14,7 +14,7 @@ import {IL1Block} from "src/interfaces/IL1Block.sol";
 
 contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @notice The contract that handles fetching the L1 block on the L2.
-  IL1Block immutable public L1_BLOCK;
+  IL1Block public immutable L1_BLOCK;
 
   /// @notice Used to indicate whether the contract has been initialized with the L2 token address.
   bool public INITIALIZED = false;

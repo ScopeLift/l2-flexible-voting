@@ -23,9 +23,7 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
 
   function setUpSource() public override {
     L1Block l1Block = new L1Block();
-    l2Erc20 =
-    new L2ERC20( "Hello", "WRLD", wormholeCoreMumbai, address(l1Block), wormholeFujiId);
-
+    l2Erc20 = new L2ERC20( "Hello", "WRLD", wormholeCoreMumbai, address(l1Block), wormholeFujiId);
   }
 
   function setUpTarget() public override {
@@ -35,15 +33,13 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   }
 }
 
-
-
 contract Constructor is L2ERC20Test {
   function testFuzz_CorrectlySetsAllArgs() public {
     L1Block l1Block = new L1Block();
     L2ERC20 erc20 =
     new L2ERC20( "Hello", "WRLD", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20, address(l1Block), wormholeFujiId);
 
-	assertEq(address(l1Block), address(erc20.L1_BLOCK()));
+    assertEq(address(l1Block), address(erc20.L1_BLOCK()));
   }
 }
 
@@ -64,18 +60,14 @@ contract Initialize is L2ERC20Test {
 
 contract ReceiveWormholeMessages is L2ERC20Test {
   function testFuzzFork_CorrectlyReceiveWormholeMessages(address account, uint224 amount) public {
-		  vm.assume(account != address(0)); // Cannot be zero address
+    vm.assume(account != address(0)); // Cannot be zero address
     l2Erc20.initialize(address(bridge));
 
-	vm.prank(wormholeCoreMumbai);
+    vm.prank(wormholeCoreMumbai);
     l2Erc20.receiveWormholeMessages(
-      abi.encode(account, amount),
-      new bytes[](0),
-      bytes32(""),
-      uint16(0),
-      bytes32("")
+      abi.encode(account, amount), new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
-	uint256 l2Amount = l2Erc20.balanceOf(account);
+    uint256 l2Amount = l2Erc20.balanceOf(account);
     assertEq(l2Amount, amount, "Amount after receive is incorrect");
   }
 }
@@ -84,8 +76,8 @@ contract Clock is L2ERC20Test {
   function testFuzzFork_CorrectlySetClock(uint48 currentBlock) public {
     l2Erc20.initialize(address(bridge));
 
-	vm.roll(currentBlock);
-	uint48 l1Block = l2Erc20.clock(); // The test L1 block implementation uses block.number
+    vm.roll(currentBlock);
+    uint48 l1Block = l2Erc20.clock(); // The test L1 block implementation uses block.number
     assertEq(l1Block, currentBlock, "Block is incorrect");
   }
 }
@@ -93,7 +85,7 @@ contract Clock is L2ERC20Test {
 contract CLOCK_MODE is L2ERC20Test {
   function test_CorrectlySetClockMode() public {
     l2Erc20.initialize(address(bridge));
-	string memory mode = l2Erc20.CLOCK_MODE(); // The test L1 block implementation uses block.number
+    string memory mode = l2Erc20.CLOCK_MODE(); // The test L1 block implementation uses block.number
 
     assertEq(mode, "mode=blocknumber&from=eip155:1", "Block is incorrect");
   }
@@ -103,36 +95,31 @@ contract CLOCK_MODE is L2ERC20Test {
 
 contract L1Unlock is L2ERC20Test {
   function testFuzzFork_CorrectlyWithdrawToken(address account, uint96 amount) public {
-		  vm.assume(account != address(0));
+    vm.assume(account != address(0));
 
     vm.selectFork(targetFork);
-	bridge.initialize(address(l2Erc20));
-	fake.mint(address(bridge), amount);
+    bridge.initialize(address(l2Erc20));
+    fake.mint(address(bridge), amount);
 
-	vm.selectFork(sourceFork);
+    vm.selectFork(sourceFork);
     l2Erc20.initialize(address(bridge));
     vm.recordLogs();
-	vm.prank(wormholeCoreMumbai);
-	// Create balance
+    vm.prank(wormholeCoreMumbai);
+    // Create balance
     l2Erc20.receiveWormholeMessages(
-      abi.encode(account, amount),
-      new bytes[](0),
-      bytes32(""),
-      uint16(0),
-      bytes32("")
+      abi.encode(account, amount), new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
 
     uint256 cost = l2Erc20.quoteDeliveryCost(wormholeFujiId);
-	vm.deal(account, 1 ether);
-	vm.prank(account);
-	l2Erc20.l1Unlock{value: cost}(account, amount);
+    vm.deal(account, 1 ether);
+    vm.prank(account);
+    l2Erc20.l1Unlock{value: cost}(account, amount);
 
     performDelivery();
 
     vm.selectFork(targetFork);
 
-	uint256 l1Balance = fake.balanceOf(account);
+    uint256 l1Balance = fake.balanceOf(account);
     assertEq(l1Balance, amount, "L1 balance is incorrect");
   }
-
 }

@@ -29,7 +29,8 @@ abstract contract L1VotePool is WormholeReceiver {
   /// @param _relayer The address of the Wormhole Relayer.
   /// @param _governor The address of the L1 Governor contract.
   constructor(address _relayer, address _governor) WormholeReceiver(_relayer) {
-    governor = IGovernor(_governor); }
+    governor = IGovernor(_governor);
+  }
 
   /// @notice Receives a message from L2 and saves the proposal vote distribution.
   /// @param payload The payload that was sent to in the delivery request.
