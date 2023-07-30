@@ -4,6 +4,7 @@ pragma solidity ^0.8.16;
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {SafeCast} from "openzeppelin/utils/math/SafeCast.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
+import {console2} from "forge-std/console2.sol";
 
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
@@ -16,16 +17,16 @@ contract L2VoteAggregator is WormholeSender {
   uint32 public constant CAST_VOTE_WINDOW = 1200;
 
   /// @notice The token used to vote on proposals provided by the `GovernorMetadata`.
-  ERC20Votes immutable VOTING_TOKEN;
+  ERC20Votes public immutable VOTING_TOKEN;
 
   /// @notice The `GovernorMetadata` contract that provides proposal information.
-  L2GovernorMetadata immutable GOVERNOR_METADATA;
+  L2GovernorMetadata public immutable GOVERNOR_METADATA;
 
   /// @notice The address of the bridge that receives L2 votes.
   address L1_BRIDGE_ADDRESS;
 
   /// @notice The contract that handles fetch the L1 block on the L2.
-  IL1Block immutable L1_BLOCK;
+  IL1Block public immutable L1_BLOCK;
 
   /// @notice Used to indicate whether the contract has been initialized with the L1 bridge address.
   bool public INITIALIZED = false;
@@ -96,7 +97,7 @@ contract L2VoteAggregator is WormholeSender {
   /// @notice Where a user can express their vote based on their L2 token voting power.
   /// @param proposalId The id of the proposal to vote on.
   /// @param support The type of vote to cast.
-  function castVote(uint256 proposalId, uint8 support) public returns (uint256 balance) {
+  function castVote(uint256 proposalId, uint8 support) public returns (uint256) {
     if (!proposalVoteActive(proposalId)) revert ProposalInactive();
     if (_proposalVotersHasVoted[proposalId][msg.sender]) revert AlreadyVoted();
     _proposalVotersHasVoted[proposalId][msg.sender] = true;
@@ -153,6 +154,8 @@ contract L2VoteAggregator is WormholeSender {
   function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
     L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
 
+	console2.logUint(L1_BLOCK.number());
+	console2.logUint(proposal.voteStart);
     // TODO: Check if this is inclusive
     return L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId)
       && L1_BLOCK.number() >= proposal.voteStart;

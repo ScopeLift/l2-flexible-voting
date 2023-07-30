@@ -36,5 +36,5 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     assertEq(proposal.voteStart, voteStart, "Vote start has been incorrectly set");
     assertEq(proposal.voteEnd, voteEnd, "Vote start has been incorrectly set");
   } // Also tests getProposal
-  // TODO: Test for onlyRelayer
+    // TODO: Test for onlyRelayer
 }
