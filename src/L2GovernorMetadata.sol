@@ -28,8 +28,8 @@ contract L2GovernorMetadata is WormholeReceiver {
   {
     (uint256 proposalId, uint256 voteStart, uint256 voteEnd) =
       abi.decode(payload, (uint256, uint256, uint256));
-	console2.logUint(111);
-	console2.logUint(voteStart);
+	console2.log("pid, receiveWormholeMessages      ", proposalId);
+	console2.log("voteStart, receiveWormholeMessages", voteStart);
 
     _proposals[proposalId] = Proposal(voteStart, voteEnd);
   }

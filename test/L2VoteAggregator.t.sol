@@ -301,22 +301,28 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     uint64 voteStart,
     uint64 voteEnd
   ) public {
+    proposalId = 0;
+    voteStart = 123;
+    voteEnd = 4560;
     vm.assume(voteStart > 0); // Underflow because we subtract 1
     vm.assume(voteEnd > 1200); // Without we have an underflow
     vm.assume(voteEnd - 1200 > voteStart); // Proposal must have a voting block before the cast
-    vm.assume(voteStart > block.number); // Block number must
-      // period ends
+    // vm.assume(voteStart > block.number); // Block number must
+    console2.log('pid, test start                   ', proposalId);
+    console2.log("voteStart, test start             ", voteStart);
+
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(wormholeCoreMumbai);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
-    console2.logBool(block.number < voteStart);
-    console2.logUint(block.number);
-    console2.logUint(voteStart);
-    console2.logUint(voteEnd);
+    // console2.logBool(block.number < voteStart);
+    // console2.logUint(block.number);
+    console2.log("voteStart, test end               ", voteStart);
+    // console2.logUint(voteEnd);
 
     bool active = l2VoteAggregator.proposalVoteActive(proposalId);
-    assertEq(active, false, "Proposal is supposed to be inactive");
+    require(false, "qqq");
+    // assertEq(active, false, "Proposal is supposed to be inactive");
   }
 }
