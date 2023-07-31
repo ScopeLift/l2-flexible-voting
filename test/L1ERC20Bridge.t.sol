@@ -21,6 +21,17 @@ contract L1ERC20BridgeHarness is L1ERC20Bridge {
   function withdraw(address account, uint256 amount) public {
     _withdraw(account, amount);
   }
+
+  function receiveWithdrawalWormholeMessages(
+    bytes memory payload,
+    bytes[] memory additionalVaas,
+    bytes32 callerAddr,
+    uint16 sourceChain,
+    bytes32 deliveryHash
+  ) public {
+    _receiveWithdrawalWormholeMessages(payload, additionalVaas, callerAddr, sourceChain, deliveryHash);
+  }
+
 }
 
 contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
@@ -62,7 +73,7 @@ contract Initialize is L1ERC20BridgeTest {
     assertEq(bridge.INITIALIZED(), true, "Bridge isn't initialized");
   }
 
-  function testFork_InitlializeL2AddressWhenAlreadyInitialized(address l2Erc20) public {
+  function testFork_InitializeL2AddressWhenAlreadyInitialized(address l2Erc20) public {
     bridge.initialize(address(l2Erc20));
 
     vm.expectRevert(L1ERC20Bridge.AlreadyInitialized.selector);
@@ -86,6 +97,37 @@ contract Deposit is L1ERC20BridgeTest {
 
     vm.selectFork(targetFork);
     assertEq(l2Erc20.balanceOf(address(this)), _amount, "L2 token balance is not correct");
+  }
+}
+
+// Receive cast
+// receive withdrawal
+// - probably best to mock these if poosible
+// - Basically we want to make sure the right function is calle//
+// test receive withdrawl
+// then go back and look for edge cases
+
+contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
+  function testFuzzFork_CorrectlyReceiveWithdrawal(address _account, uint96 _amount, address l2Erc20) public {
+    vm.assume(_account != address(0));
+    FakeERC20 fake = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", fake);
+    L1ERC20BridgeHarness bridge =
+      new L1ERC20BridgeHarness(address(fake), wormholeCoreFuji, address(gov), wormholePolygonId);
+
+    bridge.initialize(address(l2Erc20));
+    fake.approve(address(this), _amount);
+    fake.mint(address(this), _amount);
+    vm.deal(address(this), 1 ether);
+
+    fake.transfer(address(bridge), _amount);
+    assertEq(fake.balanceOf(address(bridge)), _amount, "The Bridge balance is incorrect");
+
+    bytes memory withdrawalCalldata = abi.encode(_account, _amount);
+    bridge.receiveWithdrawalWormholeMessages(
+      withdrawalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+    assertEq(fake.balanceOf(address(_account)), _amount, "The account balance is incorrect");
   }
 }
 
