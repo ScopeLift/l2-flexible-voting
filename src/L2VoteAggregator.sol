@@ -154,8 +154,10 @@ contract L2VoteAggregator is WormholeSender {
   function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
     L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
 
-	console2.logUint(L1_BLOCK.number());
-	console2.logUint(proposal.voteStart);
+    console2.logUint(L1_BLOCK.number());
+    console2.logUint(proposal.voteStart);
+    console2.logBool(L1_BLOCK.number() >= proposal.voteStart);
+    console2.logBool(L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId));
     // TODO: Check if this is inclusive
     return L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId)
       && L1_BLOCK.number() >= proposal.voteStart;

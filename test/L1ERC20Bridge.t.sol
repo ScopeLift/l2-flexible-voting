@@ -29,9 +29,10 @@ contract L1ERC20BridgeHarness is L1ERC20Bridge {
     uint16 sourceChain,
     bytes32 deliveryHash
   ) public {
-    _receiveWithdrawalWormholeMessages(payload, additionalVaas, callerAddr, sourceChain, deliveryHash);
+    _receiveWithdrawalWormholeMessages(
+      payload, additionalVaas, callerAddr, sourceChain, deliveryHash
+    );
   }
-
 }
 
 contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
@@ -100,15 +101,13 @@ contract Deposit is L1ERC20BridgeTest {
   }
 }
 
-// Receive cast
-// receive withdrawal
-// - probably best to mock these if poosible
-// - Basically we want to make sure the right function is calle//
-// test receive withdrawl
-// then go back and look for edge cases
-
+// Top level receive is tested in L2ERC20 and L2VoteAggregator
 contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
-  function testFuzzFork_CorrectlyReceiveWithdrawal(address _account, uint96 _amount, address l2Erc20) public {
+  function testFuzzFork_CorrectlyReceiveWithdrawal(
+    address _account,
+    uint96 _amount,
+    address l2Erc20
+  ) public {
     vm.assume(_account != address(0));
     FakeERC20 fake = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", fake);

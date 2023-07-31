@@ -259,14 +259,12 @@ contract BridgeVote is L2VoteAggregatorTest {
 }
 
 contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
-  function testFuzz_InternalVotingPeriod(
-    uint256 proposalId,
-    uint256 voteStart,
-    uint256 voteEnd
-  ) public {
-		  vm.assume(voteEnd > block.number);
+  function testFuzz_InternalVotingPeriod(uint256 proposalId, uint256 voteStart, uint256 voteEnd)
+    public
+  {
+    vm.assume(voteEnd > block.number);
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
-	vm.prank(wormholeCoreMumbai);
+    vm.prank(wormholeCoreMumbai);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
@@ -278,24 +276,23 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
 }
 
 contract ProposalVoteActive is L2VoteAggregatorTest {
-  function testFuzz_ProposalVoteIsActive(
-    uint256 proposalId,
-    uint64 voteStart,
-    uint64 voteEnd
-  ) public {
-		  vm.assume(voteEnd > block.number);
-		  vm.assume(voteEnd - 1200 > voteStart); // Proposal must have a voting block before the cast period ends
+  function testFuzz_ProposalVoteIsActive(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
+    public
+  {
+    vm.assume(voteEnd > block.number);
+    vm.assume(voteEnd - 1200 > voteStart); // Proposal must have a voting block before the cast
+      // period ends
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
-	vm.prank(wormholeCoreMumbai);
+    vm.prank(wormholeCoreMumbai);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
     // setup proposal in governor meta
     uint256 lastVotingBlock = l2VoteAggregator.internalVotingPeriodEnd(proposalId);
 
-	vm.roll(lastVotingBlock - 1);
-	bool active  = l2VoteAggregator.proposalVoteActive(proposalId);
-	assertEq(active, true, "Proposal is supposed to be active");
+    vm.roll(lastVotingBlock - 1);
+    bool active = l2VoteAggregator.proposalVoteActive(proposalId);
+    assertEq(active, true, "Proposal is supposed to be active");
   }
 
   // Something weird is going on here. Is this a foundry issue?
@@ -304,21 +301,22 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     uint64 voteStart,
     uint64 voteEnd
   ) public {
-		  vm.assume(voteStart > 0); // Underflow because we subtract 1
-		  vm.assume(voteStart > block.number); // Block number must
-		  vm.assume(voteEnd > 1200);
-		  vm.assume(voteEnd - 1200 > voteStart); // Proposal must have a voting block before the cast period ends
+    vm.assume(voteStart > 0); // Underflow because we subtract 1
+    vm.assume(voteEnd > 1200); // Without we have an underflow
+    vm.assume(voteEnd - 1200 > voteStart); // Proposal must have a voting block before the cast
+    vm.assume(voteStart > block.number); // Block number must
+      // period ends
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
-	vm.prank(wormholeCoreMumbai);
+    vm.prank(wormholeCoreMumbai);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
-	console2.logBool(block.number < voteStart);
-	console2.logUint(block.number);
-	console2.logUint(voteStart);
+    console2.logBool(block.number < voteStart);
+    console2.logUint(block.number);
+    console2.logUint(voteStart);
+    console2.logUint(voteEnd);
 
-	bool active  = l2VoteAggregator.proposalVoteActive(proposalId);
-	assertEq(active,false, "Proposal is supposed to be inactive");
+    bool active = l2VoteAggregator.proposalVoteActive(proposalId);
+    assertEq(active, false, "Proposal is supposed to be inactive");
   }
-
 }
