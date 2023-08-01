@@ -56,7 +56,9 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @param payload The payload that was sent to in the delivery request.
   function receiveWormholeMessages(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32)
     public
+    virtual
     override
+    onlyRelayer
   {
     (address account, uint256 amount) = abi.decode(payload, (address, uint256));
     _mint(account, amount);

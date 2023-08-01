@@ -52,8 +52,7 @@ contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
 
   function setUpTarget() public override {
     L1Block l1Block = new L1Block();
-    l2Erc20 =
-    new L2ERC20( "Hello", "WRLD", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20, address(l1Block), wormholeFujiId);
+    l2Erc20 = new L2ERC20( "Hello", "WRLD", wormholeCoreMumbai, address(l1Block), wormholeFujiId);
   }
 }
 
@@ -94,6 +93,7 @@ contract Deposit is L1ERC20BridgeTest {
 
     bridge.deposit{value: cost}(address(this), _amount);
 
+    vm.prank(wormholeCoreMumbai);
     performDelivery();
 
     vm.selectFork(targetFork);
