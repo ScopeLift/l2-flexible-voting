@@ -4,7 +4,6 @@ pragma solidity ^0.8.16;
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {SafeCast} from "openzeppelin/utils/math/SafeCast.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
-import {console2} from "forge-std/console2.sol";
 
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
@@ -152,13 +151,8 @@ contract L2VoteAggregator is WormholeSender {
   }
 
   function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
-    console2.log('pid, proposalVoteActive           ', proposalId);
     L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
 
-    // console2.logUint(L1_BLOCK.number());
-    console2.log("voteStart, proposalVoteActive     ", proposal.voteStart);
-    // console2.logBool(L1_BLOCK.number() >= proposal.voteStart);
-    // console2.logBool(L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId));
     // TODO: Check if this is inclusive
     return L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId)
       && L1_BLOCK.number() >= proposal.voteStart;

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.16;
 
 import {Test} from "forge-std/Test.sol";
-import {console2} from "forge-std/console2.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
 import {ERC20VotesComp} from
   "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
@@ -12,6 +11,7 @@ import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L1VotePool} from "src/L1VotePool.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
+import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
@@ -97,6 +97,7 @@ contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
   L1VotePoolHarness l1VotePool;
   GovernorMetadataMock l2GovernorMetadata;
+  L1Block l1Block;
 
   event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight);
 
@@ -107,7 +108,7 @@ contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
   function setUpSource() public override {
     l2GovernorMetadata = new GovernorMetadataMock(wormholeCoreMumbai);
     erc20 = new FakeERC20("GovExample", "GOV");
-    L1Block l1Block = new L1Block();
+    l1Block = new L1Block();
     l2VoteAggregator =
     new L2VoteAggregatorHarness(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
   }
@@ -262,16 +263,20 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
   function testFuzz_InternalVotingPeriod(uint256 proposalId, uint256 voteStart, uint256 voteEnd)
     public
   {
-    vm.assume(voteEnd > block.number);
+    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
+    L2VoteAggregator aggregator =
+    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+
+
+    vm.assume(voteEnd > 1200);
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(wormholeCoreMumbai);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
     // setup proposal in governor meta
-    uint256 lastVotingBlock = l2VoteAggregator.internalVotingPeriodEnd(proposalId);
-    assertEq(lastVotingBlock, block.number);
-    assertEq(lastVotingBlock, voteEnd);
+    uint256 lastVotingBlock = aggregator.internalVotingPeriodEnd(proposalId);
+    assertEq(lastVotingBlock, voteEnd - aggregator.CAST_VOTE_WINDOW());
   }
 }
 
@@ -279,8 +284,14 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
   function testFuzz_ProposalVoteIsActive(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
     public
   {
-    vm.assume(voteEnd > block.number);
-    vm.assume(voteEnd - 1200 > voteStart); // Proposal must have a voting block before the cast
+    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
+    L2VoteAggregator aggregator =
+    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+
+
+    vm.assume(voteStart < block.number);
+	vm.assume(voteEnd > 1200);
+    vm.assume(voteEnd - 1200 > block.number); // Proposal must have a voting block before the cast
       // period ends
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(wormholeCoreMumbai);
@@ -290,8 +301,8 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     // setup proposal in governor meta
     uint256 lastVotingBlock = l2VoteAggregator.internalVotingPeriodEnd(proposalId);
 
-    vm.roll(lastVotingBlock - 1);
-    bool active = l2VoteAggregator.proposalVoteActive(proposalId);
+    vm.roll(lastVotingBlock);
+    bool active = aggregator.proposalVoteActive(proposalId);
     assertEq(active, true, "Proposal is supposed to be active");
   }
 
@@ -301,28 +312,22 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     uint64 voteStart,
     uint64 voteEnd
   ) public {
-    proposalId = 0;
-    voteStart = 123;
-    voteEnd = 4560;
+    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
+    L2VoteAggregator aggregator =
+    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+
     vm.assume(voteStart > 0); // Underflow because we subtract 1
+    vm.assume(voteStart > block.number); // Block number must
     vm.assume(voteEnd > 1200); // Without we have an underflow
     vm.assume(voteEnd - 1200 > voteStart); // Proposal must have a voting block before the cast
-    // vm.assume(voteStart > block.number); // Block number must
-    console2.log('pid, test start                   ', proposalId);
-    console2.log("voteStart, test start             ", voteStart);
 
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(wormholeCoreMumbai);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
-    // console2.logBool(block.number < voteStart);
-    // console2.logUint(block.number);
-    console2.log("voteStart, test end               ", voteStart);
-    // console2.logUint(voteEnd);
 
-    bool active = l2VoteAggregator.proposalVoteActive(proposalId);
-    require(false, "qqq");
-    // assertEq(active, false, "Proposal is supposed to be inactive");
+    bool active = aggregator.proposalVoteActive(proposalId);
+    assertEq(active, false, "Proposal is supposed to be inactive");
   }
 }

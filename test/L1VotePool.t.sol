@@ -15,7 +15,6 @@ import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
 import {ERC20VotesComp} from
   "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
-import {console2} from "forge-std/console2.sol";
 
 // Create test harness and perform a cross chain call
 contract L1VotePoolHarness is L1VotePool, Test {

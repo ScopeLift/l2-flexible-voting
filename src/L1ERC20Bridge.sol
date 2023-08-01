@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
-import {console2} from "forge-std/console2.sol";
 import {L1VotePool} from "src/L1VotePool.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
 
@@ -72,8 +71,6 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
     uint16 sourceChain,
     bytes32 deliveryHash
   ) public override onlyRelayer {
-    console2.logBytes32(bytes32(uint256(uint160(L2_TOKEN_ADDRESS))));
-    console2.logBytes32(callerAddr);
     if (callerAddr == bytes32(uint256(uint160(L2_TOKEN_ADDRESS)))) {
       return _receiveWithdrawalWormholeMessages(
         payload, additionalVaas, callerAddr, sourceChain, deliveryHash

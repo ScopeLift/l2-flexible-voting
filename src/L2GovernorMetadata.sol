@@ -3,7 +3,6 @@ pragma solidity ^0.8.16;
 
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
-import {console2} from "forge-std/console2.sol";
 
 /// @notice Receives L1 messages with proposal metadata.
 contract L2GovernorMetadata is WormholeReceiver {
@@ -28,8 +27,6 @@ contract L2GovernorMetadata is WormholeReceiver {
   {
     (uint256 proposalId, uint256 voteStart, uint256 voteEnd) =
       abi.decode(payload, (uint256, uint256, uint256));
-	console2.log("pid, receiveWormholeMessages      ", proposalId);
-	console2.log("voteStart, receiveWormholeMessages", voteStart);
 
     _proposals[proposalId] = Proposal(voteStart, voteEnd);
   }
