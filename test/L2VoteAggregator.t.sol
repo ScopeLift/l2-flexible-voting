@@ -267,7 +267,6 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     L2VoteAggregator aggregator =
     new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
 
-
     vm.assume(voteEnd > 1200);
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(wormholeCoreMumbai);
@@ -288,9 +287,8 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     L2VoteAggregator aggregator =
     new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
 
-
     vm.assume(voteStart < block.number);
-	vm.assume(voteEnd > 1200);
+    vm.assume(voteEnd > 1200);
     vm.assume(voteEnd - 1200 > block.number); // Proposal must have a voting block before the cast
       // period ends
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
