@@ -133,7 +133,9 @@ contract L2VoteAggregator is WormholeSender {
       L1_BRIDGE_ADDRESS,
       proposalCalldata,
       0, // no receiver value needed since we're just passing a message
-      GAS_LIMIT
+      GAS_LIMIT,
+	  SOURCE_CHAIN,
+	  msg.sender
     );
   }
 

@@ -53,7 +53,9 @@ contract L1GovernorMetadataBridge is WormholeSender {
       L2_GOVERNOR_ADDRESS,
       proposalCalldata,
       0, // no receiver value needed since we're just passing a message
-      GAS_LIMIT
+      GAS_LIMIT,
+	  SOURCE_CHAIN,
+	  msg.sender
     );
   }
 }
