@@ -44,7 +44,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     address caller
   ) public {
     bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
-	vm.assume(caller != wormholeCoreMumbai);
+    vm.assume(caller != wormholeCoreMumbai);
     vm.prank(caller);
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
     l2GovernorMetadata.receiveWormholeMessages(
