@@ -109,7 +109,7 @@ contract Deposit is L1ERC20BridgeTest {
 
 // Top level receive is tested in L2ERC20 and L2VoteAggregator
 contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
-  function testFuzzFork_CorrectlyReceiveWithdrawal(
+  function testForkFuzz_CorrectlyReceiveWithdrawal(
     address _account,
     uint96 _amount,
     address l2Erc20

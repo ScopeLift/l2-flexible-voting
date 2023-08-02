@@ -61,7 +61,7 @@ contract Initialize is L2ERC20Test {
 }
 
 contract ReceiveWormholeMessages is L2ERC20Test {
-  function testFuzzFork_CorrectlyReceiveWormholeMessages(address account, uint224 amount) public {
+  function testForkFuzz_CorrectlyReceiveWormholeMessages(address account, uint224 amount) public {
     vm.assume(account != address(0)); // Cannot be zero address
     l2Erc20.initialize(address(bridge));
 
@@ -75,7 +75,7 @@ contract ReceiveWormholeMessages is L2ERC20Test {
 }
 
 contract Clock is L2ERC20Test {
-  function testFuzzFork_CorrectlySetClock(uint48 currentBlock) public {
+  function testForkFuzz_CorrectlySetClock(uint48 currentBlock) public {
     l2Erc20.initialize(address(bridge));
 
     vm.roll(currentBlock);
@@ -96,7 +96,7 @@ contract CLOCK_MODE is L2ERC20Test {
 }
 
 contract L1Unlock is L2ERC20Test {
-  function testFuzzFork_CorrectlyWithdrawToken(address account, uint96 amount) public {
+  function testForkFuzz_CorrectlyWithdrawToken(address account, uint96 amount) public {
     vm.assume(account != address(0));
 
     vm.selectFork(targetFork);
