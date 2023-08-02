@@ -47,6 +47,7 @@ contract SendProposalToL2 is Script, Constants {
 
     IL1GovernorMetadataBridge metadataBridge = IL1GovernorMetadataBridge(l1GovernorMetadataBridge);
     uint256 cost = metadataBridge.quoteDeliveryCost(wormholePolygonId);
+
     // Bridge proposal from the L1 to the L2
     vm.broadcast();
     metadataBridge.bridge{value: cost}(proposalId);

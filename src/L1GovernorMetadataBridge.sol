@@ -41,14 +41,14 @@ contract L1GovernorMetadataBridge is WormholeSender {
 
   /// @notice Publishes a messages with the proposal id, start block and end block
   /// @param proposalId The id of the proposal to bridge.
-  function bridge(uint256 proposalId) public payable {
+  function bridge(uint256 proposalId) public payable returns (uint256) {
     uint256 voteStart = GOVERNOR.proposalSnapshot(proposalId);
     if (voteStart == 0) revert InvalidProposalId();
     uint256 voteEnd = GOVERNOR.proposalDeadline(proposalId);
 
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
-    WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
+    return WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,
       L2_GOVERNOR_ADDRESS,
       proposalCalldata,
