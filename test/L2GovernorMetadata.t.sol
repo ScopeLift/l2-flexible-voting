@@ -18,7 +18,6 @@ contract L2GovernorMetadataTest is Constants, Test {
 contract Constructor is L2GovernorMetadataTest {
   function testFuzz_CorrectlySetsAllArgs(address wormholeCore) public {
     L2GovernorMetadata l2Gov = new L2GovernorMetadata(wormholeCore); // nothing to assert as
-      // wormholeCore is private
   }
 }
 
@@ -45,6 +44,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     address caller
   ) public {
     bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
+	vm.assume(caller != wormholeCoreMumbai);
     vm.prank(caller);
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
     l2GovernorMetadata.receiveWormholeMessages(
