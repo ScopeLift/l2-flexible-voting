@@ -20,7 +20,7 @@ contract SendProposalToL2 is Script, Constants {
 
     string memory tokenFile = "broadcast/DeployFakeERC20.s.sol/43113/run-latest.json";
     string memory tokenJson = vm.readFile(tokenFile);
-    address governorErc20= tokenJson.readAddress(".transactions[0].contractAddress");
+    address governorErc20 = tokenJson.readAddress(".transactions[0].contractAddress");
     address l1GovernorMetadataBridge =
       json.readAddress(".deployments[1].transactions[2].contractAddress");
 

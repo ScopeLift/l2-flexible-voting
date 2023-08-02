@@ -23,13 +23,15 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
 
   function setUpSource() public override {
     L1Block l1Block = new L1Block();
-    l2Erc20 = new L2ERC20( "Hello", "WRLD", wormholeCoreMumbai, address(l1Block), wormholePolygonId, wormholeFujiId);
+    l2Erc20 =
+    new L2ERC20( "Hello", "WRLD", wormholeCoreMumbai, address(l1Block), wormholePolygonId, wormholeFujiId);
   }
 
   function setUpTarget() public override {
     fake = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", fake);
-    bridge = new L1ERC20Bridge(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    bridge =
+    new L1ERC20Bridge(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
   }
 }
 

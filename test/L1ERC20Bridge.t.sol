@@ -14,9 +14,13 @@ import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
 contract L1ERC20BridgeHarness is L1ERC20Bridge {
-  constructor(address _token, address _relayer, address _governor, uint16 _sourceId, uint16 _targetId)
-    L1ERC20Bridge(_token, _relayer, _governor, _sourceId, _targetId)
-  {}
+  constructor(
+    address _token,
+    address _relayer,
+    address _governor,
+    uint16 _sourceId,
+    uint16 _targetId
+  ) L1ERC20Bridge(_token, _relayer, _governor, _sourceId, _targetId) {}
 
   function withdraw(address account, uint256 amount) public {
     _withdraw(account, amount);
@@ -47,12 +51,14 @@ contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
   function setUpSource() public override {
     fake = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", fake);
-    bridge = new L1ERC20Bridge(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    bridge =
+    new L1ERC20Bridge(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
   }
 
   function setUpTarget() public override {
     L1Block l1Block = new L1Block();
-    l2Erc20 = new L2ERC20( "Hello", "WRLD", wormholeCoreMumbai, address(l1Block), wormholePolygonId, wormholeFujiId);
+    l2Erc20 =
+    new L2ERC20( "Hello", "WRLD", wormholeCoreMumbai, address(l1Block), wormholePolygonId, wormholeFujiId);
   }
 }
 
@@ -61,7 +67,7 @@ contract Constructor is Test, Constants {
     FakeERC20 fake = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", fake);
     L1ERC20Bridge bridge =
-      new L1ERC20Bridge(address(l1Erc), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20Bridge(address(l1Erc), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
     assertEq(address(bridge.L1_TOKEN()), l1Erc, "L1 token is not set correctly");
   }
 }
@@ -112,7 +118,7 @@ contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
     FakeERC20 fake = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", fake);
     L1ERC20BridgeHarness bridge =
-      new L1ERC20BridgeHarness(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20BridgeHarness(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
 
     bridge.initialize(address(l2Erc20));
     fake.approve(address(this), _amount);
@@ -139,7 +145,7 @@ contract _Withdraw is Test, Constants {
     FakeERC20 fake = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", fake);
     L1ERC20BridgeHarness bridge =
-      new L1ERC20BridgeHarness(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20BridgeHarness(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
     bridge.initialize(address(l2Erc20));
 
     fake.approve(address(this), _amount);

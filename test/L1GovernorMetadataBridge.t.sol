@@ -25,7 +25,8 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   function setUpSource() public override {
     ERC20Votes erc20 = new FakeERC20("GovExample", "GOV");
     gov = new GovernorMock("Testington Dao", erc20);
-    bridge = new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
+    bridge =
+    new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
   }
 
   function setUpTarget() public override {

@@ -13,7 +13,7 @@ contract WormholeSender {
 
   constructor(address _relayer, uint16 _sourceChain, uint16 _targetChain) {
     WORMHOLE_RELAYER = IWormholeRelayer(_relayer);
-	SOURCE_CHAIN = _sourceChain;
+    SOURCE_CHAIN = _sourceChain;
     TARGET_CHAIN = _targetChain;
   }
 

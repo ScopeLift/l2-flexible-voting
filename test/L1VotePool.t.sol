@@ -83,7 +83,16 @@ contract L2VoteAggregatorHarness is L2VoteAggregator {
     address _l1BlockAddress,
     uint16 _sourceChain,
     uint16 _targetChain
-  ) L2VoteAggregator(_votingToken, _relayer, _governorMetadata, _l1BlockAddress, _sourceChain, _targetChain) {}
+  )
+    L2VoteAggregator(
+      _votingToken,
+      _relayer,
+      _governorMetadata,
+      _l1BlockAddress,
+      _sourceChain,
+      _targetChain
+    )
+  {}
 
   function createProposalVote(uint256 proposalId, uint128 against, uint128 inFavor, uint128 abstain)
     public

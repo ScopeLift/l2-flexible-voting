@@ -26,10 +26,13 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @param _relayer The adddress of the Wormhole relayer.
   /// @param _governor The address of the L1 governor.
   /// @param _targetChain The Wormhole id of the chain to send the message.
-  constructor(address l1TokenAddress, address _relayer, address _governor, uint16 _sourceChain, uint16 _targetChain)
-    L1VotePool(_relayer, _governor)
-    WormholeSender(_relayer, _sourceChain, _targetChain)
-  {
+  constructor(
+    address l1TokenAddress,
+    address _relayer,
+    address _governor,
+    uint16 _sourceChain,
+    uint16 _targetChain
+  ) L1VotePool(_relayer, _governor) WormholeSender(_relayer, _sourceChain, _targetChain) {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
   }
 
@@ -59,8 +62,8 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
       mintCalldata,
       0, // no receiver value needed since we're just passing a message
       GAS_LIMIT,
-	  SOURCE_CHAIN,
-	  msg.sender
+      SOURCE_CHAIN,
+      msg.sender
     );
   }
 

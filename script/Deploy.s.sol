@@ -31,7 +31,7 @@ contract Deploy is Script, Constants {
     // Create L2 ERC20Votes token
     vm.broadcast();
     L2ERC20 l2Token =
-      new L2ERC20("Scopeapotomus", "SCOPE", wormholeCoreMumbai, address(l1Block), wormholePolygonId, wormholeFujiId);
+    new L2ERC20("Scopeapotomus", "SCOPE", wormholeCoreMumbai, address(l1Block), wormholePolygonId, wormholeFujiId);
 
     vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
 
@@ -42,7 +42,7 @@ contract Deploy is Script, Constants {
     // Create L1 bridge that mints the L2 token
     vm.broadcast();
     L1ERC20Bridge bridge =
-      new L1ERC20Bridge(deployedL1Token, wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20Bridge(deployedL1Token, wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
 
     // Tell the bridge its corresponding L2 token
     vm.broadcast();
