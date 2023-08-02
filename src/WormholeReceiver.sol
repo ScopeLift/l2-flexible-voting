@@ -31,9 +31,7 @@ abstract contract WormholeReceiver is Ownable {
   ) public virtual;
 
   modifier onlyRelayer() {
-    if(msg.sender != address(WORMHOLE_RELAYER)) {
-			revert OnlyRelayerAllowed();
-	}
+    if (msg.sender != address(WORMHOLE_RELAYER)) revert OnlyRelayerAllowed();
     _;
   }
 }

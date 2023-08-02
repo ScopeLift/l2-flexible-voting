@@ -144,7 +144,6 @@ contract Constructor is L2VoteAggregatorTest {
 }
 
 contract CastVote is L2VoteAggregatorTest {
-
   function testFuzz_InactiveProposal(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 2);
     erc20.mint(address(this), _amount);

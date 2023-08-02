@@ -78,16 +78,13 @@ contract ReceiveWormholeMessages is L2ERC20Test {
     uint256 proposalId,
     uint256 voteStart,
     uint256 voteEnd,
-	address caller
+    address caller
   ) public {
     bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(caller);
-	vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
-    l2Erc20.receiveWormholeMessages(
-      payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
-    );
+    vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
+    l2Erc20.receiveWormholeMessages(payload, new bytes[](0), bytes32(""), uint16(0), bytes32(""));
   }
-
 }
 
 contract Clock is L2ERC20Test {
@@ -107,7 +104,7 @@ contract CLOCK_MODE is L2ERC20Test {
 
     assertEq(mode, "mode=blocknumber&from=eip155:1", "Block is incorrect");
   }
- }
+}
 
 contract L1Unlock is L2ERC20Test {
   function testForkFuzz_CorrectlyWithdrawToken(address account, uint96 amount) public {
