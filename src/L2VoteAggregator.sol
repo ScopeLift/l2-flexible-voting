@@ -80,8 +80,9 @@ contract L2VoteAggregator is WormholeSender {
     address _relayer,
     address _governorMetadata,
     address _l1BlockAddress,
+    uint16 _sourceChain,
     uint16 _targetChain
-  ) WormholeSender(_relayer, _targetChain) {
+  ) WormholeSender(_relayer, _sourceChain, _targetChain) {
     VOTING_TOKEN = ERC20Votes(_votingToken);
     GOVERNOR_METADATA = L2GovernorMetadata(_governorMetadata);
     L1_BLOCK = IL1Block(_l1BlockAddress);

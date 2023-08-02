@@ -34,12 +34,13 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
     string memory _symbol,
     address _relayer,
     address _l1Block,
+	uint16 _sourceChain,
     uint16 _targetChain
   )
     WormholeReceiver(_relayer)
     ERC20(_name, _symbol)
     ERC20Permit(_name)
-    WormholeSender(_relayer, _targetChain)
+    WormholeSender(_relayer, _sourceChain, _targetChain)
   {
     L1_BLOCK = IL1Block(_l1Block);
   }

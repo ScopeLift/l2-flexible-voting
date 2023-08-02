@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
-import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
 import {L1VotePool} from "src/L1VotePool.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
@@ -27,9 +26,9 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @param _relayer The adddress of the Wormhole relayer.
   /// @param _governor The address of the L1 governor.
   /// @param _targetChain The Wormhole id of the chain to send the message.
-  constructor(address l1TokenAddress, address _relayer, address _governor, uint16 _targetChain)
+  constructor(address l1TokenAddress, address _relayer, address _governor, uint16 _sourceChain, uint16 _targetChain)
     L1VotePool(_relayer, _governor)
-    WormholeSender(_relayer, _targetChain)
+    WormholeSender(_relayer, _sourceChain, _targetChain)
   {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
   }
@@ -45,7 +44,7 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @notice Deposits L1 tokens into bridge and publishes a message using Wormhole to the L2 token.
   /// @param account The address of the user on L2 where to mint the token.
   /// @param amount The amount of tokens to deposit and mint on the L2.
-  function deposit(address account, uint256 amount) external payable {
+  function deposit(address account, uint256 amount) public payable returns (uint256) {
     L1_TOKEN.transferFrom(msg.sender, address(this), amount);
 
     // TODO optimize with encodePacked
@@ -54,12 +53,14 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
     require(cost == msg.value, "Cost should be msg.Value");
 
-    WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
+    return WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,
       L2_TOKEN_ADDRESS,
       mintCalldata,
       0, // no receiver value needed since we're just passing a message
-      GAS_LIMIT
+      GAS_LIMIT,
+	  SOURCE_CHAIN,
+	  msg.sender
     );
   }
 

@@ -40,21 +40,11 @@ contract MintOnL2 is Script, Constants {
     vm.broadcast();
     erc20.approve(address(bridge), 100_000);
 
-    // uint256 cost = bridge.quoteDeliveryCost(wormholePolygonId);
-    // Deposit minted L1 token into the bridge and mint send a token to L2
-    IWormholeRelayer WORMHOLE_RELAYER = IWormholeRelayer(wormholeCoreFuji);
-    (uint256 cost,) = WORMHOLE_RELAYER.quoteEVMDeliveryPrice(5, 0, 500_000);
 
-    bytes memory mintCalldata = abi.encode(msg.sender, 100_000);
-    vm.broadcast();
-    WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
-      5,
-      0xc3e64Db48A4629cca7441f528Af1Ab9B66E9063a,
-      mintCalldata,
-      0, // no receiver value needed since we're just passing a message
-      500_000
-    );
+    uint256 cost = bridge.quoteDeliveryCost(wormholePolygonId);
 
-    // bridge.deposit{value: cost}(msg.sender, 100_000);
+	vm.broadcast();
+    bridge.deposit{value: cost}(msg.sender, 100_000);
+
   }
 }

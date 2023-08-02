@@ -81,8 +81,9 @@ contract L2VoteAggregatorHarness is L2VoteAggregator {
     address _relayer,
     address _governorMetadata,
     address _l1BlockAddress,
+    uint16 _sourceChain,
     uint16 _targetChain
-  ) L2VoteAggregator(_votingToken, _relayer, _governorMetadata, _l1BlockAddress, _targetChain) {}
+  ) L2VoteAggregator(_votingToken, _relayer, _governorMetadata, _l1BlockAddress, _sourceChain, _targetChain) {}
 
   function createProposalVote(uint256 proposalId, uint128 against, uint128 inFavor, uint128 abstain)
     public
@@ -106,7 +107,7 @@ contract L1VotePoolTest is Constants, WormholeRelayerBasicTest {
     L1Block l1Block = new L1Block();
     erc20 = new FakeERC20("GovExample", "GOV");
     l2VoteAggregator =
-    new L2VoteAggregatorHarness(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+    new L2VoteAggregatorHarness(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
   }
 
   function setUpTarget() public override {

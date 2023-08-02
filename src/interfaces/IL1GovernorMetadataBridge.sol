@@ -2,5 +2,6 @@
 pragma solidity ^0.8.0;
 
 interface IL1GovernorMetadataBridge {
-  function bridge(uint256 proposalId) external returns (uint16);
+  function bridge(uint256 proposalId) external payable returns (uint16);
+  function quoteDeliveryCost(uint16 targetChain) external returns (uint256);
 }

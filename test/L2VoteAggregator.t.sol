@@ -81,8 +81,9 @@ contract L2VoteAggregatorHarness is L2VoteAggregator {
     address _relayer,
     address _governorMetadata,
     address _l1BlockAddress,
+    uint16 _sourceChain,
     uint16 _targetChain
-  ) L2VoteAggregator(_votingToken, _relayer, _governorMetadata, _l1BlockAddress, _targetChain) {}
+  ) L2VoteAggregator(_votingToken, _relayer, _governorMetadata, _l1BlockAddress, _sourceChain, _targetChain) {}
 
   function createProposalVote(uint256 proposalId, uint128 against, uint128 inFavor, uint128 abstain)
     public
@@ -110,7 +111,7 @@ contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
     erc20 = new FakeERC20("GovExample", "GOV");
     l1Block = new L1Block();
     l2VoteAggregator =
-    new L2VoteAggregatorHarness(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+    new L2VoteAggregatorHarness(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
   }
 
   function setUpTarget() public override {
@@ -126,7 +127,7 @@ contract Constructor is L2VoteAggregatorTest {
     L1Block l1Block = new L1Block();
     GovernorMetadataMock l2GovernorMetadata = new GovernorMetadataMock(wormholeCoreMumbai);
     L2VoteAggregator l2VoteAggregator =
-    new L2VoteAggregatorHarness(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+    new L2VoteAggregatorHarness(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
 
     assertEq(address(l1Block), address(l2VoteAggregator.L1_BLOCK()));
     assertEq(address(address(erc20)), address(l2VoteAggregator.VOTING_TOKEN()));
@@ -265,7 +266,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
   {
     L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
     L2VoteAggregator aggregator =
-    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
 
     vm.assume(voteEnd > 1200);
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
@@ -285,7 +286,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
   {
     L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
     L2VoteAggregator aggregator =
-    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
 
     vm.assume(voteStart < block.number);
     vm.assume(voteEnd > 1200);
@@ -312,7 +313,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
   ) public {
     L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
     L2VoteAggregator aggregator =
-    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholeFujiId);
+    new L2VoteAggregator(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
 
     vm.assume(voteStart > 0); // Underflow because we subtract 1
     vm.assume(voteStart > block.number); // Block number must
