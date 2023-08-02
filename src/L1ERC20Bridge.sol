@@ -24,6 +24,7 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @param l1TokenAddress The address of the L1 token.
   /// @param _relayer The adddress of the Wormhole relayer.
   /// @param _governor The address of the L1 governor.
+  /// @param _sourceChain The Wormhole id of the chain sending the messages.
   /// @param _targetChain The Wormhole id of the chain to send the message.
   constructor(
     address l1TokenAddress,
@@ -46,7 +47,8 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @notice Deposits L1 tokens into bridge and publishes a message using Wormhole to the L2 token.
   /// @param account The address of the user on L2 where to mint the token.
   /// @param amount The amount of tokens to deposit and mint on the L2.
-  function deposit(address account, uint256 amount) public payable returns (uint256) {
+  /// @return sequence An identifier for the message published to L2.
+  function deposit(address account, uint256 amount) public payable returns (uint256 sequence) {
     L1_TOKEN.transferFrom(msg.sender, address(this), amount);
 
     // TODO optimize with encodePacked
@@ -66,7 +68,6 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
     );
   }
 
-  // TODO test with when refactored with L1Vote
   function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,

@@ -11,6 +11,7 @@ import {L1Block} from "src/L1Block.sol";
 import {L2ERC20} from "src/L2ERC20.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
+import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
 contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   L2ERC20 l2Erc20;
@@ -72,6 +73,21 @@ contract ReceiveWormholeMessages is L2ERC20Test {
     uint256 l2Amount = l2Erc20.balanceOf(account);
     assertEq(l2Amount, amount, "Amount after receive is incorrect");
   }
+
+  function testFuzz_RevertIfNotCalledByRelayer(
+    uint256 proposalId,
+    uint256 voteStart,
+    uint256 voteEnd,
+	address caller
+  ) public {
+    bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
+    vm.prank(caller);
+	vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
+    l2Erc20.receiveWormholeMessages(
+      payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+  }
+
 }
 
 contract Clock is L2ERC20Test {
@@ -91,9 +107,7 @@ contract CLOCK_MODE is L2ERC20Test {
 
     assertEq(mode, "mode=blocknumber&from=eip155:1", "Block is incorrect");
   }
-
-  // TODO add failure case in CLOCK_MODE
-}
+ }
 
 contract L1Unlock is L2ERC20Test {
   function testForkFuzz_CorrectlyWithdrawToken(address account, uint96 amount) public {
@@ -107,7 +121,6 @@ contract L1Unlock is L2ERC20Test {
     l2Erc20.initialize(address(bridge));
     vm.recordLogs();
     vm.prank(wormholeCoreMumbai);
-    // Create balance
     l2Erc20.receiveWormholeMessages(
       abi.encode(account, amount), new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );

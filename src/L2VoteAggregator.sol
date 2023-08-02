@@ -74,6 +74,7 @@ contract L2VoteAggregator is WormholeSender {
   /// @param _relayer The Wormhole generic relayer contract.
   /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
   /// @param _l1BlockAddress The address of the L1Block contract.
+  /// @param _sourceChain The chain sending the votes.
   /// @param _targetChain The target chain to bridge the votes to.
   constructor(
     address _votingToken,

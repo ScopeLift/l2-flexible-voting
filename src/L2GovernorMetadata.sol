@@ -12,7 +12,7 @@ contract L2GovernorMetadata is WormholeReceiver {
     uint256 voteEnd;
   }
 
-  ///@notice The id of the proposal mapped to the proposal metadata.
+  /// @notice The id of the proposal mapped to the proposal metadata.
   mapping(uint256 => Proposal) _proposals;
 
   /// @param _relayer The address of the Wormhole relayer contract.

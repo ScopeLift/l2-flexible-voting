@@ -16,7 +16,6 @@ import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
 import {ERC20VotesComp} from
   "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
 
-// Create test harness and perform a cross chain call
 contract L1VotePoolHarness is L1VotePool, Test {
   constructor(address _relayer, address _governor) L1VotePool(_relayer, _governor) {}
 
@@ -138,7 +137,6 @@ contract Constructor is L1VotePoolTest {
   }
 }
 
-// Maybe use a L2VoteAggregator test harness.
 contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
   function testFuzz_CorrectlyBridgeVoteAggregation(
     uint32 _against,
@@ -173,8 +171,6 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
     assertEq(abstain, _abstain, "abstain value was not bridged correctly");
   }
 
-  // Tests bridge vote end to end
-  // TODO refactor these to be simpler
   function testFuzz_CorrectlyBridgeVoteAggregationWithExistingVote(
     uint32 _against,
     uint32 _inFavor,
@@ -232,8 +228,7 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
 
     vm.selectFork(targetFork);
 
-    l1Erc20.approve(address(l1VotePool), uint96(_against) + uint96(_inFavor) + uint96(_abstain) + 1); // Without
-      // 1 will have cast all votes
+    l1Erc20.approve(address(l1VotePool), uint96(_against) + uint96(_inFavor) + uint96(_abstain) + 1);
     l1Erc20.mint(address(this), uint96(_against) + uint96(_inFavor) + uint96(_abstain) + 1);
     l1Erc20.delegate(address(l1VotePool));
 

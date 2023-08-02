@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {Constants} from "test/Constants.sol";
+import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
 contract L2GovernorMetadataTest is Constants, Test {
   L2GovernorMetadata l2GovernorMetadata;
@@ -35,6 +36,19 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     L2GovernorMetadata.Proposal memory proposal = l2GovernorMetadata.getProposal(proposalId);
     assertEq(proposal.voteStart, voteStart, "Vote start has been incorrectly set");
     assertEq(proposal.voteEnd, voteEnd, "Vote start has been incorrectly set");
-  } // Also tests getProposal
-    // TODO: Test for onlyRelayer
+  } 
+
+  function testFuzz_RevertIfNotCalledByRelayer(
+    uint256 proposalId,
+    uint256 voteStart,
+    uint256 voteEnd,
+	address caller
+  ) public {
+    bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
+    vm.prank(caller);
+	vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
+    l2GovernorMetadata.receiveWormholeMessages(
+      payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+  }
 }

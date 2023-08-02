@@ -18,6 +18,7 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @notice Used to indicate whether the contract has been initialized with the L2 token address.
   bool public INITIALIZED = false;
 
+  /// @notice The L1 token address.
   address public L1_TOKEN_ADDRESS;
 
   /// @dev Contract is already initialized with an L2 token.
@@ -27,6 +28,7 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @param _symbol The symbol of the ERC20 token.
   /// @param _relayer The address of the Wormhole relayer.
   /// @param _l1Block The contract that manages the clock for the ERC20.
+  /// @param _sourceChain The chain sending wormhole messages.
   /// @param _targetChain The chain to send wormhole messages.
   constructor(
     string memory _name,

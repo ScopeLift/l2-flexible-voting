@@ -26,6 +26,8 @@ contract L1GovernorMetadataBridge is WormholeSender {
 
   /// @param _governor The address of the L1 governor contract.
   /// @param _relayer The address of the L1 Wormhole relayer contract.
+  /// @param _sourceChain The chain id sending the wormhole messages.
+  /// @param _targetChain The chain id receiving the wormhole messages.
   constructor(address _governor, address _relayer, uint16 _sourceChain, uint16 _targetChain)
     WormholeSender(_relayer, _sourceChain, _targetChain)
   {
@@ -41,7 +43,8 @@ contract L1GovernorMetadataBridge is WormholeSender {
 
   /// @notice Publishes a messages with the proposal id, start block and end block
   /// @param proposalId The id of the proposal to bridge.
-  function bridge(uint256 proposalId) public payable returns (uint256) {
+  /// @return sequence An identifier for the message published to L2.
+  function bridge(uint256 proposalId) public payable returns (uint256 sequence) {
     uint256 voteStart = GOVERNOR.proposalSnapshot(proposalId);
     if (voteStart == 0) revert InvalidProposalId();
     uint256 voteEnd = GOVERNOR.proposalDeadline(proposalId);

@@ -14,8 +14,6 @@ import {
 } from "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
 import {IGovernor} from "openzeppelin-flexible-voting/governance/IGovernor.sol";
 
-// Add settings to change delay and what not
-// Or figure out how to fast forward
 contract GovernorMock is GovernorVoteMocks {
   constructor(string memory _name, ERC20Votes _token) Governor(_name) GovernorVotes(_token) {}
 }

@@ -16,7 +16,6 @@ import {Constants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
 
-// Create test harness and perform a cross chain call
 contract L1VotePoolHarness is L1VotePool, Test {
   constructor(address _relayer, address _governor) L1VotePool(_relayer, _governor) {}
 
@@ -145,8 +144,6 @@ contract Constructor is L2VoteAggregatorTest {
 }
 
 contract CastVote is L2VoteAggregatorTest {
-  // Proper event is emitted
-  // weight is returned
 
   function testFuzz_InactiveProposal(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 2);
@@ -233,7 +230,6 @@ contract CastVote is L2VoteAggregatorTest {
   }
 }
 
-// Maybe use a L2VoteAggregator test harness.
 contract BridgeVote is L2VoteAggregatorTest {
   function testFuzz_CorrectlyBridgeVoteAggregation(
     uint32 _against,
@@ -283,7 +279,6 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
-    // setup proposal in governor meta
     uint256 lastVotingBlock = aggregator.internalVotingPeriodEnd(proposalId);
     assertEq(lastVotingBlock, voteEnd - aggregator.CAST_VOTE_WINDOW());
   }
@@ -306,7 +301,6 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
-    // setup proposal in governor meta
     uint256 lastVotingBlock = l2VoteAggregator.internalVotingPeriodEnd(proposalId);
 
     vm.roll(lastVotingBlock);
@@ -314,7 +308,6 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     assertEq(active, true, "Proposal is supposed to be active");
   }
 
-  // Something weird is going on here. Is this a foundry issue?
   function testFuzz_ProposalVoteIsInactiveBefore(
     uint256 proposalId,
     uint64 voteStart,
