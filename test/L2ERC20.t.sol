@@ -19,7 +19,7 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   L1ERC20Bridge bridge;
 
   constructor() {
-    setTestnetForkChains(L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpSource() public override {

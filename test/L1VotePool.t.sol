@@ -107,7 +107,7 @@ contract L1VotePoolTest is Constants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
 
   constructor() {
-    setTestnetForkChains(L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpSource() public override {

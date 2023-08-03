@@ -23,7 +23,7 @@ contract Deploy is Script, Constants {
 
     setFallbackToDefaultRpcUrls(false);
 
-    vm.createSelectFork(getChain("polygon_mumbai").rpcUrl);
+    vm.createSelectFork(L2_CHAIN.rpcUrl);
     // Create L1 block contract
     vm.broadcast();
     L1Block l1Block = new L1Block();
@@ -33,7 +33,7 @@ contract Deploy is Script, Constants {
     L2ERC20 l2Token =
     new L2ERC20("Scopeapotomus", "SCOPE", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
-    vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
+    vm.createSelectFork(L1_CHAIN.rpcUrl);
 
     // Deploy the L1 governor used in the L1 bridge
     vm.broadcast();

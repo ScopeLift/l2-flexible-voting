@@ -19,7 +19,7 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   L2GovernorMetadata l2GovernorMetadata;
 
   constructor() {
-    setTestnetForkChains(L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    setForkChains(TESTNET, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
 
   function setUpSource() public override {

@@ -27,7 +27,7 @@ contract MintOnL2 is Script, Constants {
 
     setFallbackToDefaultRpcUrls(false);
 
-    vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
+    vm.createSelectFork(L1_CHAIN.rpcUrl);
 
     IL1ERC20Bridge bridge = IL1ERC20Bridge(address(l1Bridge));
     IERC20Mint erc20 = IERC20Mint(address(deployedL1Token));
