@@ -7,11 +7,11 @@ import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {Constants} from "test/Constants.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
-contract L2GovernorMetadataTest is Constants, Test {
+contract L2GovernorMetadataTest is Constants {
   L2GovernorMetadata l2GovernorMetadata;
 
   function setUp() public {
-    l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
+    l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
   }
 }
 
@@ -28,7 +28,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     uint256 voteEnd
   ) public {
     bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
-    vm.prank(wormholeCoreMumbai);
+    vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
@@ -44,7 +44,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     address caller
   ) public {
     bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
-    vm.assume(caller != wormholeCoreMumbai);
+    vm.assume(caller != L2_CHAIN.wormholeRelayer);
     vm.prank(caller);
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
     l2GovernorMetadata.receiveWormholeMessages(

@@ -19,25 +19,25 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   L2GovernorMetadata l2GovernorMetadata;
 
   constructor() {
-    setTestnetForkChains(6, 5);
+    setTestnetForkChains(L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
 
   function setUpSource() public override {
     ERC20Votes erc20 = new FakeERC20("GovExample", "GOV");
     gov = new GovernorMock("Testington Dao", erc20);
     bridge =
-    new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
+    new L1GovernorMetadataBridge(address(gov), L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {
-    l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
+    l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
   }
 }
 
 contract Constructor is Test, Constants {
   function testFork_CorrectlySetAllArgs(address gov) public {
     L1GovernorMetadataBridge bridge =
-      new L1GovernorMetadataBridge(gov, wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
+    new L1GovernorMetadataBridge(gov, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
     assertEq(address(bridge.GOVERNOR()), gov, "Governor is not set correctly");
   }
 }
@@ -64,7 +64,7 @@ contract Initialize is L1GovernorMetadataBridgeTest {
 contract Bridge is L1GovernorMetadataBridgeTest {
   function testFork_CorrectlyBridgeProposal(uint224 _amount) public {
     bridge.initialize(address(l2GovernorMetadata));
-    uint256 cost = bridge.quoteDeliveryCost(wormholeFujiId);
+    uint256 cost = bridge.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
     vm.recordLogs();
 
     bytes memory proposalCalldata = abi.encode(FakeERC20.mint.selector, address(gov), _amount);
@@ -95,7 +95,7 @@ contract Bridge is L1GovernorMetadataBridgeTest {
 
   function testFork_MissingProposal(uint256 _proposalId) public {
     bridge.initialize(address(l2GovernorMetadata));
-    uint256 cost = bridge.quoteDeliveryCost(wormholeFujiId);
+    uint256 cost = bridge.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
     vm.recordLogs();
 
     vm.expectRevert(L1GovernorMetadataBridge.InvalidProposalId.selector);

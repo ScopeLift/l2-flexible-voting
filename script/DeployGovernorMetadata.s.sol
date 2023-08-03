@@ -16,19 +16,22 @@ contract DeployGovernorMetadata is Script, Constants {
   using stdJson for string;
 
   function run() public {
+    Constants.ChainConfig memory L1_CHAIN = chainInfos[L1_CHAIN_ID];
+    Constants.ChainConfig memory L2_CHAIN = chainInfos[L2_CHAIN_ID];
+
     setFallbackToDefaultRpcUrls(false);
 
     string memory file = "broadcast/DeployFakeERC20.s.sol/43113/run-latest.json";
     string memory json = vm.readFile(file);
     address deployedL1Token = json.readAddress(".transactions[0].contractAddress");
 
-    vm.createSelectFork(getChain("polygon_mumbai").rpcUrl);
+    vm.createSelectFork(L2_CHAIN.rpcUrl);
 
     // Deploy the L2 metadata contract
     vm.broadcast();
-    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
+    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
 
-    vm.createSelectFork(getChain("avalanche_fuji").rpcUrl);
+    vm.createSelectFork(L1_CHAIN.rpcUrl);
 
     // Create L1 Governor with corresponding ERC20Votes
     vm.broadcast();
@@ -37,7 +40,7 @@ contract DeployGovernorMetadata is Script, Constants {
     // Create L1 Governor metadata bridge
     vm.broadcast();
     L1GovernorMetadataBridge bridge =
-    new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
+    new L1GovernorMetadataBridge(address(gov), L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
 
     // Add L2 metadata contract to L1 Governor metadata bridge
     vm.broadcast();

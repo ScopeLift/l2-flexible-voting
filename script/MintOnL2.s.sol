@@ -40,7 +40,7 @@ contract MintOnL2 is Script, Constants {
     vm.broadcast();
     erc20.approve(address(bridge), 100_000);
 
-    uint256 cost = bridge.quoteDeliveryCost(wormholePolygonId);
+    uint256 cost = bridge.quoteDeliveryCost(L2_CHAIN.wormholeChainId);
 
     vm.broadcast();
     bridge.deposit{value: cost}(msg.sender, 100_000);

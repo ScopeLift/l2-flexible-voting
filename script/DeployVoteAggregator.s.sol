@@ -29,7 +29,7 @@ contract DeployVoteAggregator is Script, Constants {
 
     setFallbackToDefaultRpcUrls(false);
 
-    vm.createSelectFork(getChain("polygon_mumbai").rpcUrl);
+    vm.createSelectFork(L2_CHAIN.rpcUrl);
 
     // Create L1 block contract
     vm.broadcast();
@@ -37,6 +37,6 @@ contract DeployVoteAggregator is Script, Constants {
 
     // Deploy the L2 vote aggregator
     vm.broadcast();
-    new L2VoteAggregator(deployedL2Token, wormholeCoreMumbai, l2GovernorMetadata, address(l1Block), wormholePolygonId, wormholeFujiId);
+    new L2VoteAggregator(deployedL2Token, L2_CHAIN.wormholeRelayer, l2GovernorMetadata, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 }
