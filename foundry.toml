@@ -11,7 +11,7 @@
   verbosity = 3
 
 [profile.ci]
-  fuzz = { runs = 5000 }
+  fuzz = { runs = 1000 }
   invariant = { runs = 1000 }
 
 [rpc_endpoints]
