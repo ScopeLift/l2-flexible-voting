@@ -9,8 +9,8 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
-  MUMBAI_RPC_URL: ${{ secrets.MUMBAI_RPC_URL }}
-  FUJI_RPC_URL: ${{ secrets.FUJI_RPC_URL }}
+  POLYGON_MUMBAI_RPC_URL: ${{ secrets.MUMBAI_RPC_URL }}
+  AVALANCHE_FUJI_RPC_URL: ${{ secrets.FUJI_RPC_URL }}
 
 jobs:
   build:
