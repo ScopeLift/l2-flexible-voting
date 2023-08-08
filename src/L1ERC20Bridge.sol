@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {SafeERC20} from "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {L1VotePool} from "src/L1VotePool.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
 
 contract L1ERC20Bridge is L1VotePool, WormholeSender {
+  using SafeERC20 for ERC20Votes;
+
   /// @notice L1 token used for deposits and voting.
   ERC20Votes public immutable L1_TOKEN;
 
@@ -49,7 +52,7 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @param amount The amount of tokens to deposit and mint on the L2.
   /// @return sequence An identifier for the message published to L2.
   function deposit(address account, uint256 amount) public payable returns (uint256 sequence) {
-    L1_TOKEN.transferFrom(msg.sender, address(this), amount);
+    L1_TOKEN.safeTransferFrom(msg.sender, address(this), amount);
 
     // TODO optimize with encodePacked
     bytes memory mintCalldata = abi.encode(account, amount);
@@ -102,6 +105,6 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
   /// @param account The address of the user withdrawing tokens.
   /// @param amount The amount of tokens to withdraw.
   function _withdraw(address account, uint256 amount) internal {
-    L1_TOKEN.transfer(account, amount);
+    L1_TOKEN.safeTransfer(account, amount);
   }
 }
