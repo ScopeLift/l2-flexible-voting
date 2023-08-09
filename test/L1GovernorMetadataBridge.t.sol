@@ -82,15 +82,15 @@ contract Bridge is L1GovernorMetadataBridgeTest {
       gov.propose(targets, values, calldatas, "Proposal: To inflate governance token");
 
     bridge.bridge{value: cost}(proposalId);
-    uint256 voteStart = gov.proposalSnapshot(proposalId);
-    uint256 voteEnd = gov.proposalDeadline(proposalId);
+    uint256 l1VoteStart = gov.proposalSnapshot(proposalId);
+    uint256 l1VoteEnd = gov.proposalDeadline(proposalId);
 
     performDelivery();
 
     vm.selectFork(targetFork);
-    L2GovernorMetadata.Proposal memory proposal = l2GovernorMetadata.getProposal(proposalId);
-    assertEq(proposal.voteStart, voteStart, "voteStart is incorrect");
-    assertEq(proposal.voteEnd, voteEnd, "voteEnd is incorrect");
+    L2GovernorMetadata.Proposal memory l2Proposal = l2GovernorMetadata.getProposal(proposalId);
+    assertEq(l2Proposal.voteStart, l1VoteStart, "voteStart is incorrect");
+    assertEq(l2Proposal.voteEnd, l1VoteEnd, "voteEnd is incorrect");
   }
 
   function testFork_RevertWhen_ProposalIsMissing(uint256 _proposalId) public {
