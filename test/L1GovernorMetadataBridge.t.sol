@@ -61,7 +61,7 @@ contract Initialize is L1GovernorMetadataBridgeTest {
   }
 }
 
-contract Bridge is L1GovernorMetadataBridgeTest {
+contract BridgeProposalMetadata is L1GovernorMetadataBridgeTest {
   function testFork_CorrectlyBridgeProposal(uint224 _amount) public {
     l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
     uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(wormholeFujiId);
@@ -81,7 +81,7 @@ contract Bridge is L1GovernorMetadataBridgeTest {
     uint256 proposalId =
       governorMock.propose(targets, values, calldatas, "Proposal: To inflate governance token");
 
-    l1GovernorMetadataBridge.bridge{value: cost}(proposalId);
+    l1GovernorMetadataBridge.bridgeProposalMetadata{value: cost}(proposalId);
     uint256 l1VoteStart = governorMock.proposalSnapshot(proposalId);
     uint256 l1VoteEnd = governorMock.proposalDeadline(proposalId);
 
@@ -99,6 +99,6 @@ contract Bridge is L1GovernorMetadataBridgeTest {
     vm.recordLogs();
 
     vm.expectRevert(L1GovernorMetadataBridge.InvalidProposalId.selector);
-    l1GovernorMetadataBridge.bridge{value: cost}(_proposalId);
+    l1GovernorMetadataBridge.bridgeProposalMetadata{value: cost}(_proposalId);
   }
 }
