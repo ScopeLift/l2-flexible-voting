@@ -74,11 +74,9 @@ contract ReceiveWormholeMessages is L2ERC20Test {
     assertEq(l2Amount, l1Amount, "Amount after receive is incorrect");
   }
 
-  function testFuzz_RevertIf_NotCalledByRelayer(
-    address account,
-    uint256 amount,
-    address caller
-  ) public {
+  function testFuzz_RevertIf_NotCalledByRelayer(address account, uint256 amount, address caller)
+    public
+  {
     bytes memory payload = abi.encode(account, amount);
     vm.prank(caller);
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);

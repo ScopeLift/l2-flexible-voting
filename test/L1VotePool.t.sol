@@ -143,7 +143,9 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
   ) public {
     vm.selectFork(targetFork);
 
-    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain));
+    l1Erc20.approve(
+      address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain)
+    );
     l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain));
     l1Erc20.delegate(address(l1VotePool));
 
@@ -162,7 +164,8 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
     performDelivery();
 
     vm.selectFork(targetFork);
-    (uint128 l1InFavor, uint128 l1Against, uint128 l1Abstain) = l1VotePool.proposalVotes(_proposalId);
+    (uint128 l1InFavor, uint128 l1Against, uint128 l1Abstain) =
+      l1VotePool.proposalVotes(_proposalId);
 
     assertEq(l1Against, _l2Against, "Against value was not bridged correctly");
     assertEq(l1InFavor, _l2InFavor, "inFavor value was not bridged correctly");
@@ -186,7 +189,9 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
     l1Erc20.approve(
       address(l1VotePool), uint96(_l2NewAgainst) + uint96(_l2NewInFavor) + uint96(_l2NewAbstain)
     );
-    l1Erc20.mint(address(this), uint96(_l2NewAgainst) + uint96(_l2NewInFavor) + uint96(_l2NewAbstain));
+    l1Erc20.mint(
+      address(this), uint96(_l2NewAgainst) + uint96(_l2NewInFavor) + uint96(_l2NewAbstain)
+    );
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
@@ -205,7 +210,8 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
     performDelivery();
 
     vm.selectFork(targetFork);
-    (uint128 l1InFavor, uint128 l1Against, uint128 l1Abstain) = l1VotePool.proposalVotes(_proposalId);
+    (uint128 l1InFavor, uint128 l1Against, uint128 l1Abstain) =
+      l1VotePool.proposalVotes(_proposalId);
 
     assertEq(l1Against, _l2NewAgainst, "Against value was not bridged correctly");
     assertEq(l1InFavor, _l2NewInFavor, "inFavor value was not bridged correctly");
@@ -226,7 +232,9 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
 
     vm.selectFork(targetFork);
 
-    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain) + 1);
+    l1Erc20.approve(
+      address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain) + 1
+    );
     l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain) + 1);
     l1Erc20.delegate(address(l1VotePool));
 

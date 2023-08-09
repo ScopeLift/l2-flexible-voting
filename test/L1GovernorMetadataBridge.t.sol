@@ -37,8 +37,10 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
 contract Constructor is Test, Constants {
   function testFork_CorrectlySetAllArgs(address governorMock) public {
     L1GovernorMetadataBridge l1GovernorMetadataBridge =
-      new L1GovernorMetadataBridge(governorMock, wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
-    assertEq(address(l1GovernorMetadataBridge.GOVERNOR()), governorMock, "Governor is not set correctly");
+    new L1GovernorMetadataBridge(governorMock, wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
+    assertEq(
+      address(l1GovernorMetadataBridge.GOVERNOR()), governorMock, "Governor is not set correctly"
+    );
   }
 }
 
@@ -46,7 +48,9 @@ contract Initialize is L1GovernorMetadataBridgeTest {
   function testFork_CorrectlyInitializeL2GovernorMetadata(address l2GovernorMetadata) public {
     l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
     assertEq(
-      l1GovernorMetadataBridge.L2_GOVERNOR_ADDRESS(), l2GovernorMetadata, "L2 governor address is not setup correctly"
+      l1GovernorMetadataBridge.L2_GOVERNOR_ADDRESS(),
+      l2GovernorMetadata,
+      "L2 governor address is not setup correctly"
     );
     assertEq(l1GovernorMetadataBridge.INITIALIZED(), true, "Bridge isn't initialized");
   }
@@ -67,7 +71,8 @@ contract BridgeProposalMetadata is L1GovernorMetadataBridgeTest {
     uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(wormholeFujiId);
     vm.recordLogs();
 
-    bytes memory proposalCalldata = abi.encode(FakeERC20.mint.selector, address(governorMock), _amount);
+    bytes memory proposalCalldata =
+      abi.encode(FakeERC20.mint.selector, address(governorMock), _amount);
 
     address[] memory targets = new address[](1);
     bytes[] memory calldatas = new bytes[](1);
