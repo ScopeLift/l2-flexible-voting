@@ -13,7 +13,7 @@ import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
 contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
-  FakeERC20 fake;
+  FakeERC20 l1Erc20;
   GovernorMock gov;
   L1GovernorMetadataBridge bridge;
   L2GovernorMetadata l2GovernorMetadata;
@@ -73,7 +73,7 @@ contract Bridge is L1GovernorMetadataBridgeTest {
     bytes[] memory calldatas = new bytes[](1);
     uint256[] memory values = new uint256[](1);
 
-    targets[0] = address(fake);
+    targets[0] = address(l1Erc20);
     calldatas[0] = proposalCalldata;
     values[0] = 0;
 

@@ -31,32 +31,32 @@ contract L1VotePoolHarness is L1VotePool, Test {
     _receiveCastVoteWormholeMessages(payload, additionalVaas, callerAddr, sourceChain, deliveryHash);
   }
 
-  function _createExampleProposal(address fakeErc20) internal returns (uint256) {
+  function _createExampleProposal(address l1Erc20) internal returns (uint256) {
     bytes memory proposalCalldata = abi.encode(FakeERC20.mint.selector, address(governor), 100_000);
 
     address[] memory targets = new address[](1);
     bytes[] memory calldatas = new bytes[](1);
     uint256[] memory values = new uint256[](1);
 
-    targets[0] = address(fakeErc20);
+    targets[0] = address(l1Erc20);
     calldatas[0] = proposalCalldata;
     values[0] = 0;
 
     return governor.propose(targets, values, calldatas, "Proposal: To inflate token");
   }
 
-  function createProposalVote(address fakeErc20) public returns (uint256) {
-    uint256 _proposalId = _createExampleProposal(fakeErc20);
+  function createProposalVote(address l1Erc20) public returns (uint256) {
+    uint256 _proposalId = _createExampleProposal(l1Erc20);
     return _proposalId;
   }
 
   function createProposalVote(
-    address fakeErc20,
+    address l1Erc20,
     uint128 _against,
     uint128 _inFavor,
     uint128 _abstain
   ) public returns (uint256) {
-    uint256 _proposalId = _createExampleProposal(fakeErc20);
+    uint256 _proposalId = _createExampleProposal(l1Erc20);
     _jumpToActiveProposal(_proposalId);
     _receiveCastVoteWormholeMessages(
       abi.encode(_proposalId, _against, _inFavor, _abstain),

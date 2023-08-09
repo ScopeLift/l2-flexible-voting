@@ -15,7 +15,7 @@ import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
 contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   L2ERC20 l2Erc20;
-  FakeERC20 fake;
+  FakeERC20 l1Erc20;
   L1ERC20Bridge bridge;
 
   constructor() {
@@ -29,10 +29,10 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   }
 
   function setUpTarget() public override {
-    fake = new FakeERC20("Hello", "WRLD");
-    IGovernor gov = new GovernorMock("Testington Dao", fake);
+    l1Erc20 = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     bridge =
-    new L1ERC20Bridge(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20Bridge(address(l1Erc20), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
   }
 }
 
@@ -112,7 +112,7 @@ contract L1Unlock is L2ERC20Test {
 
     vm.selectFork(targetFork);
     bridge.initialize(address(l2Erc20));
-    fake.mint(address(bridge), amount);
+    l1Erc20.mint(address(bridge), amount);
 
     vm.selectFork(sourceFork);
     l2Erc20.initialize(address(bridge));
@@ -131,7 +131,7 @@ contract L1Unlock is L2ERC20Test {
 
     vm.selectFork(targetFork);
 
-    uint256 l1Balance = fake.balanceOf(account);
+    uint256 l1Balance = l1Erc20.balanceOf(account);
     assertEq(l1Balance, amount, "L1 balance is incorrect");
   }
 }

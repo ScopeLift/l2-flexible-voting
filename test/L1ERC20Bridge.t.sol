@@ -41,7 +41,7 @@ contract L1ERC20BridgeHarness is L1ERC20Bridge {
 
 contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
   L2ERC20 l2Erc20;
-  FakeERC20 fake;
+  FakeERC20 l1Erc20;
   L1ERC20Bridge bridge;
 
   constructor() {
@@ -49,10 +49,10 @@ contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
   }
 
   function setUpSource() public override {
-    fake = new FakeERC20("Hello", "WRLD");
-    IGovernor gov = new GovernorMock("Testington Dao", fake);
+    l1Erc20 = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     bridge =
-    new L1ERC20Bridge(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20Bridge(address(l1Erc20), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
   }
 
   function setUpTarget() public override {
@@ -64,8 +64,8 @@ contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
 
 contract Constructor is Test, Constants {
   function testFork_CorrectlySetAllArgs(address l1Erc) public {
-    FakeERC20 fake = new FakeERC20("Hello", "WRLD");
-    IGovernor gov = new GovernorMock("Testington Dao", fake);
+    FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     L1ERC20Bridge bridge =
     new L1ERC20Bridge(address(l1Erc), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
     assertEq(address(bridge.L1_TOKEN()), l1Erc, "L1 token is not set correctly");
@@ -93,8 +93,8 @@ contract Deposit is L1ERC20BridgeTest {
     uint256 cost = bridge.quoteDeliveryCost(wormholePolygonId);
     vm.recordLogs();
 
-    fake.approve(address(bridge), _amount);
-    fake.mint(address(this), _amount);
+    l1Erc20.approve(address(bridge), _amount);
+    l1Erc20.mint(address(this), _amount);
     vm.deal(address(this), 1 ether);
 
     bridge.deposit{value: cost}(address(this), _amount);
@@ -115,24 +115,24 @@ contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
     address l2Erc20
   ) public {
     vm.assume(_account != address(0));
-    FakeERC20 fake = new FakeERC20("Hello", "WRLD");
-    IGovernor gov = new GovernorMock("Testington Dao", fake);
+    FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     L1ERC20BridgeHarness bridge =
-    new L1ERC20BridgeHarness(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20BridgeHarness(address(l1Erc20), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
 
     bridge.initialize(address(l2Erc20));
-    fake.approve(address(this), _amount);
-    fake.mint(address(this), _amount);
+    l1Erc20.approve(address(this), _amount);
+    l1Erc20.mint(address(this), _amount);
     vm.deal(address(this), 1 ether);
 
-    fake.transfer(address(bridge), _amount);
-    assertEq(fake.balanceOf(address(bridge)), _amount, "The Bridge balance is incorrect");
+    l1Erc20.transfer(address(bridge), _amount);
+    assertEq(l1Erc20.balanceOf(address(bridge)), _amount, "The Bridge balance is incorrect");
 
     bytes memory withdrawalCalldata = abi.encode(_account, _amount);
     bridge.receiveWithdrawalWormholeMessages(
       withdrawalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
-    assertEq(fake.balanceOf(address(_account)), _amount, "The account balance is incorrect");
+    assertEq(l1Erc20.balanceOf(address(_account)), _amount, "The account balance is incorrect");
   }
 }
 
@@ -142,20 +142,20 @@ contract _Withdraw is Test, Constants {
   {
     vm.assume(_account != address(0));
 
-    FakeERC20 fake = new FakeERC20("Hello", "WRLD");
-    IGovernor gov = new GovernorMock("Testington Dao", fake);
+    FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     L1ERC20BridgeHarness bridge =
-    new L1ERC20BridgeHarness(address(fake), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20BridgeHarness(address(l1Erc20), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
     bridge.initialize(address(l2Erc20));
 
-    fake.approve(address(this), _amount);
-    fake.mint(address(this), _amount);
+    l1Erc20.approve(address(this), _amount);
+    l1Erc20.mint(address(this), _amount);
     vm.deal(address(this), 1 ether);
 
-    fake.transfer(address(bridge), _amount);
-    assertEq(fake.balanceOf(address(bridge)), _amount, "The Bridge balance is incorrect");
+    l1Erc20.transfer(address(bridge), _amount);
+    assertEq(l1Erc20.balanceOf(address(bridge)), _amount, "The Bridge balance is incorrect");
 
     bridge.withdraw(_account, _amount);
-    assertEq(fake.balanceOf(address(_account)), _amount, "The account balance is incorrect");
+    assertEq(l1Erc20.balanceOf(address(_account)), _amount, "The account balance is incorrect");
   }
 }
