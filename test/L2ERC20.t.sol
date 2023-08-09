@@ -16,7 +16,7 @@ import {WormholeReceiver} from "src/WormholeReceiver.sol";
 contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   L2ERC20 l2Erc20;
   FakeERC20 l1Erc20;
-  L1ERC20Bridge bridge;
+  L1ERC20Bridge l1Erc20Bridge;
 
   constructor() {
     setTestnetForkChains(5, 6);
@@ -31,7 +31,7 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   function setUpTarget() public override {
     l1Erc20 = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
-    bridge =
+    l1Erc20Bridge =
     new L1ERC20Bridge(address(l1Erc20), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
   }
 }
@@ -47,40 +47,39 @@ contract Constructor is L2ERC20Test {
 }
 
 contract Initialize is L2ERC20Test {
-  function testFork_CorrectlyInitializeL2Token(address bridge) public {
-    l2Erc20.initialize(bridge);
-    assertEq(l2Erc20.L1_TOKEN_ADDRESS(), bridge, "L1 bridge address is not setup correctly");
+  function testFork_CorrectlyInitializeL2Token(address l1Erc20Bridge) public {
+    l2Erc20.initialize(l1Erc20Bridge);
+    assertEq(l2Erc20.L1_TOKEN_ADDRESS(), l1Erc20Bridge, "L1 bridge address is not setup correctly");
     assertEq(l2Erc20.INITIALIZED(), true, "L1 bridged isn't initialized");
   }
 
-  function testFork_RevertWhen_AlreadyInitializedWithBridgeAddress(address bridge) public {
-    l2Erc20.initialize(bridge);
+  function testFork_RevertWhen_AlreadyInitializedWithBridgeAddress(address l1Erc20Bridge) public {
+    l2Erc20.initialize(l1Erc20Bridge);
 
     vm.expectRevert(L2ERC20.AlreadyInitialized.selector);
-    l2Erc20.initialize(bridge);
+    l2Erc20.initialize(l1Erc20Bridge);
   }
 }
 
 contract ReceiveWormholeMessages is L2ERC20Test {
-  function testForkFuzz_CorrectlyReceiveWormholeMessages(address account, uint224 amount) public {
+  function testForkFuzz_CorrectlyReceiveWormholeMessages(address account, uint224 l1Amount) public {
     vm.assume(account != address(0)); // Cannot be zero address
-    l2Erc20.initialize(address(bridge));
+    l2Erc20.initialize(address(l1Erc20Bridge));
 
     vm.prank(wormholeCoreMumbai);
     l2Erc20.receiveWormholeMessages(
-      abi.encode(account, amount), new bytes[](0), bytes32(""), uint16(0), bytes32("")
+      abi.encode(account, l1Amount), new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
     uint256 l2Amount = l2Erc20.balanceOf(account);
-    assertEq(l2Amount, amount, "Amount after receive is incorrect");
+    assertEq(l2Amount, l1Amount, "Amount after receive is incorrect");
   }
 
   function testFuzz_RevertIf_NotCalledByRelayer(
-    uint256 proposalId,
-    uint256 voteStart,
-    uint256 voteEnd,
+    address account,
+    uint256 amount,
     address caller
   ) public {
-    bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
+    bytes memory payload = abi.encode(account, amount);
     vm.prank(caller);
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
     l2Erc20.receiveWormholeMessages(payload, new bytes[](0), bytes32(""), uint16(0), bytes32(""));
@@ -89,20 +88,20 @@ contract ReceiveWormholeMessages is L2ERC20Test {
 
 contract Clock is L2ERC20Test {
   function testForkFuzz_CorrectlySetClock(uint48 currentBlock) public {
-    l2Erc20.initialize(address(bridge));
+    l2Erc20.initialize(address(l1Erc20Bridge));
 
     vm.roll(currentBlock);
     uint48 l1Block = l2Erc20.clock(); // The test L1 block implementation uses block.number
-    assertEq(l1Block, currentBlock, "Block is incorrect");
+    assertEq(l1Block, currentBlock, "L2 clovk is incorrect");
   }
 }
 
 contract CLOCK_MODE is L2ERC20Test {
   function test_CorrectlySetClockMode() public {
-    l2Erc20.initialize(address(bridge));
-    string memory mode = l2Erc20.CLOCK_MODE(); // The test L1 block implementation uses block.number
+    l2Erc20.initialize(address(l1Erc20Bridge));
+    string memory mode = l2Erc20.CLOCK_MODE();
 
-    assertEq(mode, "mode=blocknumber&from=eip155:1", "Block is incorrect");
+    assertEq(mode, "mode=blocknumber&from=eip155:1", "Clock mode is incorrect");
   }
 }
 
@@ -111,11 +110,11 @@ contract L1Unlock is L2ERC20Test {
     vm.assume(account != address(0));
 
     vm.selectFork(targetFork);
-    bridge.initialize(address(l2Erc20));
-    l1Erc20.mint(address(bridge), amount);
+    l1Erc20Bridge.initialize(address(l2Erc20));
+    l1Erc20.mint(address(l1Erc20Bridge), amount);
 
     vm.selectFork(sourceFork);
-    l2Erc20.initialize(address(bridge));
+    l2Erc20.initialize(address(l1Erc20Bridge));
     vm.recordLogs();
     vm.prank(wormholeCoreMumbai);
     l2Erc20.receiveWormholeMessages(

@@ -14,8 +14,8 @@ import {GovernorMock} from "test/mock/GovernorMock.sol";
 
 contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
-  GovernorMock gov;
-  L1GovernorMetadataBridge bridge;
+  GovernorMock governorMock;
+  L1GovernorMetadataBridge l1GovernorMetadataBridge;
   L2GovernorMetadata l2GovernorMetadata;
 
   constructor() {
@@ -24,9 +24,9 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
 
   function setUpSource() public override {
     ERC20Votes erc20 = new FakeERC20("GovExample", "GOV");
-    gov = new GovernorMock("Testington Dao", erc20);
-    bridge =
-    new L1GovernorMetadataBridge(address(gov), wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
+    governorMock = new GovernorMock("Testington Dao", erc20);
+    l1GovernorMetadataBridge =
+    new L1GovernorMetadataBridge(address(governorMock), wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
   }
 
   function setUpTarget() public override {
@@ -35,39 +35,39 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
 }
 
 contract Constructor is Test, Constants {
-  function testFork_CorrectlySetAllArgs(address gov) public {
-    L1GovernorMetadataBridge bridge =
-      new L1GovernorMetadataBridge(gov, wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
-    assertEq(address(bridge.GOVERNOR()), gov, "Governor is not set correctly");
+  function testFork_CorrectlySetAllArgs(address governorMock) public {
+    L1GovernorMetadataBridge l1GovernorMetadataBridge =
+      new L1GovernorMetadataBridge(governorMock, wormholeCoreFuji, wormholeFujiId, wormholePolygonId);
+    assertEq(address(l1GovernorMetadataBridge.GOVERNOR()), governorMock, "Governor is not set correctly");
   }
 }
 
 contract Initialize is L1GovernorMetadataBridgeTest {
   function testFork_CorrectlyInitializeL2GovernorMetadata(address l2GovernorMetadata) public {
-    bridge.initialize(address(l2GovernorMetadata));
+    l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
     assertEq(
-      bridge.L2_GOVERNOR_ADDRESS(), l2GovernorMetadata, "L2 governor address is not setup correctly"
+      l1GovernorMetadataBridge.L2_GOVERNOR_ADDRESS(), l2GovernorMetadata, "L2 governor address is not setup correctly"
     );
-    assertEq(bridge.INITIALIZED(), true, "Bridge isn't initialized");
+    assertEq(l1GovernorMetadataBridge.INITIALIZED(), true, "Bridge isn't initialized");
   }
 
-  function testFork_RevertWhen_AlreadyIntializedWithL2GovernorMetadataAddress(
+  function testFork_RevertWhen_AlreadyInitializedWithL2GovernorMetadataAddress(
     address l2GovernorMetadata
   ) public {
-    bridge.initialize(address(l2GovernorMetadata));
+    l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
 
     vm.expectRevert(L1GovernorMetadataBridge.AlreadyInitialized.selector);
-    bridge.initialize(address(l2GovernorMetadata));
+    l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
   }
 }
 
 contract Bridge is L1GovernorMetadataBridgeTest {
   function testFork_CorrectlyBridgeProposal(uint224 _amount) public {
-    bridge.initialize(address(l2GovernorMetadata));
-    uint256 cost = bridge.quoteDeliveryCost(wormholeFujiId);
+    l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
+    uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(wormholeFujiId);
     vm.recordLogs();
 
-    bytes memory proposalCalldata = abi.encode(FakeERC20.mint.selector, address(gov), _amount);
+    bytes memory proposalCalldata = abi.encode(FakeERC20.mint.selector, address(governorMock), _amount);
 
     address[] memory targets = new address[](1);
     bytes[] memory calldatas = new bytes[](1);
@@ -79,11 +79,11 @@ contract Bridge is L1GovernorMetadataBridgeTest {
 
     // Create proposal
     uint256 proposalId =
-      gov.propose(targets, values, calldatas, "Proposal: To inflate governance token");
+      governorMock.propose(targets, values, calldatas, "Proposal: To inflate governance token");
 
-    bridge.bridge{value: cost}(proposalId);
-    uint256 l1VoteStart = gov.proposalSnapshot(proposalId);
-    uint256 l1VoteEnd = gov.proposalDeadline(proposalId);
+    l1GovernorMetadataBridge.bridge{value: cost}(proposalId);
+    uint256 l1VoteStart = governorMock.proposalSnapshot(proposalId);
+    uint256 l1VoteEnd = governorMock.proposalDeadline(proposalId);
 
     performDelivery();
 
@@ -94,11 +94,11 @@ contract Bridge is L1GovernorMetadataBridgeTest {
   }
 
   function testFork_RevertWhen_ProposalIsMissing(uint256 _proposalId) public {
-    bridge.initialize(address(l2GovernorMetadata));
-    uint256 cost = bridge.quoteDeliveryCost(wormholeFujiId);
+    l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
+    uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(wormholeFujiId);
     vm.recordLogs();
 
     vm.expectRevert(L1GovernorMetadataBridge.InvalidProposalId.selector);
-    bridge.bridge{value: cost}(_proposalId);
+    l1GovernorMetadataBridge.bridge{value: cost}(_proposalId);
   }
 }

@@ -101,7 +101,7 @@ contract L2VoteAggregatorHarness is L2VoteAggregator {
 contract L1VotePoolTest is Constants, WormholeRelayerBasicTest {
   L1VotePoolHarness l1VotePool;
   L2VoteAggregatorHarness l2VoteAggregator;
-  FakeERC20 erc20;
+  FakeERC20 l2Erc20;
   FakeERC20 l1Erc20;
 
   constructor() {
@@ -111,9 +111,9 @@ contract L1VotePoolTest is Constants, WormholeRelayerBasicTest {
   function setUpSource() public override {
     GovernorMetadataMock l2GovernorMetadata = new GovernorMetadataMock(wormholeCoreMumbai);
     L1Block l1Block = new L1Block();
-    erc20 = new FakeERC20("GovExample", "GOV");
+    l2Erc20 = new FakeERC20("GovExample", "GOV");
     l2VoteAggregator =
-    new L2VoteAggregatorHarness(address(erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
+    new L2VoteAggregatorHarness(address(l2Erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
   }
 
   function setUpTarget() public override {
@@ -137,14 +137,14 @@ contract Constructor is L1VotePoolTest {
 
 contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
   function testFuzz_CorrectlyBridgeVoteAggregation(
-    uint32 _against,
-    uint32 _inFavor,
-    uint32 _abstain
+    uint32 _l2Against,
+    uint32 _l2InFavor,
+    uint32 _l2Abstain
   ) public {
     vm.selectFork(targetFork);
 
-    l1Erc20.approve(address(l1VotePool), uint96(_against) + uint96(_inFavor) + uint96(_abstain));
-    l1Erc20.mint(address(this), uint96(_against) + uint96(_inFavor) + uint96(_abstain));
+    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain));
+    l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain));
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
@@ -156,42 +156,42 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
     vm.recordLogs();
     vm.deal(address(this), 10 ether);
 
-    l2VoteAggregator.createProposalVote(_proposalId, _against, _inFavor, _abstain);
+    l2VoteAggregator.createProposalVote(_proposalId, _l2Against, _l2InFavor, _l2Abstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
 
     performDelivery();
 
     vm.selectFork(targetFork);
-    (uint128 inFavor, uint128 against, uint128 abstain) = l1VotePool.proposalVotes(_proposalId);
+    (uint128 l1InFavor, uint128 l1Against, uint128 l1Abstain) = l1VotePool.proposalVotes(_proposalId);
 
-    assertEq(against, _against, "Against value was not bridged correctly");
-    assertEq(inFavor, _inFavor, "inFavor value was not bridged correctly");
-    assertEq(abstain, _abstain, "abstain value was not bridged correctly");
+    assertEq(l1Against, _l2Against, "Against value was not bridged correctly");
+    assertEq(l1InFavor, _l2InFavor, "inFavor value was not bridged correctly");
+    assertEq(l1Abstain, _l2Abstain, "abstain value was not bridged correctly");
   }
 
   function testFuzz_CorrectlyBridgeVoteAggregationWithExistingVote(
-    uint32 _against,
-    uint32 _inFavor,
-    uint32 _abstain,
-    uint32 _newAgainst,
-    uint32 _newInFavor,
-    uint32 _newAbstain
+    uint32 _l2Against,
+    uint32 _l2InFavor,
+    uint32 _l2Abstain,
+    uint32 _l2NewAgainst,
+    uint32 _l2NewInFavor,
+    uint32 _l2NewAbstain
   ) public {
-    vm.assume(_newAgainst > _against);
-    vm.assume(_newInFavor > _inFavor);
-    vm.assume(_newAbstain > _abstain);
+    vm.assume(_l2NewAgainst > _l2Against);
+    vm.assume(_l2NewInFavor > _l2InFavor);
+    vm.assume(_l2NewAbstain > _l2Abstain);
 
     vm.selectFork(targetFork);
 
     l1Erc20.approve(
-      address(l1VotePool), uint96(_newAgainst) + uint96(_newInFavor) + uint96(_newAbstain)
+      address(l1VotePool), uint96(_l2NewAgainst) + uint96(_l2NewInFavor) + uint96(_l2NewAbstain)
     );
-    l1Erc20.mint(address(this), uint96(_newAgainst) + uint96(_newInFavor) + uint96(_newAbstain));
+    l1Erc20.mint(address(this), uint96(_l2NewAgainst) + uint96(_l2NewInFavor) + uint96(_l2NewAbstain));
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
     uint256 _proposalId =
-      l1VotePool.createProposalVote(address(l1Erc20), _against, _inFavor, _abstain);
+      l1VotePool.createProposalVote(address(l1Erc20), _l2Against, _l2InFavor, _l2Abstain);
 
     vm.selectFork(sourceFork);
     l2VoteAggregator.initialize(address(l1VotePool));
@@ -199,45 +199,45 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
     vm.recordLogs();
     vm.deal(address(this), 10 ether);
 
-    l2VoteAggregator.createProposalVote(_proposalId, _newAgainst, _newInFavor, _newAbstain);
+    l2VoteAggregator.createProposalVote(_proposalId, _l2NewAgainst, _l2NewInFavor, _l2NewAbstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
 
     performDelivery();
 
     vm.selectFork(targetFork);
-    (uint128 inFavor, uint128 against, uint128 abstain) = l1VotePool.proposalVotes(_proposalId);
+    (uint128 l1InFavor, uint128 l1Against, uint128 l1Abstain) = l1VotePool.proposalVotes(_proposalId);
 
-    assertEq(against, _newAgainst, "Against value was not bridged correctly");
-    assertEq(inFavor, _newInFavor, "inFavor value was not bridged correctly");
-    assertEq(abstain, _newAbstain, "abstain value was not bridged correctly");
+    assertEq(l1Against, _l2NewAgainst, "Against value was not bridged correctly");
+    assertEq(l1InFavor, _l2NewInFavor, "inFavor value was not bridged correctly");
+    assertEq(l1Abstain, _l2NewAbstain, "abstain value was not bridged correctly");
   }
 
   function testFuzz_RevertWhen_InvalidVoteHasBeenBridged(
-    uint32 _against,
-    uint32 _inFavor,
-    uint32 _abstain,
-    uint32 _newAgainst,
-    uint32 _newInFavor,
-    uint32 _newAbstain
+    uint32 _l2Against,
+    uint32 _l2InFavor,
+    uint32 _l2Abstain,
+    uint32 _l2NewAgainst,
+    uint32 _l2NewInFavor,
+    uint32 _l2NewAbstain
   ) public {
-    vm.assume(_newAgainst < _against);
-    vm.assume(_newInFavor < _inFavor);
-    vm.assume(_newAbstain < _abstain);
+    vm.assume(_l2NewAgainst < _l2Against);
+    vm.assume(_l2NewInFavor < _l2InFavor);
+    vm.assume(_l2NewAbstain < _l2Abstain);
 
     vm.selectFork(targetFork);
 
-    l1Erc20.approve(address(l1VotePool), uint96(_against) + uint96(_inFavor) + uint96(_abstain) + 1);
-    l1Erc20.mint(address(this), uint96(_against) + uint96(_inFavor) + uint96(_abstain) + 1);
+    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain) + 1);
+    l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain) + 1);
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
     uint256 _proposalId =
-      l1VotePool.createProposalVote(address(l1Erc20), _against, _inFavor, _abstain);
+      l1VotePool.createProposalVote(address(l1Erc20), _l2Against, _l2InFavor, _l2Abstain);
 
     vm.prank(wormholeCoreFuji);
     vm.expectRevert(L1VotePool.InvalidProposalVote.selector);
     l1VotePool.receiveWormholeMessages(
-      abi.encode(_proposalId, _newAgainst, _newInFavor, _newAbstain),
+      abi.encode(_proposalId, _l2NewAgainst, _l2NewInFavor, _l2NewAbstain),
       new bytes[](0),
       bytes32(""),
       uint16(0),

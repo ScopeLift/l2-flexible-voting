@@ -24,26 +24,26 @@ contract Constructor is L2GovernorMetadataTest {
 contract ReceiveWormholeMessages is L2GovernorMetadataTest {
   function testFuzz_CorrectlySaveProposalMetadata(
     uint256 proposalId,
-    uint256 voteStart,
-    uint256 voteEnd
+    uint256 l1VoteStart,
+    uint256 l1VoteEnd
   ) public {
-    bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
+    bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd);
     vm.prank(wormholeCoreMumbai);
     l2GovernorMetadata.receiveWormholeMessages(
       payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
-    L2GovernorMetadata.Proposal memory proposal = l2GovernorMetadata.getProposal(proposalId);
-    assertEq(proposal.voteStart, voteStart, "Vote start has been incorrectly set");
-    assertEq(proposal.voteEnd, voteEnd, "Vote start has been incorrectly set");
+    L2GovernorMetadata.Proposal memory l2Proposal = l2GovernorMetadata.getProposal(proposalId);
+    assertEq(l2Proposal.voteStart, l1VoteStart, "Vote start has been incorrectly set");
+    assertEq(l2Proposal.voteEnd, l1VoteEnd, "Vote start has been incorrectly set");
   }
 
   function testFuzz_RevertIf_NotCalledByRelayer(
     uint256 proposalId,
-    uint256 voteStart,
-    uint256 voteEnd,
+    uint256 l1VoteStart,
+    uint256 l1VoteEnd,
     address caller
   ) public {
-    bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
+    bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd);
     vm.assume(caller != wormholeCoreMumbai);
     vm.prank(caller);
 
