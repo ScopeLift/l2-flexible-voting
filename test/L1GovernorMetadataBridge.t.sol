@@ -51,9 +51,9 @@ contract Initialize is L1GovernorMetadataBridgeTest {
     assertEq(bridge.INITIALIZED(), true, "Bridge isn't initialized");
   }
 
-  function testFork_RevertWhen_AlreadyIntializedWithL2GovernorMetadataAddress(address l2GovernorMetadata)
-    public
-  {
+  function testFork_RevertWhen_AlreadyIntializedWithL2GovernorMetadataAddress(
+    address l2GovernorMetadata
+  ) public {
     bridge.initialize(address(l2GovernorMetadata));
 
     vm.expectRevert(L1GovernorMetadataBridge.AlreadyInitialized.selector);

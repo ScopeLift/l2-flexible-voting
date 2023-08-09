@@ -15,12 +15,12 @@ import {GovernorMock} from "test/mock/GovernorMock.sol";
 
 contract L1ERC20BridgeHarness is L1ERC20Bridge {
   constructor(
-    address _token,
-    address _relayer,
-    address _governor,
+    address _l1Token,
+    address _l1Relayer,
+    address _l1Governor,
     uint16 _sourceId,
     uint16 _targetId
-  ) L1ERC20Bridge(_token, _relayer, _governor, _sourceId, _targetId) {}
+  ) L1ERC20Bridge(_l1Token, _l1Relayer, _l1Governor, _sourceId, _targetId) {}
 
   function withdraw(address account, uint256 amount) public {
     _withdraw(account, amount);
@@ -63,7 +63,7 @@ contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
 }
 
 contract Constructor is Test, Constants {
-  function testFork_CorrectlySetAllArgs(address l1Erc) public {
+  function testForkFuzz_CorrectlySetAllArgs(address l1Erc) public {
     FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     L1ERC20Bridge bridge =
@@ -88,7 +88,7 @@ contract Initialize is L1ERC20BridgeTest {
 }
 
 contract Deposit is L1ERC20BridgeTest {
-  function testFork_CorrectlyDepositTokens(uint96 _amount) public {
+  function testForkFuzz_CorrectlyDepositTokens(uint96 _amount) public {
     bridge.initialize(address(l2Erc20));
     uint256 cost = bridge.quoteDeliveryCost(wormholePolygonId);
     vm.recordLogs();
@@ -98,6 +98,9 @@ contract Deposit is L1ERC20BridgeTest {
     vm.deal(address(this), 1 ether);
 
     bridge.deposit{value: cost}(address(this), _amount);
+
+    uint256 bridgeBalance = l1Erc20.balanceOf(address(bridge));
+    assertEq(bridgeBalance, _amount, "Amount has not been transfered to the bridge");
 
     vm.prank(wormholeCoreMumbai);
     performDelivery();

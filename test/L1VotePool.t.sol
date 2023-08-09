@@ -50,12 +50,10 @@ contract L1VotePoolHarness is L1VotePool, Test {
     return _proposalId;
   }
 
-  function createProposalVote(
-    address l1Erc20,
-    uint128 _against,
-    uint128 _inFavor,
-    uint128 _abstain
-  ) public returns (uint256) {
+  function createProposalVote(address l1Erc20, uint128 _against, uint128 _inFavor, uint128 _abstain)
+    public
+    returns (uint256)
+  {
     uint256 _proposalId = _createExampleProposal(l1Erc20);
     _jumpToActiveProposal(_proposalId);
     _receiveCastVoteWormholeMessages(
