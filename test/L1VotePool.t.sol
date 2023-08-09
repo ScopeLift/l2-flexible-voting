@@ -214,7 +214,7 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
     assertEq(abstain, _newAbstain, "abstain value was not bridged correctly");
   }
 
-  function testFuzz_InvalidVoteBridged(
+  function testFuzz_RevertWhen_InvalidVoteHasBeenBridged(
     uint32 _against,
     uint32 _inFavor,
     uint32 _abstain,

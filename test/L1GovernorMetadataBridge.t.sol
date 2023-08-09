@@ -51,7 +51,7 @@ contract Initialize is L1GovernorMetadataBridgeTest {
     assertEq(bridge.INITIALIZED(), true, "Bridge isn't initialized");
   }
 
-  function testFork_InitlializeL2GovernorMetadataWhenAlreadyInitialized(address l2GovernorMetadata)
+  function testFork_RevertWhen_AlreadyIntializedWithL2GovernorMetadataAddress(address l2GovernorMetadata)
     public
   {
     bridge.initialize(address(l2GovernorMetadata));
@@ -93,7 +93,7 @@ contract Bridge is L1GovernorMetadataBridgeTest {
     assertEq(proposal.voteEnd, voteEnd, "voteEnd is incorrect");
   }
 
-  function testFork_MissingProposal(uint256 _proposalId) public {
+  function testFork_RevertWhen_ProposalIsMissing(uint256 _proposalId) public {
     bridge.initialize(address(l2GovernorMetadata));
     uint256 cost = bridge.quoteDeliveryCost(wormholeFujiId);
     vm.recordLogs();

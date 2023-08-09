@@ -144,7 +144,7 @@ contract Constructor is L2VoteAggregatorTest {
 }
 
 contract CastVote is L2VoteAggregatorTest {
-  function testFuzz_InactiveProposal(uint96 _amount, uint8 _support) public {
+  function testFuzz_RevertWhen_ProposalIsInactive(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 2);
     erc20.mint(address(this), _amount);
 
@@ -153,7 +153,7 @@ contract CastVote is L2VoteAggregatorTest {
     l2VoteAggregator.castVote(1, _support);
   }
 
-  function testFuzz_VoterAlreadyVoted(uint96 _amount, uint8 _support) public {
+  function testFuzz_RevertWhen_VoterHasAlreadyVoted(uint96 _amount, uint8 _support) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 2);
     erc20.mint(address(this), _amount);
@@ -166,13 +166,14 @@ contract CastVote is L2VoteAggregatorTest {
     l2VoteAggregator.castVote(1, _support);
   }
 
-  function testFuzz_VoterNoWeight(uint96 _amount, uint8 _support) public {
+  function testFuzz_RevertWhen_VoterHasNoWeight(uint96 _amount, uint8 _support) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 2);
 
     L2GovernorMetadata.Proposal memory proposal =
       l2VoteAggregator.GOVERNOR_METADATA().getProposal(1);
     vm.roll(proposal.voteStart + 1);
+
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
     l2VoteAggregator.castVote(1, _support);
   }

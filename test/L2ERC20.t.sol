@@ -53,7 +53,7 @@ contract Initialize is L2ERC20Test {
     assertEq(l2Erc20.INITIALIZED(), true, "L1 bridged isn't initialized");
   }
 
-  function testFork_InitlializeL2AddressWhenAlreadyInitialized(address bridge) public {
+  function testFork_RevertWhen_AlreadyInitializedWithBridgeAddress(address bridge) public {
     l2Erc20.initialize(bridge);
 
     vm.expectRevert(L2ERC20.AlreadyInitialized.selector);
@@ -74,7 +74,7 @@ contract ReceiveWormholeMessages is L2ERC20Test {
     assertEq(l2Amount, amount, "Amount after receive is incorrect");
   }
 
-  function testFuzz_RevertIfNotCalledByRelayer(
+  function testFuzz_RevertIf_NotCalledByRelayer(
     uint256 proposalId,
     uint256 voteStart,
     uint256 voteEnd,

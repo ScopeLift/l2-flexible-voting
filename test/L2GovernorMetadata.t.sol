@@ -37,7 +37,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     assertEq(proposal.voteEnd, voteEnd, "Vote start has been incorrectly set");
   }
 
-  function testFuzz_RevertIfNotCalledByRelayer(
+  function testFuzz_RevertIf_NotCalledByRelayer(
     uint256 proposalId,
     uint256 voteStart,
     uint256 voteEnd,
@@ -46,6 +46,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     bytes memory payload = abi.encode(proposalId, voteStart, voteEnd);
     vm.assume(caller != wormholeCoreMumbai);
     vm.prank(caller);
+
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
     l2GovernorMetadata.receiveWormholeMessages(
       payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")

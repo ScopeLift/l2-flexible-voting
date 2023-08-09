@@ -79,7 +79,7 @@ contract Initialize is L1ERC20BridgeTest {
     assertEq(bridge.INITIALIZED(), true, "Bridge isn't initialized");
   }
 
-  function testFork_InitializeL2AddressWhenAlreadyInitialized(address l2Erc20) public {
+  function testFork_RevertWhen_AlreadyInitializedWithL2Erc20Address(address l2Erc20) public {
     bridge.initialize(address(l2Erc20));
 
     vm.expectRevert(L1ERC20Bridge.AlreadyInitialized.selector);
