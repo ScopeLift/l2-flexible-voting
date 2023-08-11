@@ -292,8 +292,9 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     new L2VoteAggregator(address(l2Erc20), wormholeCoreMumbai, address(l2GovernorMetadata), address(l1Block), wormholePolygonId, wormholeFujiId);
 
     vm.assume(voteStart < block.number);
-    vm.assume(voteEnd >  aggregator.CAST_VOTE_WINDOW());
-    vm.assume(voteEnd - aggregator.CAST_VOTE_WINDOW() > block.number); // Proposal must have a voting block before the cast
+    vm.assume(voteEnd > aggregator.CAST_VOTE_WINDOW());
+    vm.assume(voteEnd - aggregator.CAST_VOTE_WINDOW() > block.number); // Proposal must have a
+      // voting block before the cast
       // period ends
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(wormholeCoreMumbai);
@@ -319,7 +320,8 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     vm.assume(voteStart > 0); // Underflow because we subtract 1
     vm.assume(voteStart > block.number); // Block number must
     vm.assume(voteEnd > aggregator.CAST_VOTE_WINDOW()); // Without we have an underflow
-    vm.assume(voteEnd - aggregator.CAST_VOTE_WINDOW() > voteStart); // Proposal must have a voting block before the cast
+    vm.assume(voteEnd - aggregator.CAST_VOTE_WINDOW() > voteStart); // Proposal must have a voting
+      // block before the cast
 
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(wormholeCoreMumbai);

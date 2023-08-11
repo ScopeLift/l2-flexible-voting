@@ -59,16 +59,26 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
       secondPayload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
 
-    L2GovernorMetadata.Proposal memory firstProposal = l2GovernorMetadata.getProposal(firstProposalId);
-    assertEq(firstProposal.voteStart, firstVoteStart, "First proposal vote start has been incorrectly set");
-    assertEq(firstProposal.voteEnd, firstVoteEnd, "First proposal vote start has been incorrectly set");
+    L2GovernorMetadata.Proposal memory firstProposal =
+      l2GovernorMetadata.getProposal(firstProposalId);
+    assertEq(
+      firstProposal.voteStart, firstVoteStart, "First proposal vote start has been incorrectly set"
+    );
+    assertEq(
+      firstProposal.voteEnd, firstVoteEnd, "First proposal vote start has been incorrectly set"
+    );
 
-    L2GovernorMetadata.Proposal memory secondProposal = l2GovernorMetadata.getProposal(secondProposalId);
-    assertEq(secondProposal.voteStart, secondVoteStart, "Second proposal vote start has been incorrectly set");
-    assertEq(secondProposal.voteEnd, secondVoteEnd, "Second proposal vote start has been incorrectly set");
+    L2GovernorMetadata.Proposal memory secondProposal =
+      l2GovernorMetadata.getProposal(secondProposalId);
+    assertEq(
+      secondProposal.voteStart,
+      secondVoteStart,
+      "Second proposal vote start has been incorrectly set"
+    );
+    assertEq(
+      secondProposal.voteEnd, secondVoteEnd, "Second proposal vote start has been incorrectly set"
+    );
   }
-
-
 
   function testFuzz_RevertIfNotCalledByRelayer(
     uint256 proposalId,
