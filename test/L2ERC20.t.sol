@@ -90,7 +90,7 @@ contract Clock is L2ERC20Test {
 
     vm.roll(currentBlock);
     uint48 l1Block = l2Erc20.clock(); // The test L1 block implementation uses block.number
-    assertEq(l1Block, currentBlock, "L2 clovk is incorrect");
+    assertEq(l1Block, currentBlock, "L2 clock is incorrect");
   }
 }
 
