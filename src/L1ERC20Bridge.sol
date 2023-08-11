@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {SafeERC20} from "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {L1VotePool} from "src/L1VotePool.sol";
+import {WormholeSender} from "src/WormholeSender.sol";
 
-contract L1ERC20Bridge is L1VotePool {
+contract L1ERC20Bridge is L1VotePool, WormholeSender {
+  using SafeERC20 for ERC20Votes;
+
   /// @notice L1 token used for deposits and voting.
   ERC20Votes public immutable L1_TOKEN;
 
@@ -21,11 +25,17 @@ contract L1ERC20Bridge is L1VotePool {
   error AlreadyInitialized();
 
   /// @param l1TokenAddress The address of the L1 token.
-  /// @param _core The address of the core wormhole contract.
+  /// @param _relayer The adddress of the Wormhole relayer.
   /// @param _governor The address of the L1 governor.
-  constructor(address l1TokenAddress, address _core, address _governor)
-    L1VotePool(_core, _governor)
-  {
+  /// @param _sourceChain The Wormhole id of the chain sending the messages.
+  /// @param _targetChain The Wormhole id of the chain to send the message.
+  constructor(
+    address l1TokenAddress,
+    address _relayer,
+    address _governor,
+    uint16 _sourceChain,
+    uint16 _targetChain
+  ) L1VotePool(_relayer, _governor) WormholeSender(_relayer, _sourceChain, _targetChain) {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
   }
 
@@ -41,13 +51,60 @@ contract L1ERC20Bridge is L1VotePool {
   /// @param account The address of the user on L2 where to mint the token.
   /// @param amount The amount of tokens to deposit and mint on the L2.
   /// @return sequence An identifier for the message published to L2.
-  function deposit(address account, uint256 amount) external payable returns (uint64 sequence) {
-    L1_TOKEN.transferFrom(msg.sender, address(this), amount);
+  function deposit(address account, uint256 amount) public payable returns (uint256 sequence) {
+    L1_TOKEN.safeTransferFrom(msg.sender, address(this), amount);
 
     // TODO optimize with encodePacked
     bytes memory mintCalldata = abi.encode(account, amount);
-    sequence = CORE_BRIDGE.publishMessage(nonce, mintCalldata, 1);
-    nonce = nonce + 1;
-    return sequence;
+
+    uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
+    require(cost == msg.value, "Cost should be msg.Value");
+
+    return WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
+      TARGET_CHAIN,
+      L2_TOKEN_ADDRESS,
+      mintCalldata,
+      0, // no receiver value needed since we're just passing a message
+      GAS_LIMIT,
+      SOURCE_CHAIN,
+      msg.sender
+    );
+  }
+
+  function receiveWormholeMessages(
+    bytes memory payload,
+    bytes[] memory additionalVaas,
+    bytes32 callerAddr,
+    uint16 sourceChain,
+    bytes32 deliveryHash
+  ) public override onlyRelayer {
+    if (callerAddr == bytes32(uint256(uint160(L2_TOKEN_ADDRESS)))) {
+      return _receiveWithdrawalWormholeMessages(
+        payload, additionalVaas, callerAddr, sourceChain, deliveryHash
+      );
+    }
+    return _receiveCastVoteWormholeMessages(
+      payload, additionalVaas, callerAddr, sourceChain, deliveryHash
+    );
+  }
+
+  /// @notice Receives an encoded withdrawal message from the L2
+  /// @param payload The payload that was sent to in the delivery request.
+  function _receiveWithdrawalWormholeMessages(
+    bytes memory payload,
+    bytes[] memory,
+    bytes32,
+    uint16,
+    bytes32
+  ) internal {
+    (address account, uint256 amount) = abi.decode(payload, (address, uint256));
+    _withdraw(account, amount);
+  }
+
+  /// @notice Withdraws deposited tokens to an account.
+  /// @param account The address of the user withdrawing tokens.
+  /// @param amount The amount of tokens to withdraw.
+  function _withdraw(address account, uint256 amount) internal {
+    L1_TOKEN.safeTransfer(account, amount);
   }
 }

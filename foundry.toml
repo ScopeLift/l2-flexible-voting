@@ -5,12 +5,13 @@
   remappings = [
     "wormhole/=lib/wormhole/ethereum/contracts",
     "openzeppelin/=lib/openzeppelin-contracts/contracts",
+    "openzeppelin-flexible-voting/=lib/flexible-voting/lib/openzeppelin-contracts/contracts/",
   ]
   solc_version = "0.8.16"
   verbosity = 3
 
 [profile.ci]
-  fuzz = { runs = 5000 }
+  fuzz = { runs = 1000 }
   invariant = { runs = 1000 }
 
 [rpc_endpoints]

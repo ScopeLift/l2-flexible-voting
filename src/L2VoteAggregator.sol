@@ -7,27 +7,28 @@ import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
+import {WormholeSender} from "src/WormholeSender.sol";
 
 /// @notice A contract to collect votes on L2 to be bridged to L1.
-contract L2VoteAggregator {
+contract L2VoteAggregator is WormholeSender {
   /// @notice The number of blocks before L2 voting closes. We close voting 1200 blocks before the
   /// end of the proposal to cast the vote.
   uint32 public constant CAST_VOTE_WINDOW = 1200;
 
-  /// @notice The Wormhole contract to bridge messages to L1.
-  IWormhole immutable CORE_BRIDGE;
-
-  /// @notice A unique number used to send messages.
-  uint32 public nonce;
-
   /// @notice The token used to vote on proposals provided by the `GovernorMetadata`.
-  ERC20Votes immutable VOTING_TOKEN;
+  ERC20Votes public immutable VOTING_TOKEN;
 
   /// @notice The `GovernorMetadata` contract that provides proposal information.
-  L2GovernorMetadata immutable GOVERNOR_METADATA;
+  L2GovernorMetadata public immutable GOVERNOR_METADATA;
+
+  /// @notice The address of the bridge that receives L2 votes.
+  address L1_BRIDGE_ADDRESS;
 
   /// @notice The contract that handles fetch the L1 block on the L2.
-  IL1Block immutable L1_BLOCK;
+  IL1Block public immutable L1_BLOCK;
+
+  /// @notice Used to indicate whether the contract has been initialized with the L1 bridge address.
+  bool public INITIALIZED = false;
 
   /// @dev Thrown when an address has no voting weight on a proposal.
   error NoWeight();
@@ -40,6 +41,9 @@ contract L2VoteAggregator {
 
   /// @dev Thrown when proposal is inactive.
   error ProposalInactive();
+
+  /// @dev Contract is already initialized with an L2 token.
+  error AlreadyInitialized();
 
   /// @dev The voting options corresponding to those used in the Governor.
   enum VoteType {
@@ -67,25 +71,34 @@ contract L2VoteAggregator {
   event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight);
 
   /// @param _votingToken The token used to vote on proposals.
-  /// @param _core The Wormhole contract to bridge messages to L1.
+  /// @param _relayer The Wormhole generic relayer contract.
   /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
-  /// @param l1BlockAddress The address of the L1Block contract.
+  /// @param _l1BlockAddress The address of the L1Block contract.
+  /// @param _sourceChain The chain sending the votes.
+  /// @param _targetChain The target chain to bridge the votes to.
   constructor(
     address _votingToken,
-    address _core,
+    address _relayer,
     address _governorMetadata,
-    address l1BlockAddress
-  ) {
+    address _l1BlockAddress,
+    uint16 _sourceChain,
+    uint16 _targetChain
+  ) WormholeSender(_relayer, _sourceChain, _targetChain) {
     VOTING_TOKEN = ERC20Votes(_votingToken);
-    CORE_BRIDGE = IWormhole(_core);
     GOVERNOR_METADATA = L2GovernorMetadata(_governorMetadata);
-    L1_BLOCK = IL1Block(l1BlockAddress);
+    L1_BLOCK = IL1Block(_l1BlockAddress);
+  }
+
+  function initialize(address l1BridgeAddress) public {
+    if (INITIALIZED) revert AlreadyInitialized();
+    INITIALIZED = true;
+    L1_BRIDGE_ADDRESS = l1BridgeAddress;
   }
 
   /// @notice Where a user can express their vote based on their L2 token voting power.
   /// @param proposalId The id of the proposal to vote on.
   /// @param support The type of vote to cast.
-  function castVote(uint256 proposalId, uint8 support) public returns (uint256 balance) {
+  function castVote(uint256 proposalId, uint8 support) public returns (uint256) {
     if (!proposalVoteActive(proposalId)) revert ProposalInactive();
     if (_proposalVotersHasVoted[proposalId][msg.sender]) revert AlreadyVoted();
     _proposalVotersHasVoted[proposalId][msg.sender] = true;
@@ -109,17 +122,22 @@ contract L2VoteAggregator {
 
   /// @notice Bridges a vote to the L1.
   /// @param proposalId The id of the proposal to bridge.
-  /// @return sequence The id of the of the message sent through Wormhole.
-  function bridgeVote(uint256 proposalId) external payable returns (uint64 sequence) {
+  function bridgeVote(uint256 proposalId) external payable {
     if (!proposalVoteActive(proposalId)) revert ProposalInactive();
 
     ProposalVote memory vote = proposalVotes[proposalId];
 
-    bytes memory proposalCalldata =
-      abi.encodePacked(proposalId, vote.against, vote.inFavor, vote.abstain);
-    sequence = CORE_BRIDGE.publishMessage(nonce, proposalCalldata, 1);
-    nonce = nonce + 1;
-    return sequence;
+    bytes memory proposalCalldata = abi.encode(proposalId, vote.against, vote.inFavor, vote.abstain);
+    uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
+    WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
+      TARGET_CHAIN,
+      L1_BRIDGE_ADDRESS,
+      proposalCalldata,
+      0, // no receiver value needed since we're just passing a message
+      GAS_LIMIT,
+      SOURCE_CHAIN,
+      msg.sender
+    );
   }
 
   /// @notice Method which returns the deadline for token holders to express their voting

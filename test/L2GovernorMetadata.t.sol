@@ -5,26 +5,94 @@ import {Test} from "forge-std/Test.sol";
 
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {Constants} from "test/Constants.sol";
+import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
-contract L2GovernorMetadataTest is Test, Constants {
+contract L2GovernorMetadataTest is Constants, Test {
   L2GovernorMetadata l2GovernorMetadata;
 
   function setUp() public {
-    vm.createSelectFork(vm.rpcUrl("polygon_mumbai"));
     l2GovernorMetadata = new L2GovernorMetadata(wormholeCoreMumbai);
-    l2GovernorMetadata.registerApplicationContracts(
-      6, bytes32(uint256(uint160(address(0x628C44d859d17aD932960DFcE226F5de427f9d6D))))
-    );
   }
 }
 
-contract ReceiveEndcodedMsg is L2GovernorMetadataTest {
-  function testFork_CorrectlyStoreMetadata() public {
-    // Encoded message was generated from transaction
-    // 0x873dab653e1a8a746a8e4f51eb0e1de46f878255312e18506301e3cc5cb29954
-    // on Avalanche Fuji
-    l2GovernorMetadata.receiveEncodedMsg(
-      hex"01000000000100643f702e8fcb9eb6999b9f8950845f449dc257fade56c5f5d39e30d6cc8eed415c1e634d651a6de79e641d0e7d1ce13d828d95e64b4fec570f840012828b762f006490867d000000030006000000000000000000000000628c44d859d17ad932960dfce226f5de427f9d6d0000000000000003013b16cb6bd01a5bf0aedd40b736c5da6ee6a6d1a44a0bd327cb4942345972b6a6000000000000000000000000000000000000000000000000000000000163309f00000000000000000000000000000000000000000000000000000000016330af"
+contract Constructor is L2GovernorMetadataTest {
+  function testFuzz_CorrectlySetsAllArgs(address wormholeCore) public {
+    new L2GovernorMetadata(wormholeCore); // nothing to assert as there are no constructor args set
+  }
+}
+
+contract ReceiveWormholeMessages is L2GovernorMetadataTest {
+  function testFuzz_CorrectlySaveProposalMetadata(
+    uint256 proposalId,
+    uint256 l1VoteStart,
+    uint256 l1VoteEnd
+  ) public {
+    bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd);
+    vm.prank(wormholeCoreMumbai);
+    l2GovernorMetadata.receiveWormholeMessages(
+      payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+    L2GovernorMetadata.Proposal memory l2Proposal = l2GovernorMetadata.getProposal(proposalId);
+    assertEq(l2Proposal.voteStart, l1VoteStart, "Vote start has been incorrectly set");
+    assertEq(l2Proposal.voteEnd, l1VoteEnd, "Vote start has been incorrectly set");
+  }
+
+  function testFuzz_CorrectlySaveProposalMetadataForTwoProposals(
+    uint256 firstProposalId,
+    uint256 firstVoteStart,
+    uint256 firstVoteEnd,
+    uint256 secondProposalId,
+    uint256 secondVoteStart,
+    uint256 secondVoteEnd
+  ) public {
+    vm.assume(firstProposalId != secondProposalId);
+
+    bytes memory firstPayload = abi.encode(firstProposalId, firstVoteStart, firstVoteEnd);
+    vm.prank(wormholeCoreMumbai);
+    l2GovernorMetadata.receiveWormholeMessages(
+      firstPayload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+
+    bytes memory secondPayload = abi.encode(secondProposalId, secondVoteStart, secondVoteEnd);
+    vm.prank(wormholeCoreMumbai);
+    l2GovernorMetadata.receiveWormholeMessages(
+      secondPayload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+
+    L2GovernorMetadata.Proposal memory firstProposal =
+      l2GovernorMetadata.getProposal(firstProposalId);
+    assertEq(
+      firstProposal.voteStart, firstVoteStart, "First proposal vote start has been incorrectly set"
+    );
+    assertEq(
+      firstProposal.voteEnd, firstVoteEnd, "First proposal vote start has been incorrectly set"
+    );
+
+    L2GovernorMetadata.Proposal memory secondProposal =
+      l2GovernorMetadata.getProposal(secondProposalId);
+    assertEq(
+      secondProposal.voteStart,
+      secondVoteStart,
+      "Second proposal vote start has been incorrectly set"
+    );
+    assertEq(
+      secondProposal.voteEnd, secondVoteEnd, "Second proposal vote start has been incorrectly set"
+    );
+  }
+
+  function testFuzz_RevertIf_NotCalledByRelayer(
+    uint256 proposalId,
+    uint256 l1VoteStart,
+    uint256 l1VoteEnd,
+    address caller
+  ) public {
+    bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd);
+    vm.assume(caller != wormholeCoreMumbai);
+    vm.prank(caller);
+
+    vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
+    l2GovernorMetadata.receiveWormholeMessages(
+      payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
   }
 }

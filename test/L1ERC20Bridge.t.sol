@@ -3,33 +3,162 @@ pragma solidity ^0.8.0;
 
 import {Test} from "forge-std/Test.sol";
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
+import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
 
+import {L1Block} from "src/L1Block.sol";
 import {IERC20Mint} from "src/interfaces/IERC20Mint.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L1ERC20Bridge} from "src/L1ERC20Bridge.sol";
+import {L2ERC20} from "src/L2ERC20.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
-contract L1ERC20BridgeTest is Test, Constants {
-  IERC20Mint erc20;
+contract L1ERC20BridgeHarness is L1ERC20Bridge {
+  constructor(
+    address _l1Token,
+    address _l1Relayer,
+    address _l1Governor,
+    uint16 _sourceId,
+    uint16 _targetId
+  ) L1ERC20Bridge(_l1Token, _l1Relayer, _l1Governor, _sourceId, _targetId) {}
 
-  function setUp() public {
-    vm.createSelectFork(vm.rpcUrl("avalanche_fuji"));
-    erc20 = new FakeERC20("Hello", "WRLD");
+  function withdraw(address account, uint256 amount) public {
+    _withdraw(account, amount);
+  }
+
+  function receiveWithdrawalWormholeMessages(
+    bytes memory payload,
+    bytes[] memory additionalVaas,
+    bytes32 callerAddr,
+    uint16 sourceChain,
+    bytes32 deliveryHash
+  ) public {
+    _receiveWithdrawalWormholeMessages(
+      payload, additionalVaas, callerAddr, sourceChain, deliveryHash
+    );
+  }
+}
+
+contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
+  L2ERC20 l2Erc20;
+  FakeERC20 l1Erc20;
+  L1ERC20Bridge l1Erc20Bridge;
+
+  constructor() {
+    setTestnetForkChains(6, 5);
+  }
+
+  function setUpSource() public override {
+    l1Erc20 = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
+    l1Erc20Bridge =
+    new L1ERC20Bridge(address(l1Erc20), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+  }
+
+  function setUpTarget() public override {
+    L1Block l1Block = new L1Block();
+    l2Erc20 =
+    new L2ERC20( "Hello", "WRLD", wormholeCoreMumbai, address(l1Block), wormholePolygonId, wormholeFujiId);
+  }
+}
+
+contract Constructor is Test, Constants {
+  function testForkFuzz_CorrectlySetAllArgs(address l1Erc) public {
+    FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
+    L1ERC20Bridge l1Erc20Bridge =
+    new L1ERC20Bridge(address(l1Erc), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    assertEq(address(l1Erc20Bridge.L1_TOKEN()), l1Erc, "L1 token is not set correctly");
+  }
+}
+
+contract Initialize is L1ERC20BridgeTest {
+  function testFork_CorrectlyInitializeL2Token(address l2Erc20) public {
+    l1Erc20Bridge.initialize(address(l2Erc20));
+    assertEq(l1Erc20Bridge.L2_TOKEN_ADDRESS(), l2Erc20, "L2 token address is not setup correctly");
+    assertTrue(l1Erc20Bridge.INITIALIZED(), "Bridge isn't initialized");
+  }
+
+  function testFork_RevertWhen_AlreadyInitializedWithL2Erc20Address(address l2Erc20) public {
+    l1Erc20Bridge.initialize(address(l2Erc20));
+
+    vm.expectRevert(L1ERC20Bridge.AlreadyInitialized.selector);
+    l1Erc20Bridge.initialize(address(l2Erc20));
   }
 }
 
 contract Deposit is L1ERC20BridgeTest {
-  function testFork_CorrectlyDepositTokens() public {
-    FakeERC20 erc20 = new FakeERC20("Hello", "WRLD");
-    IGovernor gov = new GovernorMock("Testington Dao", erc20);
-    L1ERC20Bridge bridge = new L1ERC20Bridge(address(erc20), wormholeCoreFuji, address(gov));
-    bridge.initialize(0xBaA85b5C4c74f53c46872acfF2750f512bcBEC43);
+  function testForkFuzz_CorrectlyDepositTokens(uint96 _amount) public {
+    l1Erc20Bridge.initialize(address(l2Erc20));
+    uint256 cost = l1Erc20Bridge.quoteDeliveryCost(wormholePolygonId);
+    vm.recordLogs();
 
-    erc20.approve(address(bridge), 100_000);
-    erc20.mint(address(this), 100_000);
+    l1Erc20.approve(address(l1Erc20Bridge), _amount);
+    l1Erc20.mint(address(this), _amount);
     vm.deal(address(this), 1 ether);
 
-    bridge.deposit(address(this), 100_000);
+    l1Erc20Bridge.deposit{value: cost}(address(this), _amount);
+
+    uint256 bridgeBalance = l1Erc20.balanceOf(address(l1Erc20Bridge));
+    assertEq(bridgeBalance, _amount, "Amount has not been transfered to the bridge");
+
+    vm.prank(wormholeCoreMumbai);
+    performDelivery();
+
+    vm.selectFork(targetFork);
+    assertEq(l2Erc20.balanceOf(address(this)), _amount, "L2 token balance is not correct");
+  }
+}
+
+// Top level receive is tested in L2ERC20 and L2VoteAggregator
+contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
+  function testForkFuzz_CorrectlyReceiveWithdrawal(
+    address _account,
+    uint96 _amount,
+    address l2Erc20
+  ) public {
+    vm.assume(_account != address(0));
+    FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
+    L1ERC20BridgeHarness l1Erc20Bridge =
+    new L1ERC20BridgeHarness(address(l1Erc20), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+
+    l1Erc20Bridge.initialize(address(l2Erc20));
+    l1Erc20.approve(address(this), _amount);
+    l1Erc20.mint(address(this), _amount);
+    vm.deal(address(this), 1 ether);
+
+    l1Erc20.transfer(address(l1Erc20Bridge), _amount);
+    assertEq(l1Erc20.balanceOf(address(l1Erc20Bridge)), _amount, "The Bridge balance is incorrect");
+
+    bytes memory withdrawalCalldata = abi.encode(_account, _amount);
+    l1Erc20Bridge.receiveWithdrawalWormholeMessages(
+      withdrawalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+    assertEq(l1Erc20.balanceOf(address(_account)), _amount, "The account balance is incorrect");
+  }
+}
+
+contract _Withdraw is Test, Constants {
+  function testFork_CorrectlyWithdrawTokens(address _account, uint96 _amount, address l2Erc20)
+    public
+  {
+    vm.assume(_account != address(0));
+
+    FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
+    IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
+    L1ERC20BridgeHarness l1Erc20Bridge =
+    new L1ERC20BridgeHarness(address(l1Erc20), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    l1Erc20Bridge.initialize(address(l2Erc20));
+
+    l1Erc20.approve(address(this), _amount);
+    l1Erc20.mint(address(this), _amount);
+    vm.deal(address(this), 1 ether);
+
+    l1Erc20.transfer(address(l1Erc20Bridge), _amount);
+    assertEq(l1Erc20.balanceOf(address(l1Erc20Bridge)), _amount, "The Bridge balance is incorrect");
+
+    l1Erc20Bridge.withdraw(_account, _amount);
+    assertEq(l1Erc20.balanceOf(address(_account)), _amount, "The account balance is incorrect");
   }
 }

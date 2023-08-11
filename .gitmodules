@@ -7,3 +7,9 @@
 [submodule "lib/wormhole"]
 	path = lib/wormhole
 	url = https://github.com/wormhole-foundation/wormhole
+[submodule "lib/wormhole-solidity-sdk"]
+	path = lib/wormhole-solidity-sdk
+	url = https://github.com/alexkeating/wormhole-solidity-sdk
+[submodule "lib/flexible-voting"]
+	path = lib/flexible-voting
+	url = https://github.com/ScopeLift/flexible-voting
