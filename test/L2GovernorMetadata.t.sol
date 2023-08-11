@@ -17,7 +17,7 @@ contract L2GovernorMetadataTest is Constants, Test {
 
 contract Constructor is L2GovernorMetadataTest {
   function testFuzz_CorrectlySetsAllArgs(address wormholeCore) public {
-    L2GovernorMetadata l2Gov = new L2GovernorMetadata(wormholeCore); // nothing to assert as
+    new L2GovernorMetadata(wormholeCore); // nothing to assert as there are no constructor args set
   }
 }
 
@@ -37,7 +37,40 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     assertEq(l2Proposal.voteEnd, l1VoteEnd, "Vote start has been incorrectly set");
   }
 
-  function testFuzz_RevertIf_NotCalledByRelayer(
+  function testFuzz_CorrectlySaveProposalMetadataForTwoProposals(
+    uint256 firstProposalId,
+    uint256 firstVoteStart,
+    uint256 firstVoteEnd,
+    uint256 secondProposalId,
+    uint256 secondVoteStart,
+    uint256 secondVoteEnd
+  ) public {
+    vm.assume(firstProposalId != secondProposalId);
+
+    bytes memory firstPayload = abi.encode(firstProposalId, firstVoteStart, firstVoteEnd);
+    vm.prank(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata.receiveWormholeMessages(
+      firstPayload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+
+    bytes memory secondPayload = abi.encode(secondProposalId, secondVoteStart, secondVoteEnd);
+    vm.prank(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata.receiveWormholeMessages(
+      secondPayload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+
+    L2GovernorMetadata.Proposal memory firstProposal = l2GovernorMetadata.getProposal(firstProposalId);
+    assertEq(firstProposal.voteStart, firstVoteStart, "First proposal vote start has been incorrectly set");
+    assertEq(firstProposal.voteEnd, firstVoteEnd, "First proposal vote start has been incorrectly set");
+
+    L2GovernorMetadata.Proposal memory secondProposal = l2GovernorMetadata.getProposal(secondProposalId);
+    assertEq(secondProposal.voteStart, secondVoteStart, "Second proposal vote start has been incorrectly set");
+    assertEq(secondProposal.voteEnd, secondVoteEnd, "Second proposal vote start has been incorrectly set");
+  }
+
+
+
+  function testFuzz_RevertIfNotCalledByRelayer(
     uint256 proposalId,
     uint256 l1VoteStart,
     uint256 l1VoteEnd,
