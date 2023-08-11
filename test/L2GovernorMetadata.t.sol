@@ -80,7 +80,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     );
   }
 
-  function testFuzz_RevertIfNotCalledByRelayer(
+  function testFuzz_RevertIf_NotCalledByRelayer(
     uint256 proposalId,
     uint256 l1VoteStart,
     uint256 l1VoteEnd,
