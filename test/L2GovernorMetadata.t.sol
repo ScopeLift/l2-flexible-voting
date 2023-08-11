@@ -48,13 +48,13 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     vm.assume(firstProposalId != secondProposalId);
 
     bytes memory firstPayload = abi.encode(firstProposalId, firstVoteStart, firstVoteEnd);
-    vm.prank(L2_CHAIN.wormholeRelayer);
+    vm.prank(wormholeCoreMumbai);
     l2GovernorMetadata.receiveWormholeMessages(
       firstPayload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
 
     bytes memory secondPayload = abi.encode(secondProposalId, secondVoteStart, secondVoteEnd);
-    vm.prank(L2_CHAIN.wormholeRelayer);
+    vm.prank(wormholeCoreMumbai);
     l2GovernorMetadata.receiveWormholeMessages(
       secondPayload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
