@@ -76,7 +76,7 @@ contract Initialize is L1ERC20BridgeTest {
   function testFork_CorrectlyInitializeL2Token(address l2Erc20) public {
     l1Erc20Bridge.initialize(address(l2Erc20));
     assertEq(l1Erc20Bridge.L2_TOKEN_ADDRESS(), l2Erc20, "L2 token address is not setup correctly");
-    assertEq(l1Erc20Bridge.INITIALIZED(), true, "Bridge isn't initialized");
+    assertTrue(l1Erc20Bridge.INITIALIZED(), "Bridge isn't initialized");
   }
 
   function testFork_RevertWhen_AlreadyInitializedWithL2Erc20Address(address l2Erc20) public {

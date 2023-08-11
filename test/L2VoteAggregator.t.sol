@@ -328,6 +328,6 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     );
 
     bool active = aggregator.proposalVoteActive(proposalId);
-    assertEq(active, false, "Proposal is supposed to be inactive");
+    assertFalse(active, "Proposal is supposed to be inactive");
   }
 }
