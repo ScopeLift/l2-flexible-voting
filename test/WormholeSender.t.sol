@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {Test} from "forge-std/Test.sol";
 import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
+import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
 
 import {WormholeSender} from "src/WormholeSender.sol";
 import {Constants} from "test/Constants.sol";
@@ -17,15 +18,19 @@ contract WormholeSenderHarness is WormholeSender {
   }
 }
 
-contract WormholeSenderTest is Test, Constants {
+contract WormholeSenderTest is Constants, WormholeRelayerBasicTest {
   WormholeSender wormholeSender;
 
-  function setUp() public {
-    vm.createSelectFork(L1_CHAIN.rpcUrl);
+  constructor() {
+    setForkChains(TESTNET, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+  }
 
+  function setUpSource() public override {
     wormholeSender =
     new WormholeSender(L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
+
+  function setUpTarget() public override {}
 }
 
 contract Constructor is WormholeSenderTest {
@@ -49,7 +54,7 @@ contract Constructor is WormholeSenderTest {
 
 contract QuoteDeliveryCost is WormholeSenderTest {
   function testFork_QuoteForDeliveryCostReturned() public {
-    uint256 cost = wormholeSender.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
+    uint256 cost = wormholeSender.quoteDeliveryCost(L2_CHAIN.wormholeChainId);
     assertGt(cost, 0, "No cost was quoted");
   }
 }
