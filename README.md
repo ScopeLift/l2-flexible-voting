@@ -1,6 +1,6 @@
 # L2 Flexible Voting
 
-⚠️ **This codebase is a work in progress and not meant to be used in a production setting.**
+**This codebase contains smart contracts that enable governance voting from Layer 2 rollups using bridged tokens. The current implementation is an MVP. These contracts have not yet been audited or deployed in production. Use at your own risk.**
 
 - [About](#about)
 - [Architecture](#architecture)
@@ -10,9 +10,11 @@
 
 ## About
 
-[Flexible voting](https://www.scopelift.co/blog/introducing-flexible-voting) is a Governor extension that allows arbitrary delegate contracts to be developed. Allowing token holders to maintain their voting rights even when they choose to use their tokens in Defi or any other contract that supports flexible voting.
+[Flexible Voting](https://www.scopelift.co/blog/introducing-flexible-voting) is a Governor extension that enables arbitrary voting contracts to be developed, allowing token holders to maintain their voting rights even when they deposit tokens in DeFi or any other contract.
 
-In this repo, we are building a production ready proof of concept for Layer 2 flexible voting. When a user deposits their governance token into a bridge they lose access to the voting rights of that token. We hope to solve this problem and allow for token holders to take advantage of the gas fees on Layer 2.
+This codebase contains smart contracts that enable governance voting from Layer 2 rollups using bridged tokens. Today, when a user deposits their governance token into a bridge, they lose access to the voting rights of that token. These contracts allow holders of bridged governance tokens to vote on Layer 2—paying the lower gas fees these networks offer—then see their votes reflected on Layer 1 in a trust minimized fashion.
+
+The current implementation was built with a grant from the Ethereum Foundation. It is a minimum viable product, demonstrating the feasibility of such a system with a set of contracts that *could* be deployed in production. Please note these contracts have not yet been audited, and should be used only with caution in their current state.
 
 
 ## Architecture
@@ -24,28 +26,60 @@ Our initial architecture is shown in the diagram below. This provides a high lev
 </div>
 
 
-## Testing
+## Development
 
-To currently test the bridge add a wallet private key that has some native tokens on avalanche fuji
-and polygon mumbai. Then run the below docker commands to setup the spy and local redis node.
+### Foundry
 
-```
-docker run --rm -p6379:6379 --name redis-docker -d redis 
+This project uses [Foundry](https://github.com/foundry-rs/foundry). Follow [these instructions](https://github.com/foundry-rs/foundry#installation) to install it.
 
 
-docker run \
-    --platform=linux/amd64 \
-    -p 7073:7073 \
-    --entrypoint /guardiand \
-    ghcr.io/wormhole-foundation/guardiand:latest \
-spy --nodeKey /node.key --spyRPC "[::]:7073" --network /wormhole/testnet/2/1 --bootstrap
- /dns4/wormhole-testnet-v2-bootstrap.certus.one/udp/8999/quic/p2p/12D3KooWAkB9ynDur1Jtoa
-97LBUp8RXdhzS5uHgAfdTquJbrbN7i
+#### Getting started
+
+Clone the repo
+
+```bash
+git clone git@github.com:ScopeLift/l2-flexible-voting.git
+cd l2-flexible-voting
 ```
 
-Once those are running you will need to setup the L2 relayer. Follow the instructions 
-[here](https://github.com/ScopeLift/l2-wormhole-relayer-engine). Now, you should be able to run 
-the `MintOnL2` script demonstrating passing a  message cross-chain.
+Copy the `.env.template` file and populate it with values
+
+```bash
+cp sample .env
+# Open the .env file and add your values
+```
+
+```bash
+forge install
+forge build
+forge test
+```
+
+### Formatting
+
+Formatting is done via [scopelint](https://github.com/ScopeLift/scopelint). To install scopelint, run:
+
+```bash
+cargo install scopelint
+```
+
+#### Apply formatting
+
+```bash
+scopelint fmt
+```
+
+#### Check formatting
+
+```bash
+scopelint check
+```
+
+## Scripts
+
+This repository contains a series of Foundry scripts which can be used to deploy and exercise the contracts on testnets or real networks.
+
+These scripts are meant for end-to-end testing on real networks. They should not be used as-is for production deployments.
 
 ## License
 
