@@ -8,7 +8,7 @@ contract GovernorMetadataMock is L2GovernorMetadata {
     _proposals[1] = Proposal({voteStart: block.number, voteEnd: block.number + 3000});
   }
 
-  function getProposal(uint256 proposalId) public view override returns (Proposal memory) {
+  function getProposal(uint256) public view override returns (Proposal memory) {
     return _proposals[1];
   }
 }

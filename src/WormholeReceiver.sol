@@ -4,17 +4,11 @@ pragma solidity ^0.8.16;
 import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
 import {Ownable} from "openzeppelin/access/Ownable.sol";
 
-abstract contract WormholeReceiver is Ownable {
-  /// @notice The wormhole relayer used to trustlessly send messages.
-  IWormholeRelayer private immutable WORMHOLE_RELAYER;
+import {WormholeBase} from "src/WormholeBase.sol";
 
+abstract contract WormholeReceiver is Ownable, WormholeBase {
   /// @dev Function called with an address that isn't a relayer.
   error OnlyRelayerAllowed();
-
-  /// @param _relayer The address of the Wormhole relayer contract.
-  constructor(address _relayer) {
-    WORMHOLE_RELAYER = IWormholeRelayer(_relayer);
-  }
 
   /// @notice The function the wormhole relayer calls when the DeliveryProvider competes a delivery.
   /// @param payload The payload that was sent to in the delivery request.

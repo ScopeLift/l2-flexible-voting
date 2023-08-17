@@ -9,6 +9,8 @@ import {SafeCast} from "openzeppelin/utils/math/SafeCast.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
+import {WormholeBase} from "src/WormholeBase.sol";
+
 import {IL1Block} from "src/interfaces/IL1Block.sol";
 
 contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
@@ -38,10 +40,10 @@ contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
     uint16 _sourceChain,
     uint16 _targetChain
   )
-    WormholeReceiver(_relayer)
+    WormholeBase(_relayer)
     ERC20(_name, _symbol)
     ERC20Permit(_name)
-    WormholeSender(_relayer, _sourceChain, _targetChain)
+    WormholeSender(_sourceChain, _targetChain)
   {
     L1_BLOCK = IL1Block(_l1Block);
   }

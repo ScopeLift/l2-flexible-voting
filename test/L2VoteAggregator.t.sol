@@ -12,12 +12,13 @@ import {FakeERC20} from "src/FakeERC20.sol";
 import {L1VotePool} from "src/L1VotePool.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {WormholeBase} from "src/WormholeBase.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
 
 contract L1VotePoolHarness is L1VotePool, Test {
-  constructor(address _relayer, address _l1Governor) L1VotePool(_relayer, _l1Governor) {}
+  constructor(address _relayer, address _l1Governor) WormholeBase(_relayer) L1VotePool(_l1Governor) {}
 
   function receiveWormholeMessages(
     bytes memory payload,

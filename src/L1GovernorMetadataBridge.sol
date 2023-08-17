@@ -3,7 +3,9 @@ pragma solidity ^0.8.16;
 
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
+
 import {WormholeSender} from "src/WormholeSender.sol";
+import {WormholeBase} from "src/WormholeBase.sol";
 
 /// @notice Handles sending proposal metadata such as proposal id, start date and end date from L1
 /// to L2.
@@ -29,7 +31,8 @@ contract L1GovernorMetadataBridge is WormholeSender {
   /// @param _sourceChain The chain id sending the wormhole messages.
   /// @param _targetChain The chain id receiving the wormhole messages.
   constructor(address _governor, address _relayer, uint16 _sourceChain, uint16 _targetChain)
-    WormholeSender(_relayer, _sourceChain, _targetChain)
+    WormholeBase(_relayer)
+    WormholeSender(_sourceChain, _targetChain)
   {
     GOVERNOR = IGovernor(_governor);
   }

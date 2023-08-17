@@ -5,12 +5,14 @@ import {Test} from "forge-std/Test.sol";
 import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
 
+import {WormholeBase} from "src/WormholeBase.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
 import {Constants} from "test/Constants.sol";
 
 contract WormholeSenderHarness is WormholeSender {
   constructor(address _relayer, uint16 _sourceChain, uint16 _targetChain)
-    WormholeSender(_relayer, _sourceChain, _targetChain)
+    WormholeBase(_relayer)
+    WormholeSender(_sourceChain, _targetChain)
   {}
 
   function wormholeRelayer() public view returns (IWormholeRelayer) {
@@ -27,7 +29,7 @@ contract WormholeSenderTest is Constants, WormholeRelayerBasicTest {
 
   function setUpSource() public override {
     wormholeSender =
-    new WormholeSender(L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    new WormholeSenderHarness(L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {}

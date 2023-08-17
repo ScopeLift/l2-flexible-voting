@@ -3,11 +3,12 @@ pragma solidity ^0.8.0;
 
 import {Test} from "forge-std/Test.sol";
 
+import {WormholeBase} from "src/WormholeBase.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {Constants} from "test/Constants.sol";
 
 contract WormholeReceiverTestHarness is WormholeReceiver {
-  constructor(address _relayer) WormholeReceiver(_relayer) {}
+  constructor(address _relayer) WormholeBase(_relayer) {}
   function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,
