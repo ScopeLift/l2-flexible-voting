@@ -19,20 +19,20 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   L1ERC20Bridge l1Erc20Bridge;
 
   constructor() {
-    setTestnetForkChains(5, 6);
+    setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpSource() public override {
     L1Block l1Block = new L1Block();
     l2Erc20 =
-    new L2ERC20( "Hello", "WRLD", wormholeCoreMumbai, address(l1Block), wormholePolygonId, wormholeFujiId);
+    new L2ERC20( "Hello", "WRLD", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {
     l1Erc20 = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     l1Erc20Bridge =
-    new L1ERC20Bridge(address(l1Erc20), wormholeCoreFuji, address(gov), wormholeFujiId, wormholePolygonId);
+    new L1ERC20Bridge(address(l1Erc20), L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
 }
 
@@ -40,7 +40,7 @@ contract Constructor is L2ERC20Test {
   function testFuzz_CorrectlySetsAllArgs() public {
     L1Block l1Block = new L1Block();
     L2ERC20 erc20 =
-    new L2ERC20( "Hello", "WRLD", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20, address(l1Block), wormholePolygonId, wormholeFujiId);
+    new L2ERC20( "Hello", "WRLD", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
     assertEq(address(l1Block), address(erc20.L1_BLOCK()));
   }
@@ -66,7 +66,7 @@ contract ReceiveWormholeMessages is L2ERC20Test {
     vm.assume(account != address(0)); // Cannot be zero address
     l2Erc20.initialize(address(l1Erc20Bridge));
 
-    vm.prank(wormholeCoreMumbai);
+    vm.prank(L2_CHAIN.wormholeRelayer);
     l2Erc20.receiveWormholeMessages(
       abi.encode(account, l1Amount), new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
@@ -114,12 +114,12 @@ contract L1Unlock is L2ERC20Test {
     vm.selectFork(sourceFork);
     l2Erc20.initialize(address(l1Erc20Bridge));
     vm.recordLogs();
-    vm.prank(wormholeCoreMumbai);
+    vm.prank(L2_CHAIN.wormholeRelayer);
     l2Erc20.receiveWormholeMessages(
       abi.encode(account, amount), new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
 
-    uint256 cost = l2Erc20.quoteDeliveryCost(wormholeFujiId);
+    uint256 cost = l2Erc20.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
     vm.deal(account, 1 ether);
     vm.prank(account);
     l2Erc20.l1Unlock{value: cost}(account, amount);
