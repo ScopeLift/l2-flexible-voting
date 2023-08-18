@@ -8,6 +8,7 @@ import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
+import {WormholeBase} from "src/WormholeBase.sol";
 
 /// @notice A contract to collect votes on L2 to be bridged to L1.
 contract L2VoteAggregator is WormholeSender {
@@ -83,7 +84,7 @@ contract L2VoteAggregator is WormholeSender {
     address _l1BlockAddress,
     uint16 _sourceChain,
     uint16 _targetChain
-  ) WormholeSender(_relayer, _sourceChain, _targetChain) {
+  ) WormholeBase(_relayer) WormholeSender(_sourceChain, _targetChain) {
     VOTING_TOKEN = ERC20Votes(_votingToken);
     GOVERNOR_METADATA = L2GovernorMetadata(_governorMetadata);
     L1_BLOCK = IL1Block(_l1BlockAddress);

@@ -4,20 +4,21 @@ pragma solidity ^0.8.0;
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {Vm, Test} from "forge-std/Test.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
+import {ERC20VotesComp} from
+  "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
 
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L1Block} from "src/L1Block.sol";
 import {L1VotePool} from "src/L1VotePool.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {WormholeBase} from "src/WormholeBase.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
-import {ERC20VotesComp} from
-  "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
 
 contract L1VotePoolHarness is L1VotePool, Test {
-  constructor(address _relayer, address _governor) L1VotePool(_relayer, _governor) {}
+  constructor(address _relayer, address _governor) WormholeBase(_relayer) L1VotePool(_governor) {}
 
   function receiveWormholeMessages(
     bytes memory payload,

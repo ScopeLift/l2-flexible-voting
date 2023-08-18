@@ -26,9 +26,8 @@ abstract contract L1VotePool is WormholeReceiver {
   /// @notice A mapping of proposal id to the proposal vote distribution.
   mapping(uint256 => ProposalVote) public proposalVotes;
 
-  /// @param _relayer The address of the Wormhole Relayer.
   /// @param _governor The address of the L1 Governor contract.
-  constructor(address _relayer, address _governor) WormholeReceiver(_relayer) {
+  constructor(address _governor) {
     governor = IGovernor(_governor);
   }
 

@@ -3,6 +3,7 @@ pragma solidity ^0.8.16;
 
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
+import {WormholeBase} from "src/WormholeBase.sol";
 
 /// @notice Receives L1 messages with proposal metadata.
 contract L2GovernorMetadata is WormholeReceiver {
@@ -16,7 +17,7 @@ contract L2GovernorMetadata is WormholeReceiver {
   mapping(uint256 => Proposal) _proposals;
 
   /// @param _relayer The address of the Wormhole relayer contract.
-  constructor(address _relayer) WormholeReceiver(_relayer) {}
+  constructor(address _relayer) WormholeBase(_relayer) {}
 
   /// @notice Receives a message from L1 and saves the proposal metadata.
   /// @param payload The payload that was sent to in the delivery request.
