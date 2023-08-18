@@ -302,7 +302,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
-	); 
+    );
     uint256 lastVotingBlock = aggregator.internalVotingPeriodEnd(proposalId);
 
     vm.roll(lastVotingBlock);
