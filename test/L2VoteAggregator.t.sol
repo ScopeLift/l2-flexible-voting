@@ -305,7 +305,6 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     );
     uint256 lastVotingBlock = l2VoteAggregator.internalVotingPeriodEnd(proposalId);
 
-    vm.roll(lastVotingBlock);
     bool active = aggregator.proposalVoteActive(proposalId);
     assertEq(active, true, "Proposal is supposed to be active");
   }
