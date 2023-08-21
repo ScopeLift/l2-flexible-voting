@@ -106,6 +106,13 @@ scopelint check
 
 This repository contains a series of Foundry scripts which can be used to deploy and exercise the contracts on testnets or real networks.
 
+* __Deploy.s.sol__ - Deploy L1 bridge and corresponding token to be minted on L2
+* __DeployFakeERC20.s.sol__ - Deploys an ERC20 on any chain. It is used to create a token for the L1 Governor when testing
+* __DeployGovernorMetadata.s.sol__ - Deploy the L2 GovernorMetadata contract along with the L1 GovernorMetadata bridge
+* __DeployVoteAggregator.s.sol__ - Deploys an L2 vote aggregator contract to test collecting votes on L2
+* __MintOnL2.s.sol__ - Calls the bridge on L1 which will call the mint function on the L2 token.
+* __SendProposalToL2.s.sol__ - Create an L1 and L2 governor metadata contract, and have the L1 contract pass a proposal to the L2 metadata contract.
+
 These scripts are meant for end-to-end testing on real networks. They should not be used as-is for production deployments.
 
 ## License
