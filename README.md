@@ -19,12 +19,39 @@ The current implementation was built with a grant from the Ethereum Foundation. 
 
 ## Architecture
 
-Our initial architecture is shown in the diagram below. This provides a high level overview of what we plan to build and is subject to change.
+This diagram represents the architecture of the current implementation.
 
-<div align="center">
-  <img width="900" src="./img/l2_flexible_voting_diagram.png" alt="Initial L2 Diagram">
-</div>
+```mermaid
+flowchart TD
+    subgraph L1
+    X(ERC20 Bridge)
+    E --------> |Fetches proposal metadata|G(Governor Metadata Bridge)
+    end
+    subgraph L2
+    A(Token holder) -->|votes| B(Vote Aggregator)
+    X -------> |Bridge Token| A
+    A --> |Withdraw token|X
+    B --> |Read proposal metadata|F(Governor Metadata)
+    G --> |Bridge proposal metadata| F
+    X ---> |Cast Vote| E(Governor)
+    B --> |Send message with vote distribution| X
+    end
+```
 
+Let's review each component individually and summarize its role in the system.
+
+
+#### On Layer 1
+
+* __Governor__ - The DAO's Flexible Voting compatible governance contract.
+* __Governor Metadata Bridge__ - Contract that reads governance proposal metadata from the Governor and sends it to L2.
+* __ERC20 Bridge__ - Contract where users lock their tokens to bridge them to L2. Also receives the aggregated votes from L2 and forwards them (via Flexible Voting extension) to the Governor.
+
+#### On Layer 2
+
+* __Bridged ERC20__ - The delegation-enabled ERC20 voting contract the user receives on L2.
+* __Governor Metadata__ - The contract that receives governance proposal metadata sent from L1 and makes it available to the vote aggregator.
+* __Vote Aggregator__ - The contract that collects the votes of holders of the bridged governance token on L2 and forwards the aggregated votes back to L1.
 
 ## Development
 
