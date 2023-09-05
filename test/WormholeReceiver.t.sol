@@ -28,7 +28,7 @@ contract OnlyRelayerTest is Test, Constants {
     receiver.modifierTest();
   }
 
-  function testFuzz_RevertsIf_NotCalledByWormholeRelayer(address relayer) public {
+  function testFuzz_RevertIf_NotCalledByWormholeRelayer(address relayer) public {
     vm.assume(relayer != address(this));
     WormholeReceiverTestHarness receiver = new WormholeReceiverTestHarness(relayer);
 
