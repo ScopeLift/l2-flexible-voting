@@ -69,10 +69,10 @@ git clone git@github.com:ScopeLift/l2-flexible-voting.git
 cd l2-flexible-voting
 ```
 
-Copy the `.env.template` file and populate it with values
+Copy the `env.sample` file and populate it with values
 
 ```bash
-cp sample .env
+cp env.sample .env
 # Open the .env file and add your values
 ```
 
