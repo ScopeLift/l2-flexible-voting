@@ -44,7 +44,7 @@ contract L1GovernorMetadataBridge is WormholeSender {
     L2_GOVERNOR_ADDRESS = l2GovernorMetadata;
   }
 
-  /// @notice Publishes a messages with the proposal id, start block and end block
+  /// @notice Publishes a messages with the proposal id, start block and end block.
   /// @param proposalId The id of the proposal to bridge.
   /// @return sequence An identifier for the message published to L2.
   function bridgeProposalMetadata(uint256 proposalId) public payable returns (uint256 sequence) {
