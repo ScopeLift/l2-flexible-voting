@@ -7,7 +7,8 @@ import {ERC20VotesComp} from
   "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
 
 import {L1Block} from "src/L1Block.sol";
-import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
+import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L1VotePool} from "src/WormholeL1VotePool.sol";
 import {L2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
@@ -269,7 +270,8 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
   function testFuzz_InternalVotingPeriod(uint256 proposalId, uint256 voteStart, uint256 voteEnd)
     public
   {
-    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    WormholeL2GovernorMetadata l2GovernorMetadata =
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
     L2VoteAggregator aggregator =
     new L2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
@@ -289,7 +291,8 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
   function testFuzz_ProposalVoteIsActive(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
     public
   {
-    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    WormholeL2GovernorMetadata l2GovernorMetadata =
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
     L2VoteAggregator aggregator =
     new L2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
@@ -315,7 +318,8 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     uint64 voteStart,
     uint64 voteEnd
   ) public {
-    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    WormholeL2GovernorMetadata l2GovernorMetadata =
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
     L2VoteAggregator aggregator =
     new L2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 

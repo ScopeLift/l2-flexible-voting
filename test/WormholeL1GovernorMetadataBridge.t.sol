@@ -8,7 +8,8 @@ import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRe
 
 import {L1GovernorMetadataBridge} from "src/WormholeL1GovernorMetadataBridge.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
-import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
+import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
@@ -16,7 +17,7 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
   GovernorMock governorMock;
   L1GovernorMetadataBridge l1GovernorMetadataBridge;
-  L2GovernorMetadata l2GovernorMetadata;
+  WormholeL2GovernorMetadata l2GovernorMetadata;
 
   constructor() {
     setForkChains(TESTNET, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
@@ -30,7 +31,7 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   }
 
   function setUpTarget() public override {
-    l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
   }
 }
 

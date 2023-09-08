@@ -3,21 +3,23 @@ pragma solidity ^0.8.0;
 
 import {Test} from "forge-std/Test.sol";
 
-import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
+import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {Constants} from "test/Constants.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
 contract L2GovernorMetadataTest is Constants {
-  L2GovernorMetadata l2GovernorMetadata;
+  WormholeL2GovernorMetadata l2GovernorMetadata;
 
   function setUp() public {
-    l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
   }
 }
 
 contract Constructor is L2GovernorMetadataTest {
   function testFuzz_CorrectlySetsAllArgs(address wormholeCore) public {
-    new L2GovernorMetadata(wormholeCore); // nothing to assert as there are no constructor args set
+    new WormholeL2GovernorMetadata(wormholeCore); // nothing to assert as there are no constructor
+      // args set
   }
 }
 

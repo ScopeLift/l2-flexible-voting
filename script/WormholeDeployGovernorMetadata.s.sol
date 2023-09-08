@@ -6,7 +6,7 @@ import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 
 import {L1GovernorMetadataBridge} from "src/WormholeL1GovernorMetadataBridge.sol";
-import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
+import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 import {Constants} from "test/Constants.sol";
@@ -29,7 +29,8 @@ contract DeployGovernorMetadata is Script, Constants {
 
     // Deploy the L2 metadata contract
     vm.broadcast();
-    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    WormholeL2GovernorMetadata l2GovernorMetadata =
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
 
     vm.createSelectFork(L1_CHAIN.rpcUrl);
 
