@@ -6,8 +6,8 @@ import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 
 import {L1Block} from "src/L1Block.sol";
-import {L1ERC20Bridge} from "src/L1ERC20Bridge.sol";
-import {L2ERC20} from "src/L2ERC20.sol";
+import {L1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
+import {L2ERC20} from "src/WormholeL2ERC20.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 

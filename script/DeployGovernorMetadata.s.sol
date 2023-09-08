@@ -5,8 +5,8 @@ import {Script, stdJson} from "forge-std/Script.sol";
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 
-import {L1GovernorMetadataBridge} from "src/L1GovernorMetadataBridge.sol";
-import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {L1GovernorMetadataBridge} from "src/WormholeL1GovernorMetadataBridge.sol";
+import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 import {Constants} from "test/Constants.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 
 contract GovernorMetadataMock is L2GovernorMetadata {
   constructor(address _core) L2GovernorMetadata(_core) {

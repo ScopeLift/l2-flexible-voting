@@ -4,8 +4,8 @@ pragma solidity ^0.8.16;
 import {Script, stdJson} from "forge-std/Script.sol";
 
 import {Constants} from "test/Constants.sol";
-import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
-import {L1VotePool} from "src/L1VotePool.sol";
+import {L2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
+import {L1VotePool} from "src/WormholeL1VotePool.sol";
 import {L1Block} from "src/L1Block.sol";
 
 /// @dev Reads the L2 governor metadata contract address and deploys an L2 vote aggregator contract

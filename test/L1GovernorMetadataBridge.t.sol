@@ -6,9 +6,9 @@ import {Governor, IGovernor} from "openzeppelin/governance/Governor.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
 
-import {L1GovernorMetadataBridge} from "src/L1GovernorMetadataBridge.sol";
+import {L1GovernorMetadataBridge} from "src/WormholeL1GovernorMetadataBridge.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
-import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 

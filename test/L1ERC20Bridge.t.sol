@@ -8,8 +8,8 @@ import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRe
 import {L1Block} from "src/L1Block.sol";
 import {IERC20Mint} from "src/interfaces/IERC20Mint.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
-import {L1ERC20Bridge} from "src/L1ERC20Bridge.sol";
-import {L2ERC20} from "src/L2ERC20.sol";
+import {L1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
+import {L2ERC20} from "src/WormholeL2ERC20.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 

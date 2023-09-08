@@ -5,7 +5,7 @@ import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {SafeCast} from "openzeppelin/utils/math/SafeCast.sol";
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
-import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
 import {WormholeBase} from "src/WormholeBase.sol";

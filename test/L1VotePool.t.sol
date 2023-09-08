@@ -9,9 +9,9 @@ import {ERC20VotesComp} from
 
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L1Block} from "src/L1Block.sol";
-import {L1VotePool} from "src/L1VotePool.sol";
-import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
-import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {L1VotePool} from "src/WormholeL1VotePool.sol";
+import {L2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
+import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
