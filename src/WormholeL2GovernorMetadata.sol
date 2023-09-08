@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 
-import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 
-/// @notice Receives L1 messages with proposal metadata.
+/// @notice Use Wormhole to receive L1 proposal metadata.
 contract WormholeL2GovernorMetadata is L2GovernorMetadata, WormholeReceiver {
   /// @param _relayer The address of the Wormhole relayer contract.
   constructor(address _relayer) WormholeBase(_relayer) L2GovernorMetadata() {}

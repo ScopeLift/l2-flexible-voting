@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 
-/// @notice Receives L1 messages with proposal metadata.
+/// @notice This contract is used by an L2VoteAggregator to store proposal metadata.
+/// It expects to receive proposal metadata from a valid L1 bridge source.
+/// Derived contracts are responsible for implementing the L1 bridging, plus validation of
+/// source.
 abstract contract L2GovernorMetadata {
-  /// @notice The L1 proposal metadata.
+  /// @notice Matches schema of L1 proposal metadata.
   struct Proposal {
     uint256 voteStart;
     uint256 voteEnd;
@@ -13,7 +16,6 @@ abstract contract L2GovernorMetadata {
   mapping(uint256 => Proposal) _proposals;
 
   /// @notice Add proposal to internal storage.
-  /// @dev We expect this method to be called by the L1GovernorMetadata bridge.
   /// @param proposalId The id of the proposal.
   /// @param voteStart The block number or timestamp when voting starts.
   /// @param voteEnd The block number or timestamp when voting ends.
