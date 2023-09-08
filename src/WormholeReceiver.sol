@@ -4,6 +4,7 @@ pragma solidity ^0.8.16;
 import {Ownable} from "openzeppelin/access/Ownable.sol";
 
 import {WormholeBase} from "src/WormholeBase.sol";
+import {console2} from "forge-std/console2.sol";
 
 abstract contract WormholeReceiver is Ownable, WormholeBase {
   /// @dev Function called with an address that isn't a relayer.
