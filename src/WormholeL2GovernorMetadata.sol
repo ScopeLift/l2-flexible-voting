@@ -4,20 +4,12 @@ pragma solidity ^0.8.16;
 import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
+import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 
 /// @notice Receives L1 messages with proposal metadata.
-contract L2GovernorMetadata is WormholeReceiver {
-  /// @notice The L1 proposal metadata.
-  struct Proposal {
-    uint256 voteStart;
-    uint256 voteEnd;
-  }
-
-  /// @notice The id of the proposal mapped to the proposal metadata.
-  mapping(uint256 => Proposal) _proposals;
-
+contract WormholeL2GovernorMetadata is L2GovernorMetadata, WormholeReceiver {
   /// @param _relayer The address of the Wormhole relayer contract.
-  constructor(address _relayer) WormholeBase(_relayer) {}
+  constructor(address _relayer) WormholeBase(_relayer) L2GovernorMetadata() {}
 
   /// @notice Receives a message from L1 and saves the proposal metadata.
   /// @param payload The payload that was sent to in the delivery request.
@@ -26,15 +18,10 @@ contract L2GovernorMetadata is WormholeReceiver {
     override
     onlyRelayer
   {
+    // TODO: verify message's sourceAddress (and sourceChain?)
     (uint256 proposalId, uint256 voteStart, uint256 voteEnd) =
       abi.decode(payload, (uint256, uint256, uint256));
 
-    _proposals[proposalId] = Proposal(voteStart, voteEnd);
-  }
-
-  /// @notice Returns the proposal metadata for a given proposal id.
-  /// @param proposalId The id of the proposal.
-  function getProposal(uint256 proposalId) public view virtual returns (Proposal memory) {
-    return _proposals[proposalId];
+    _addProposal(proposalId, voteStart, voteEnd);
   }
 }
