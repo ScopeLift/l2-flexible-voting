@@ -13,6 +13,9 @@ contract L2GovernorMetadataTest is Constants {
 
   function setUp() public {
     l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata.setRegisteredSender(
+      L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
+    );
   }
 }
 
@@ -32,7 +35,11 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
-      payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+      payload,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
     );
     L2GovernorMetadata.Proposal memory l2Proposal = l2GovernorMetadata.getProposal(proposalId);
     assertEq(l2Proposal.voteStart, l1VoteStart, "Vote start has been incorrectly set");
@@ -52,13 +59,21 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     bytes memory firstPayload = abi.encode(firstProposalId, firstVoteStart, firstVoteEnd);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
-      firstPayload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+      firstPayload,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
     );
 
     bytes memory secondPayload = abi.encode(secondProposalId, secondVoteStart, secondVoteEnd);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
-      secondPayload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+      secondPayload,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
     );
 
     L2GovernorMetadata.Proposal memory firstProposal =
@@ -95,6 +110,21 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
     l2GovernorMetadata.receiveWormholeMessages(
       payload, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+    );
+  }
+
+  function testFuzz_RevertIf_NotCalledByRegisteredSender(
+    uint256 proposalId,
+    uint256 l1VoteStart,
+    uint256 l1VoteEnd,
+    bytes32 caller
+  ) public {
+    bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd);
+    vm.assume(caller != MOCK_WORMHOLE_SERIALIZED_ADDRESS);
+    vm.prank(L2_CHAIN.wormholeRelayer);
+    vm.expectRevert(abi.encodeWithSelector(WormholeReceiver.UnregisteredSender.selector, caller));
+    l2GovernorMetadata.receiveWormholeMessages(
+      payload, new bytes[](0), caller, L1_CHAIN.wormholeChainId, bytes32("")
     );
   }
 }

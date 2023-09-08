@@ -7,6 +7,8 @@ contract Constants is Test {
   uint256 L1_CHAIN_ID = vm.envOr("L1_CHAIN_ID", uint256(43_113));
   uint256 L2_CHAIN_ID = vm.envOr("L2_CHAIN_ID", uint256(80_001));
   bool TESTNET = vm.envOr("TESTNET", true);
+  bytes32 MOCK_WORMHOLE_SERIALIZED_ADDRESS =
+    bytes32(uint256(uint160(0xEAC5F0d4A9a45E1f9FdD0e7e2882e9f60E301156)));
   Constants.ChainConfig L1_CHAIN;
   Constants.ChainConfig L2_CHAIN;
 

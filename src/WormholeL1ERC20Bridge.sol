@@ -76,17 +76,17 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
   function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,
-    bytes32 callerAddr,
+    bytes32 sourceAddress,
     uint16 sourceChain,
     bytes32 deliveryHash
-  ) public override onlyRelayer {
-    if (callerAddr == bytes32(uint256(uint160(L2_TOKEN_ADDRESS)))) {
+  ) public override onlyRelayer isRegisteredSender(sourceChain, sourceAddress) {
+    if (sourceAddress == bytes32(uint256(uint160(L2_TOKEN_ADDRESS)))) {
       return _receiveWithdrawalWormholeMessages(
-        payload, additionalVaas, callerAddr, sourceChain, deliveryHash
+        payload, additionalVaas, sourceAddress, sourceChain, deliveryHash
       );
     }
     return _receiveCastVoteWormholeMessages(
-      payload, additionalVaas, callerAddr, sourceChain, deliveryHash
+      payload, additionalVaas, sourceAddress, sourceChain, deliveryHash
     );
   }
 

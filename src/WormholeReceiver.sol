@@ -4,10 +4,18 @@ pragma solidity ^0.8.16;
 import {Ownable} from "openzeppelin/access/Ownable.sol";
 
 import {WormholeBase} from "src/WormholeBase.sol";
+import {console2} from "forge-std/console2.sol";
 
 abstract contract WormholeReceiver is Ownable, WormholeBase {
   /// @dev Function called with an address that isn't a relayer.
   error OnlyRelayerAllowed();
+
+  /// @dev Function was called with an unregistered sender address.
+  error UnregisteredSender(bytes32 wormholeAddress);
+
+  /// @dev A mapping of Wormhole chain ID to a mapping of wormhole serialized sender address to
+  /// existence boolean.
+  mapping(uint16 => mapping(bytes32 => bool)) public registeredSenders;
 
   /// @notice The function the wormhole relayer calls when the DeliveryProvider competes a delivery.
   /// @param payload The payload that was sent to in the delivery request.
@@ -23,8 +31,25 @@ abstract contract WormholeReceiver is Ownable, WormholeBase {
     bytes32 deliveryHash
   ) public virtual;
 
+  /// @dev Set a registered sender for a given chain.
+  /// @param sourceChain The Wormhole ID of the source chain to set the registered sender.
+  /// @param sourceAddress The source address for receiving a wormhole message.
+  function setRegisteredSender(uint16 sourceChain, bytes32 sourceAddress) public onlyOwner {
+    registeredSenders[sourceChain][sourceAddress] = true;
+  }
+
+  /// @dev Revert when the msg.sender is not the wormhole relayer.
   modifier onlyRelayer() {
     if (msg.sender != address(WORMHOLE_RELAYER)) revert OnlyRelayerAllowed();
+    _;
+  }
+
+  /// @dev Revert when a call is made by an unregistered address.
+  modifier isRegisteredSender(uint16 sourceChain, bytes32 sourceAddress) {
+    bool isRegistered = registeredSenders[sourceChain][sourceAddress];
+    if (!isRegistered || sourceAddress == bytes32(uint256(uint160(address(0))))) {
+      revert UnregisteredSender(sourceAddress);
+    }
     _;
   }
 }

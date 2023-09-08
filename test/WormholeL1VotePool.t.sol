@@ -27,13 +27,15 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
   function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,
-    bytes32 callerAddr,
+    bytes32 sourceAddress,
     uint16 sourceChain,
     bytes32 deliveryHash
-  ) public override onlyRelayer {
+  ) public override onlyRelayer isRegisteredSender(sourceChain, sourceAddress) {
     (uint256 proposalId,,,) = abi.decode(payload, (uint256, uint128, uint128, uint128));
     _jumpToActiveProposal(proposalId);
-    _receiveCastVoteWormholeMessages(payload, additionalVaas, callerAddr, sourceChain, deliveryHash);
+    _receiveCastVoteWormholeMessages(
+      payload, additionalVaas, sourceAddress, sourceChain, deliveryHash
+    );
   }
 
   function _createExampleProposal(address l1Erc20) internal returns (uint256) {
@@ -126,6 +128,9 @@ contract L1VotePoolTest is Constants, WormholeRelayerBasicTest {
     GovernorFlexibleVotingMock gov =
       new GovernorFlexibleVotingMock("Testington Dao", ERC20VotesComp(address(l1Erc20)));
     l1VotePool = new L1VotePoolHarness(L1_CHAIN.wormholeRelayer, address(gov));
+    l1VotePool.setRegisteredSender(
+      L2_CHAIN.wormholeChainId, bytes32(uint256(uint160(address(l2VoteAggregator))))
+    );
   }
 }
 
@@ -140,7 +145,7 @@ contract Constructor is L1VotePoolTest {
   }
 }
 
-contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
+contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
   function testFuzz_CorrectlyBridgeVoteAggregation(
     uint32 _l2Against,
     uint32 _l2InFavor,
@@ -252,8 +257,8 @@ contract _ReceiveCastvoteWormholeMessages is L1VotePoolTest {
     l1VotePool.receiveWormholeMessages(
       abi.encode(_proposalId, _l2NewAgainst, _l2NewInFavor, _l2NewAbstain),
       new bytes[](0),
-      bytes32(""),
-      uint16(0),
+      bytes32(uint256(uint160(address(l2VoteAggregator)))),
+      L2_CHAIN.wormholeChainId,
       bytes32("")
     );
   }

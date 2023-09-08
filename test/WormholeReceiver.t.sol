@@ -17,15 +17,28 @@ contract WormholeReceiverTestHarness is WormholeReceiver {
     bytes32 deliveryHash
   ) public virtual override {}
 
-  function modifierTest() public onlyRelayer {}
+  function onlyRelayerModifierFunc() public onlyRelayer {}
+
+  function isRegisteredSenderModifierFunc(uint16 sourceChain, bytes32 senderAddress)
+    public
+    isRegisteredSender(sourceChain, senderAddress)
+  {}
 }
 
-contract OnlyRelayerTest is Test, Constants {
-  function testFuzz_SucceedsIfCalledByWormholeRelayer(address relayer) public {
+contract WormholeReceiverTest is Test, Constants {
+  WormholeReceiverTestHarness receiver;
+
+  function setUp() public {
+    receiver = new WormholeReceiverTestHarness(L1_CHAIN.wormholeRelayer);
+  }
+}
+
+contract OnlyRelayer is Test, Constants {
+  function testFuzz_SucceedIfCalledByWormholeRelayer(address relayer) public {
     WormholeReceiverTestHarness receiver = new WormholeReceiverTestHarness(relayer);
 
     vm.prank(relayer);
-    receiver.modifierTest();
+    receiver.onlyRelayerModifierFunc();
   }
 
   function testFuzz_RevertIf_NotCalledByWormholeRelayer(address relayer) public {
@@ -33,6 +46,42 @@ contract OnlyRelayerTest is Test, Constants {
     WormholeReceiverTestHarness receiver = new WormholeReceiverTestHarness(relayer);
 
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
-    receiver.modifierTest();
+    receiver.onlyRelayerModifierFunc();
+  }
+}
+
+contract SetRegisteredSender is WormholeReceiverTest {
+  function testFuzz_SuccessfullySetRegisteredSender(uint16 sourceChain, address sender) public {
+    bytes32 senderBytes = bytes32(uint256(uint160(address(sender))));
+    receiver.setRegisteredSender(sourceChain, senderBytes);
+
+    assertEq(
+      receiver.registeredSenders(sourceChain, senderBytes),
+      true,
+      "Registered sender on source chain is not correct"
+    );
+  }
+}
+
+contract IsRegisteredSender is WormholeReceiverTest {
+  function testFuzz_SuccessfullyCallWithRegisteredSender(uint16 sourceChain, address sender) public {
+    vm.assume(sender != address(0));
+    bytes32 senderBytes = bytes32(uint256(uint160(address(sender))));
+    receiver.setRegisteredSender(sourceChain, senderBytes);
+    receiver.isRegisteredSenderModifierFunc(sourceChain, senderBytes);
+  }
+
+  function testFuzz_RevertIf_NotCalledByRegisteredSender(
+    uint16 sourceChain,
+    address sender,
+    address caller
+  ) public {
+    bytes32 senderBytes = bytes32(uint256(uint160(address(sender))));
+
+    vm.prank(caller);
+    vm.expectRevert(
+      abi.encodeWithSelector(WormholeReceiver.UnregisteredSender.selector, senderBytes)
+    );
+    receiver.isRegisteredSenderModifierFunc(sourceChain, senderBytes);
   }
 }
