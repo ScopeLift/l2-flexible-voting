@@ -61,8 +61,15 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
     bytes[] memory,
     bytes32 sourceAddress,
     uint16 sourceChain,
-    bytes32
-  ) public virtual override onlyRelayer isRegisteredSender(sourceChain, sourceAddress) {
+    bytes32 deliveryHash
+  )
+    public
+    virtual
+    override
+    onlyRelayer
+    isRegisteredSender(sourceChain, sourceAddress)
+    replayProtect(deliveryHash)
+  {
     (address account, uint256 amount) = abi.decode(payload, (address, uint256));
     _mint(account, amount);
   }
