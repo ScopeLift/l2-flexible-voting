@@ -119,6 +119,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     uint256 l1VoteEnd,
     bytes32 caller
   ) public {
+    vm.assume(caller != MOCK_WORMHOLE_SERIALIZED_ADDRESS);
     bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd);
     vm.assume(caller != MOCK_WORMHOLE_SERIALIZED_ADDRESS);
     vm.prank(L2_CHAIN.wormholeRelayer);
