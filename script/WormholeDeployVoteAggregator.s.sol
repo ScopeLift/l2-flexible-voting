@@ -4,7 +4,7 @@ pragma solidity ^0.8.16;
 import {Script, stdJson} from "forge-std/Script.sol";
 
 import {Constants} from "test/Constants.sol";
-import {L2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
+import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {L1VotePool} from "src/WormholeL1VotePool.sol";
 import {L1Block} from "src/L1Block.sol";
 
@@ -37,6 +37,6 @@ contract DeployVoteAggregator is Script, Constants {
 
     // Deploy the L2 vote aggregator
     vm.broadcast();
-    new L2VoteAggregator(deployedL2Token, L2_CHAIN.wormholeRelayer, l2GovernorMetadata, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregator(deployedL2Token, L2_CHAIN.wormholeRelayer, l2GovernorMetadata, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 }
