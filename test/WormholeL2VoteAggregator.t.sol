@@ -160,13 +160,39 @@ contract Constructor is L2VoteAggregatorTest {
 }
 
 contract CastVote is L2VoteAggregatorTest {
-  function testFuzz_RevertWhen_ProposalIsInactive(uint96 _amount, uint8 _support) public {
+  function testFuzz_RevertWhen_BeforeProposalStart(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 2);
     l2Erc20.mint(address(this), _amount);
 
     vm.roll(block.number - 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
     l2VoteAggregator.castVote(1, _support);
+  }
+
+  // timeToProposalEnd needs to be a uint32 because the L1Block interface has a max value of uint64
+  function testFuzz_RevertWhen_AfterCastWindow(
+    uint96 _amount,
+    uint8 _support,
+    uint256 proposalId,
+    uint32 timeToProposalEnd
+  ) public {
+    vm.assume(_support < 2);
+    vm.assume(_amount != 0);
+    vm.assume(proposalId != 1); // We have a hardcoded proposal that needs to be removed
+    vm.assume(l2VoteAggregator.CAST_VOTE_WINDOW() < timeToProposalEnd);
+
+    // In the setup we use a mock contract rather than the actual contract
+    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
+      address(l2VoteAggregator.GOVERNOR_METADATA())
+    ).createProposal(proposalId, timeToProposalEnd);
+
+    vm.roll(l2Proposal.voteStart - 1);
+    l2Erc20.mint(address(this), _amount);
+
+    // Our active check is inclusinve so we need to add 1
+    vm.roll(l2Proposal.voteStart + (timeToProposalEnd - l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
+    vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
+    l2VoteAggregator.castVote(proposalId, _support);
   }
 
   function testFuzz_RevertWhen_VoterHasAlreadyVoted(uint96 _amount, uint8 _support) public {
@@ -269,6 +295,9 @@ contract BridgeVote is L2VoteAggregatorTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _against, _inFavor, _abstain);
+    GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
+      _proposalId, 3000
+    );
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
 
     performDelivery();
