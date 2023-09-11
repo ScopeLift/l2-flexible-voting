@@ -3,12 +3,13 @@ pragma solidity ^0.8.0;
 
 import {SafeERC20} from "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
-import {L1VotePool} from "src/WormholeL1VotePool.sol";
+import {WormholeL1VotePool} from "src/WormholeL1VotePool.sol";
 
 import {WormholeSender} from "src/WormholeSender.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
+import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
-contract L1ERC20Bridge is L1VotePool, WormholeSender {
+contract L1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeReceiver {
   using SafeERC20 for ERC20Votes;
 
   /// @notice L1 token used for deposits and voting.
@@ -37,7 +38,7 @@ contract L1ERC20Bridge is L1VotePool, WormholeSender {
     address _governor,
     uint16 _sourceChain,
     uint16 _targetChain
-  ) WormholeBase(_relayer) L1VotePool(_governor) WormholeSender(_sourceChain, _targetChain) {
+  ) WormholeL1VotePool(_governor) WormholeBase(_relayer) WormholeSender(_sourceChain, _targetChain) {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
   }
 

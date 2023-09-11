@@ -10,17 +10,21 @@ import {L1Block} from "src/L1Block.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
-import {L1VotePool} from "src/WormholeL1VotePool.sol";
+import {WormholeL1VotePool} from "src/WormholeL1VotePool.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
+import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
 
-contract L1VotePoolHarness is L1VotePool, Test {
-  constructor(address _relayer, address _l1Governor) WormholeBase(_relayer) L1VotePool(_l1Governor) {}
+contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
+  constructor(address _relayer, address _l1Governor)
+    WormholeBase(_relayer)
+    WormholeL1VotePool(_l1Governor)
+  {}
 
   function receiveWormholeMessages(
     bytes memory payload,

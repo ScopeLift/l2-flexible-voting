@@ -8,16 +8,21 @@ import {ERC20VotesComp} from
 
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L1Block} from "src/L1Block.sol";
-import {L1VotePool} from "src/WormholeL1VotePool.sol";
+import {L1VotePool} from "src/L1VotePool.sol";
+import {WormholeL1VotePool} from "src/WormholeL1VotePool.sol";
 import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
+import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
-contract L1VotePoolHarness is L1VotePool, Test {
-  constructor(address _relayer, address _governor) WormholeBase(_relayer) L1VotePool(_governor) {}
+contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
+  constructor(address _relayer, address _governor)
+    WormholeBase(_relayer)
+    WormholeL1VotePool(_governor)
+  {}
 
   function receiveWormholeMessages(
     bytes memory payload,
