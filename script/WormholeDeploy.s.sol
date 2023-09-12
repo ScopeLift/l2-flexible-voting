@@ -6,8 +6,8 @@ import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 
 import {L1Block} from "src/L1Block.sol";
-import {L1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
-import {L2ERC20} from "src/WormholeL2ERC20.sol";
+import {WormholeL1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
+import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
@@ -30,8 +30,8 @@ contract Deploy is Script, Constants {
 
     // Create L2 ERC20Votes token
     vm.broadcast();
-    L2ERC20 l2Token =
-    new L2ERC20("Scopeapotomus", "SCOPE", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    WormholeL2ERC20 l2Token =
+    new WormholeL2ERC20("Scopeapotomus", "SCOPE", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
     vm.createSelectFork(L1_CHAIN.rpcUrl);
 
@@ -41,8 +41,8 @@ contract Deploy is Script, Constants {
 
     // Create L1 bridge that mints the L2 token
     vm.broadcast();
-    L1ERC20Bridge bridge =
-    new L1ERC20Bridge(deployedL1Token, L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    WormholeL1ERC20Bridge bridge =
+    new WormholeL1ERC20Bridge(deployedL1Token, L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
 
     // Tell the bridge its corresponding L2 token
     vm.broadcast();

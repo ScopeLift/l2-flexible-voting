@@ -2,14 +2,12 @@
 pragma solidity ^0.8.16;
 
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
-import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
-
 import {WormholeSender} from "src/WormholeSender.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
 
 /// @notice Handles sending proposal metadata such as proposal id, start date and end date from L1
 /// to L2.
-contract L1GovernorMetadataBridge is WormholeSender {
+contract WormholeL1GovernorMetadataBridge is WormholeSender {
   /// @notice The governor where proposals are fetched and bridged.
   IGovernor public immutable GOVERNOR;
 

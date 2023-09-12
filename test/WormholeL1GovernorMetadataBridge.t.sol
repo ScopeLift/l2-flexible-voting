@@ -6,7 +6,7 @@ import {Governor, IGovernor} from "openzeppelin/governance/Governor.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
 
-import {L1GovernorMetadataBridge} from "src/WormholeL1GovernorMetadataBridge.sol";
+import {WormholeL1GovernorMetadataBridge} from "src/WormholeL1GovernorMetadataBridge.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
@@ -16,7 +16,7 @@ import {GovernorMock} from "test/mock/GovernorMock.sol";
 contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
   GovernorMock governorMock;
-  L1GovernorMetadataBridge l1GovernorMetadataBridge;
+  WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge;
   WormholeL2GovernorMetadata l2GovernorMetadata;
 
   constructor() {
@@ -27,7 +27,7 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
     ERC20Votes erc20 = new FakeERC20("GovExample", "GOV");
     governorMock = new GovernorMock("Testington Dao", erc20);
     l1GovernorMetadataBridge =
-    new L1GovernorMetadataBridge(address(governorMock), L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    new WormholeL1GovernorMetadataBridge(address(governorMock), L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {
@@ -37,8 +37,8 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
 
 contract Constructor is Test, Constants {
   function testFork_CorrectlySetAllArgs(address governorMock) public {
-    L1GovernorMetadataBridge l1GovernorMetadataBridge =
-    new L1GovernorMetadataBridge(governorMock, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge =
+    new WormholeL1GovernorMetadataBridge(governorMock, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
     assertEq(
       address(l1GovernorMetadataBridge.GOVERNOR()), governorMock, "Governor is not set correctly"
     );
@@ -61,7 +61,7 @@ contract Initialize is L1GovernorMetadataBridgeTest {
   ) public {
     l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
 
-    vm.expectRevert(L1GovernorMetadataBridge.AlreadyInitialized.selector);
+    vm.expectRevert(WormholeL1GovernorMetadataBridge.AlreadyInitialized.selector);
     l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
   }
 }
@@ -104,7 +104,7 @@ contract BridgeProposalMetadata is L1GovernorMetadataBridgeTest {
     uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
     vm.recordLogs();
 
-    vm.expectRevert(L1GovernorMetadataBridge.InvalidProposalId.selector);
+    vm.expectRevert(WormholeL1GovernorMetadataBridge.InvalidProposalId.selector);
     l1GovernorMetadataBridge.bridgeProposalMetadata{value: cost}(_proposalId);
   }
 }

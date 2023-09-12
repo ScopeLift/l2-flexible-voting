@@ -4,16 +4,14 @@ pragma solidity ^0.8.16;
 import {ERC20} from "openzeppelin/token/ERC20/ERC20.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
-import {Ownable} from "openzeppelin/access/Ownable.sol";
 import {SafeCast} from "openzeppelin/utils/math/SafeCast.sol";
-import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
 
 import {IL1Block} from "src/interfaces/IL1Block.sol";
 
-contract L2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
+contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @notice The contract that handles fetching the L1 block on the L2.
   IL1Block public immutable L1_BLOCK;
 
