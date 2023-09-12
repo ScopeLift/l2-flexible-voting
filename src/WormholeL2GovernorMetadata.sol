@@ -17,7 +17,6 @@ contract WormholeL2GovernorMetadata is L2GovernorMetadata, WormholeReceiver {
     override
     onlyRelayer
   {
-    // TODO: verify message's sourceAddress (and sourceChain?)
     (uint256 proposalId, uint256 voteStart, uint256 voteEnd) =
       abi.decode(payload, (uint256, uint256, uint256));
 

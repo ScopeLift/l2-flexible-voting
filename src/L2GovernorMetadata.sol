@@ -2,9 +2,8 @@
 pragma solidity ^0.8.16;
 
 /// @notice This contract is used by an L2VoteAggregator to store proposal metadata.
-/// It expects to receive proposal metadata from a valid L1 bridge source.
-/// Derived contracts are responsible for implementing the L1 bridging, plus validation of
-/// source.
+/// It expects to receive proposal metadata from a valid L1 source.
+/// Derived contracts are responsible for processing and validating incoming metadata.
 abstract contract L2GovernorMetadata {
   /// @notice Matches schema of L1 proposal metadata.
   struct Proposal {
