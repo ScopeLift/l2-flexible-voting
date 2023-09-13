@@ -31,8 +31,7 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
   }
 
   /// @dev We need this function because when we call `performDelivery` the proposal is not active,
-  /// and it does
-  /// not seem configurable in
+  /// and it does not seem configurable in the wormhole sdk utilities.
   function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,
