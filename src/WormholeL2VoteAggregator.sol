@@ -22,7 +22,7 @@ contract WormholeL2VoteAggregator is WormholeSender, L2VoteAggregator {
     uint16 _sourceChain,
     uint16 _targetChain
   )
-    L2VoteAggregator(_votingToken, _governorMetadata, _l1BlockAddress, _sourceChain, _targetChain)
+    L2VoteAggregator(_votingToken, _governorMetadata, _l1BlockAddress)
     WormholeBase(_relayer)
     WormholeSender(_sourceChain, _targetChain)
   {}

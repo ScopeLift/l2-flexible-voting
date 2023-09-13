@@ -71,15 +71,7 @@ abstract contract L2VoteAggregator {
   /// @param _votingToken The token used to vote on proposals.
   /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
   /// @param _l1BlockAddress The address of the L1Block contract.
-  /// @param _sourceChain The chain sending the votes.
-  /// @param _targetChain The target chain to bridge the votes to.
-  constructor(
-    address _votingToken,
-    address _governorMetadata,
-    address _l1BlockAddress,
-    uint16 _sourceChain,
-    uint16 _targetChain
-  ) {
+  constructor(address _votingToken, address _governorMetadata, address _l1BlockAddress) {
     VOTING_TOKEN = ERC20Votes(_votingToken);
     GOVERNOR_METADATA = L2GovernorMetadata(_governorMetadata);
     L1_BLOCK = IL1Block(_l1BlockAddress);
