@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 
-import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
 
 abstract contract WormholeSender is WormholeBase {

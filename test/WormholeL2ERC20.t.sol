@@ -5,18 +5,18 @@ import {Test} from "forge-std/Test.sol";
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
 
-import {L1ERC20Bridge} from "src/L1ERC20Bridge.sol";
+import {WormholeL1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L1Block} from "src/L1Block.sol";
-import {L2ERC20} from "src/L2ERC20.sol";
+import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
 contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
-  L2ERC20 l2Erc20;
+  WormholeL2ERC20 l2Erc20;
   FakeERC20 l1Erc20;
-  L1ERC20Bridge l1Erc20Bridge;
+  WormholeL1ERC20Bridge l1Erc20Bridge;
 
   constructor() {
     setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
@@ -25,22 +25,22 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   function setUpSource() public override {
     L1Block l1Block = new L1Block();
     l2Erc20 =
-    new L2ERC20( "Hello", "WRLD", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2ERC20( "Hello", "WRLD", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {
     l1Erc20 = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     l1Erc20Bridge =
-    new L1ERC20Bridge(address(l1Erc20), L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    new WormholeL1ERC20Bridge(address(l1Erc20), L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
   }
 }
 
 contract Constructor is L2ERC20Test {
   function testFuzz_CorrectlySetsAllArgs() public {
     L1Block l1Block = new L1Block();
-    L2ERC20 erc20 =
-    new L2ERC20( "Hello", "WRLD", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    WormholeL2ERC20 erc20 =
+    new WormholeL2ERC20( "Hello", "WRLD", 0x0CBE91CF822c73C2315FB05100C2F714765d5c20, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
     assertEq(address(l1Block), address(erc20.L1_BLOCK()));
   }
@@ -56,7 +56,7 @@ contract Initialize is L2ERC20Test {
   function testFork_RevertWhen_AlreadyInitializedWithBridgeAddress(address l1Erc20Bridge) public {
     l2Erc20.initialize(l1Erc20Bridge);
 
-    vm.expectRevert(L2ERC20.AlreadyInitialized.selector);
+    vm.expectRevert(WormholeL2ERC20.AlreadyInitialized.selector);
     l2Erc20.initialize(l1Erc20Bridge);
   }
 }

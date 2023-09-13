@@ -3,15 +3,12 @@ pragma solidity ^0.8.16;
 
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {SafeCast} from "openzeppelin/utils/math/SafeCast.sol";
-import {IWormhole} from "wormhole/interfaces/IWormhole.sol";
 
-import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
-import {WormholeSender} from "src/WormholeSender.sol";
-import {WormholeBase} from "src/WormholeBase.sol";
 
 /// @notice A contract to collect votes on L2 to be bridged to L1.
-contract L2VoteAggregator is WormholeSender {
+abstract contract L2VoteAggregator {
   /// @notice The number of blocks before L2 voting closes. We close voting 1200 blocks before the
   /// end of the proposal to cast the vote.
   uint32 public constant CAST_VOTE_WINDOW = 1200;
@@ -72,19 +69,9 @@ contract L2VoteAggregator is WormholeSender {
   event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight);
 
   /// @param _votingToken The token used to vote on proposals.
-  /// @param _relayer The Wormhole generic relayer contract.
   /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
   /// @param _l1BlockAddress The address of the L1Block contract.
-  /// @param _sourceChain The chain sending the votes.
-  /// @param _targetChain The target chain to bridge the votes to.
-  constructor(
-    address _votingToken,
-    address _relayer,
-    address _governorMetadata,
-    address _l1BlockAddress,
-    uint16 _sourceChain,
-    uint16 _targetChain
-  ) WormholeBase(_relayer) WormholeSender(_sourceChain, _targetChain) {
+  constructor(address _votingToken, address _governorMetadata, address _l1BlockAddress) {
     VOTING_TOKEN = ERC20Votes(_votingToken);
     GOVERNOR_METADATA = L2GovernorMetadata(_governorMetadata);
     L1_BLOCK = IL1Block(_l1BlockAddress);
@@ -129,17 +116,10 @@ contract L2VoteAggregator is WormholeSender {
     ProposalVote memory vote = proposalVotes[proposalId];
 
     bytes memory proposalCalldata = abi.encode(proposalId, vote.against, vote.inFavor, vote.abstain);
-    uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
-    WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
-      TARGET_CHAIN,
-      L1_BRIDGE_ADDRESS,
-      proposalCalldata,
-      0, // no receiver value needed since we're just passing a message
-      GAS_LIMIT,
-      SOURCE_CHAIN,
-      msg.sender
-    );
+    _bridgeVote(proposalCalldata);
   }
+
+  function _bridgeVote(bytes memory proposalCalldata) internal virtual;
 
   /// @notice Method which returns the deadline for token holders to express their voting
   /// preferences to this Aggregator contract. Will always be before the Governor's corresponding

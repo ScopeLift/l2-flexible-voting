@@ -5,8 +5,8 @@ import {Script, stdJson} from "forge-std/Script.sol";
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 
-import {L1GovernorMetadataBridge} from "src/L1GovernorMetadataBridge.sol";
-import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
+import {WormholeL1GovernorMetadataBridge} from "src/WormholeL1GovernorMetadataBridge.sol";
+import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 import {Constants} from "test/Constants.sol";
@@ -29,7 +29,8 @@ contract DeployGovernorMetadata is Script, Constants {
 
     // Deploy the L2 metadata contract
     vm.broadcast();
-    L2GovernorMetadata l2GovernorMetadata = new L2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    WormholeL2GovernorMetadata l2GovernorMetadata =
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
 
     vm.createSelectFork(L1_CHAIN.rpcUrl);
 
@@ -39,8 +40,8 @@ contract DeployGovernorMetadata is Script, Constants {
 
     // Create L1 Governor metadata bridge
     vm.broadcast();
-    L1GovernorMetadataBridge bridge =
-    new L1GovernorMetadataBridge(address(gov), L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    WormholeL1GovernorMetadataBridge bridge =
+    new WormholeL1GovernorMetadataBridge(address(gov), L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
 
     // Add L2 metadata contract to L1 Governor metadata bridge
     vm.broadcast();
