@@ -181,9 +181,9 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     vm.selectFork(targetFork);
 
     l1Erc20.approve(
-      address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain)
+      address(l1VotePool), uint96(_l2Against) + _l2InFavor + _l2Abstain
     );
-    l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain));
+    l1Erc20.mint(address(this), uint96(_l2Against) + _l2InFavor + _l2Abstain);
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
@@ -227,10 +227,10 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     vm.selectFork(targetFork);
 
     l1Erc20.approve(
-      address(l1VotePool), uint96(_l2NewAgainst) + uint96(_l2NewInFavor) + uint96(_l2NewAbstain)
+      address(l1VotePool), uint96(_l2NewAgainst) + _l2NewInFavor + _l2NewAbstain
     );
     l1Erc20.mint(
-      address(this), uint96(_l2NewAgainst) + uint96(_l2NewInFavor) + uint96(_l2NewAbstain)
+      address(this), uint96(_l2NewAgainst) + _l2NewInFavor + _l2NewAbstain
     );
     l1Erc20.delegate(address(l1VotePool));
 
@@ -276,9 +276,9 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     vm.selectFork(targetFork);
 
     l1Erc20.approve(
-      address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain) + 1
+      address(l1VotePool), uint96(_l2Against) + _l2InFavor + _l2Abstain + 1
     );
-    l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain) + 1);
+    l1Erc20.mint(address(this), uint96(_l2Against) + _l2InFavor + _l2Abstain + 1);
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
@@ -312,9 +312,9 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     vm.selectFork(targetFork);
 
     l1Erc20.approve(
-      address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain)
+      address(l1VotePool), uint96(_l2Against) + _l2InFavor + _l2Abstain
     );
-    l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain));
+    l1Erc20.mint(address(this), uint96(_l2Against) + _l2InFavor + _l2Abstain);
     l1Erc20.delegate(address(l1VotePool));
 
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
@@ -346,9 +346,9 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     vm.selectFork(targetFork);
 
     l1Erc20.approve(
-      address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain)
+      address(l1VotePool), uint96(_l2Against) + _l2InFavor + _l2Abstain
     );
-    l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain));
+    l1Erc20.mint(address(this), uint96(_l2Against) + _l2InFavor + _l2Abstain);
     l1Erc20.delegate(address(l1VotePool));
 
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
