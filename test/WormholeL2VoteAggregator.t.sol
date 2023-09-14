@@ -188,7 +188,7 @@ contract CastVote is L2VoteAggregatorTest {
     vm.roll(l2Proposal.voteStart - 1);
     l2Erc20.mint(address(this), _amount);
 
-    // Our active check is inclusinve so we need to add 1
+    // Our active check is inclusive so we need to add 1
     vm.roll(l2Proposal.voteStart + (timeToProposalEnd - l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
     l2VoteAggregator.castVote(proposalId, _support);
