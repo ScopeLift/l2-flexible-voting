@@ -172,7 +172,7 @@ contract CastVote is L2VoteAggregatorTest {
     vm.assume(_support < 2);
     vm.assume(_amount != 0);
     vm.assume(l2VoteAggregator.CAST_VOTE_WINDOW() < timeToProposalEnd);
-	timeToProposalEnd = uint64(bound(timeToProposalEnd, 0, type(uint64).max - block.number));
+    timeToProposalEnd = uint64(bound(timeToProposalEnd, 0, type(uint64).max - block.number));
 
     // In the setup we use a mock contract rather than the actual contract
     L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
