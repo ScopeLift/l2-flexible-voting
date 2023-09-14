@@ -24,7 +24,7 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
     WormholeL1VotePool(_governor)
   {}
 
-  function _jumpToActiveProposal(uint256 proposalId) public {
+  function _jumpToActiveProposal(uint256 proposalId) internal {
     uint256 _deadline = governor.proposalDeadline(proposalId);
     vm.roll(_deadline - 1);
   }
