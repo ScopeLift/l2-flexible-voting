@@ -17,7 +17,6 @@ import {Constants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
-import {console2} from "forge-std/console2.sol";
 
 contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
   constructor(address _relayer, address _governor)
@@ -318,7 +317,6 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     l1Erc20.delegate(address(l1VotePool));
 
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
-    console2.logString("vote created");
 
     vm.prank(L1_CHAIN.wormholeRelayer);
     vm.expectRevert("Governor: vote not currently active");
@@ -352,11 +350,8 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain));
     l1Erc20.delegate(address(l1VotePool));
 
-    console2.logString("Proposal block");
-    console2.logUint(block.number);
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
     l1VotePool._jumpToProposalEnd(_proposalId, 1);
-    console2.logString("vote created");
 
     vm.prank(L1_CHAIN.wormholeRelayer);
     vm.expectRevert("Governor: vote not currently active");
