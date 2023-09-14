@@ -51,8 +51,10 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
     bytes32 sourceAddress,
     uint16 sourceChain,
     bytes32 deliveryHash,
-    bool active
+    bool jump
   ) public onlyRelayer isRegisteredSender(sourceChain, sourceAddress) {
+    (uint256 proposalId,,,) = abi.decode(payload, (uint256, uint128, uint128, uint128));
+     if (jump)  _jumpToActiveProposal(proposalId);
     _receiveCastVoteWormholeMessages(
       payload, additionalVaas, sourceAddress, sourceChain, deliveryHash
     );
@@ -282,7 +284,6 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     vm.roll(block.number + 1); // To checkpoint erc20 mint
     uint256 _proposalId =
       l1VotePool.createProposalVote(address(l1Erc20), _l2Against, _l2InFavor, _l2Abstain);
-    l1VotePool._jumpToActiveProposal(_proposalId);
 
     vm.prank(L1_CHAIN.wormholeRelayer);
     vm.expectRevert(L1VotePool.InvalidProposalVote.selector);
@@ -292,7 +293,7 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
       bytes32(uint256(uint160(address(l2VoteAggregator)))),
       L2_CHAIN.wormholeChainId,
       bytes32(""),
-      false
+      true
     );
   }
 
