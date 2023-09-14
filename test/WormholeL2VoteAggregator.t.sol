@@ -171,8 +171,7 @@ contract CastVote is L2VoteAggregatorTest {
   ) public {
     vm.assume(_support < 2);
     vm.assume(_amount != 0);
-    vm.assume(l2VoteAggregator.CAST_VOTE_WINDOW() < timeToProposalEnd);
-    timeToProposalEnd = uint64(bound(timeToProposalEnd, 0, type(uint64).max - block.number));
+    timeToProposalEnd = uint64(bound(timeToProposalEnd, l2VoteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number));
 
     // In the setup we use a mock contract rather than the actual contract
     L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
@@ -317,7 +316,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     L2VoteAggregator aggregator =
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
-    vm.assume(voteEnd > aggregator.CAST_VOTE_WINDOW());
+	voteEnd = bound(voteEnd, aggregator.CAST_VOTE_WINDOW(), type(uint256).max);
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
 
     vm.prank(L2_CHAIN.wormholeRelayer);
@@ -345,11 +344,9 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     L2VoteAggregator aggregator =
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
-    vm.assume(voteStart < block.number);
-    vm.assume(voteEnd > aggregator.CAST_VOTE_WINDOW());
-    vm.assume(voteEnd - aggregator.CAST_VOTE_WINDOW() > block.number); // Proposal must have a
-      // voting block before the cast
-      // period ends
+	voteStart = uint64(bound(voteStart, 0, block.number));
+	voteEnd = uint64(bound(voteEnd, block.number + aggregator.CAST_VOTE_WINDOW(), type(uint64).max));
+
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
