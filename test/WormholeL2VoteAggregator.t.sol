@@ -169,17 +169,16 @@ contract CastVote is L2VoteAggregatorTest {
     l2VoteAggregator.castVote(1, _support);
   }
 
-  // timeToProposalEnd needs to be a uint32 because the L1Block interface has a max value of uint64
   function testFuzz_RevertWhen_AfterCastWindow(
     uint96 _amount,
     uint8 _support,
     uint256 proposalId,
-    uint32 timeToProposalEnd
+    uint64 timeToProposalEnd
   ) public {
     vm.assume(_support < 2);
     vm.assume(_amount != 0);
-    vm.assume(proposalId != 1); // We have a hardcoded proposal that needs to be removed
     vm.assume(l2VoteAggregator.CAST_VOTE_WINDOW() < timeToProposalEnd);
+	timeToProposalEnd = uint64(bound(timeToProposalEnd, 0, type(uint64).max - block.number));
 
     // In the setup we use a mock contract rather than the actual contract
     L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
