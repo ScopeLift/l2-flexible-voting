@@ -305,9 +305,9 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     uint32 _l2NewInFavor,
     uint32 _l2NewAbstain
   ) public {
-    vm.assume(_l2NewAgainst < _l2Against);
-    vm.assume(_l2NewInFavor < _l2InFavor);
-    vm.assume(_l2NewAbstain < _l2Abstain);
+	_l2NewAgainst = uint32(bound(_l2NewAgainst, 0, _l2Against));
+	_l2NewInFavor = uint32(bound(_l2NewInFavor, 0, _l2InFavor));
+	_l2NewAbstain = uint32(bound(_l2NewAbstain, 0, _l2Abstain));
 
     vm.selectFork(targetFork);
 
@@ -339,9 +339,10 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     uint32 _l2NewInFavor,
     uint32 _l2NewAbstain
   ) public {
-    vm.assume(_l2NewAgainst < _l2Against);
-    vm.assume(_l2NewInFavor < _l2InFavor);
-    vm.assume(_l2NewAbstain < _l2Abstain);
+	_l2NewAgainst = uint32(bound(_l2NewAgainst, 0, _l2Against));
+	_l2NewInFavor = uint32(bound(_l2NewInFavor, 0, _l2InFavor));
+	_l2NewAbstain = uint32(bound(_l2NewAbstain, 0, _l2Abstain));
+
 
     vm.selectFork(targetFork);
 
