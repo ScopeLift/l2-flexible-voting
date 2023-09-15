@@ -91,7 +91,7 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
       withdrawCalldata,
       0, // no receiver value needed since we're just passing a message
       GAS_LIMIT,
-      SOURCE_CHAIN,
+      REFUND_CHAIN,
       msg.sender
     );
   }
