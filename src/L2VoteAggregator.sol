@@ -60,7 +60,8 @@ abstract contract L2VoteAggregator {
 
   /// @notice A mapping of proposal to a mapping of voter address to boolean indicating whether a
   /// voter has voted or not.
-  mapping(uint256 proposalId => mapping(address voterAddress => bool hasVoted)) private _proposalVotersHasVoted;
+  mapping(uint256 proposalId => mapping(address voterAddress => bool hasVoted)) private
+    _proposalVotersHasVoted;
 
   /// @notice A mapping of proposal id to proposal vote totals.
   mapping(uint256 proposalId => ProposalVote proposalVote) public proposalVotes;
