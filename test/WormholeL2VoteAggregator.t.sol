@@ -162,11 +162,12 @@ contract Constructor is L2VoteAggregatorTest {
 contract CastVote is L2VoteAggregatorTest {
   function testFuzz_RevertWhen_BeforeProposalStart(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 2);
+
     l2Erc20.mint(address(this), _amount);
 
     vm.roll(block.number - 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
-    l2VoteAggregator.castVote(1, _support);
+    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType(_support));
   }
 
   function testFuzz_RevertWhen_AfterCastWindow(
@@ -175,11 +176,11 @@ contract CastVote is L2VoteAggregatorTest {
     uint256 _proposalId,
     uint64 _proposalDuration
   ) public {
-    vm.assume(_support < 2);
     vm.assume(_amount != 0);
+    vm.assume(_support < 2);
+
     _proposalDuration = uint64(
       bound(_proposalDuration, l2VoteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number)
-    );
 
     // In the setup we use a mock contract rather than the actual contract
     L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
@@ -192,22 +193,23 @@ contract CastVote is L2VoteAggregatorTest {
     // Our active check is inclusive so we need to add 1
     vm.roll(l2Proposal.voteStart + (_proposalDuration - l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
-    l2VoteAggregator.castVote(_proposalId, _support);
+    l2VoteAggregator.castVote(proposalId, L2VoteAggregator.VoteType(_support));
   }
 
   function testFuzz_RevertWhen_VoterHasAlreadyVoted(uint96 _amount, uint8 _support) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 2);
+
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
       l2VoteAggregator.GOVERNOR_METADATA().getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
-    l2VoteAggregator.castVote(1, _support);
+    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType(_support));
 
     vm.expectRevert(L2VoteAggregator.AlreadyVoted.selector);
-    l2VoteAggregator.castVote(1, _support);
+    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType(_support));
   }
 
   function testFuzz_RevertWhen_VoterHasNoWeight(uint96 _amount, uint8 _support) public {
@@ -219,7 +221,7 @@ contract CastVote is L2VoteAggregatorTest {
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
-    l2VoteAggregator.castVote(1, _support);
+    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType(_support));
   }
 
   function testFuzz_CorrectlyCastVoteAgainst(uint96 _amount) public {
@@ -233,7 +235,7 @@ contract CastVote is L2VoteAggregatorTest {
     vm.expectEmit();
     emit VoteCast(address(this), 1, 0, _amount);
 
-    l2VoteAggregator.castVote(1, 0);
+    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType.Against);
     (uint256 against,,) = l2VoteAggregator.proposalVotes(1);
     assertEq(against, _amount, "Votes against is not correct");
   }
@@ -249,7 +251,7 @@ contract CastVote is L2VoteAggregatorTest {
     vm.expectEmit();
     emit VoteCast(address(this), 1, 2, _amount);
 
-    l2VoteAggregator.castVote(1, 2);
+    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType.Abstain);
     (,, uint256 abstain) = l2VoteAggregator.proposalVotes(1);
 
     assertEq(abstain, _amount, "Votes abstain is not correct");
@@ -266,7 +268,7 @@ contract CastVote is L2VoteAggregatorTest {
     vm.expectEmit();
     emit VoteCast(address(this), 1, 1, _amount);
 
-    l2VoteAggregator.castVote(1, 1);
+    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType.For);
     (, uint256 inFavor,) = l2VoteAggregator.proposalVotes(1);
 
     assertEq(inFavor, _amount, "Votes inFavor is not correct");
