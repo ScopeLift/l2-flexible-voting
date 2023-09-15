@@ -30,7 +30,7 @@ contract DeployGovernorMetadata is Script, Constants {
     // Deploy the L2 metadata contract
     vm.broadcast();
     WormholeL2GovernorMetadata l2GovernorMetadata =
-      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
 
     vm.createSelectFork(L1_CHAIN.rpcUrl);
 

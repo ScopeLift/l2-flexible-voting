@@ -31,7 +31,7 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   }
 
   function setUpTarget() public override {
-    l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, bytes32(uint256(uint160(address(l1GovernorMetadataBridge))))
     );

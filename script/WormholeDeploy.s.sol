@@ -31,7 +31,7 @@ contract Deploy is Script, Constants {
     // Create L2 ERC20Votes token
     vm.broadcast();
     WormholeL2ERC20 l2Token =
-    new WormholeL2ERC20("Scopeapotomus", "SCOPE", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2ERC20("Scopeapotomus", "SCOPE", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, msg.sender);
 
     vm.createSelectFork(L1_CHAIN.rpcUrl);
 
@@ -42,7 +42,7 @@ contract Deploy is Script, Constants {
     // Create L1 bridge that mints the L2 token
     vm.broadcast();
     WormholeL1ERC20Bridge bridge =
-    new WormholeL1ERC20Bridge(deployedL1Token, L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    new WormholeL1ERC20Bridge(deployedL1Token, L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, msg.sender);
 
     // Tell the bridge its corresponding L2 token
     vm.broadcast();

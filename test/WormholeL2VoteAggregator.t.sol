@@ -24,6 +24,7 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
   constructor(address _relayer, address _l1Governor)
     WormholeBase(_relayer)
     WormholeL1VotePool(_l1Governor)
+    WormholeReceiver(msg.sender)
   {}
 
   function receiveWormholeMessages(
@@ -321,7 +322,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     public
   {
     WormholeL2GovernorMetadata l2GovernorMetadata =
-      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
     );
@@ -350,10 +351,11 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     public
   {
     WormholeL2GovernorMetadata l2GovernorMetadata =
-      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
     );
+
     L2VoteAggregator aggregator =
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
@@ -382,7 +384,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     uint64 voteEnd
   ) public {
     WormholeL2GovernorMetadata l2GovernorMetadata =
-      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
     );

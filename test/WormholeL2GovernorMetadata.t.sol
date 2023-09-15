@@ -12,7 +12,7 @@ contract L2GovernorMetadataTest is Constants {
   WormholeL2GovernorMetadata l2GovernorMetadata;
 
   function setUp() public {
-    l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
     );
@@ -21,7 +21,8 @@ contract L2GovernorMetadataTest is Constants {
 
 contract Constructor is L2GovernorMetadataTest {
   function testFuzz_CorrectlySetsAllArgs(address wormholeCore) public {
-    new WormholeL2GovernorMetadata(wormholeCore); // nothing to assert as there are no constructor
+    new WormholeL2GovernorMetadata(wormholeCore, msg.sender); // nothing to assert as there are no
+      // constructor
       // args set
   }
 }

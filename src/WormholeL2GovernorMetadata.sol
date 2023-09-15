@@ -8,7 +8,11 @@ import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 /// @notice Use Wormhole to receive L1 proposal metadata.
 contract WormholeL2GovernorMetadata is L2GovernorMetadata, WormholeReceiver {
   /// @param _relayer The address of thWormholeL2GovernorMetadata contract.
-  constructor(address _relayer) WormholeBase(_relayer) L2GovernorMetadata() {}
+  constructor(address _relayer, address _owner)
+    WormholeBase(_relayer)
+    WormholeReceiver(_owner)
+    L2GovernorMetadata()
+  {}
 
   /// @notice Receives a message from L1 and saves the proposal metadata.
   /// @param payload The payload that was sent to in the delivery request.

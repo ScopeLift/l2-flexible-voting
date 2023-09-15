@@ -22,6 +22,7 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
   constructor(address _relayer, address _governor)
     WormholeBase(_relayer)
     WormholeL1VotePool(_governor)
+    WormholeReceiver(msg.sender)
   {}
 
   function _jumpToActiveProposal(uint256 proposalId) internal {
