@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.20;
 
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {WormholeBase} from "src/WormholeBase.sol";

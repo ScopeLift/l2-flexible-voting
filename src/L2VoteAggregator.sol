@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.20;
 
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {SafeCast} from "openzeppelin/utils/math/SafeCast.sol";
@@ -60,10 +60,10 @@ abstract contract L2VoteAggregator {
 
   /// @notice A mapping of proposal to a mapping of voter address to boolean indicating whether a
   /// voter has voted or not.
-  mapping(uint256 => mapping(address => bool)) private _proposalVotersHasVoted;
+  mapping(uint256 proposalId => mapping(address voterAddress => bool hasVoted)) private _proposalVotersHasVoted;
 
   /// @notice A mapping of proposal id to proposal vote totals.
-  mapping(uint256 => ProposalVote) public proposalVotes;
+  mapping(uint256 proposalId => ProposalVote proposalVote) public proposalVotes;
 
   /// @dev Emitted when a vote is cast on L2.
   event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight);

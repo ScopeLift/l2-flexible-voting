@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.20;
 
 import {SafeCast} from "openzeppelin/utils/math/SafeCast.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
