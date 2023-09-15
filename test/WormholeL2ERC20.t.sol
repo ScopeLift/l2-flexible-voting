@@ -104,6 +104,7 @@ contract ReceiveWormholeMessages is L2ERC20Test {
   ) public {
     bytes memory payload = abi.encode(account, amount);
     vm.prank(L2_CHAIN.wormholeRelayer);
+    vm.assume(caller != MOCK_WORMHOLE_SERIALIZED_ADDRESS);
     vm.expectRevert(abi.encodeWithSelector(WormholeReceiver.UnregisteredSender.selector, caller));
     l2Erc20.receiveWormholeMessages(
       payload, new bytes[](0), caller, L1_CHAIN.wormholeChainId, bytes32("")
