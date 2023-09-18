@@ -162,12 +162,13 @@ contract Constructor is L2VoteAggregatorTest {
 contract CastVote is L2VoteAggregatorTest {
   function testFuzz_RevertWhen_BeforeProposalStart(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 3);
+	L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     l2Erc20.mint(address(this), _amount);
 
     vm.roll(block.number - 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
-    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType(_support));
+    l2VoteAggregator.castVote(1, _voteType);
   }
 
   function testFuzz_RevertWhen_AfterCastWindow(
@@ -178,6 +179,7 @@ contract CastVote is L2VoteAggregatorTest {
   ) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
+	L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     _proposalDuration = uint64(
       bound(_proposalDuration, l2VoteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number)
@@ -194,12 +196,13 @@ contract CastVote is L2VoteAggregatorTest {
     // Our active check is inclusive so we need to add 1
     vm.roll(l2Proposal.voteStart + (_proposalDuration - l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
-    l2VoteAggregator.castVote(_proposalId, L2VoteAggregator.VoteType(_support));
+    l2VoteAggregator.castVote(_proposalId, L2VoteAggregator.VoteType(_voteType));
   }
 
   function testFuzz_RevertWhen_VoterHasAlreadyVoted(uint96 _amount, uint8 _support) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
+	L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -207,22 +210,23 @@ contract CastVote is L2VoteAggregatorTest {
       l2VoteAggregator.GOVERNOR_METADATA().getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
-    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType(_support));
+    l2VoteAggregator.castVote(1, _voteType);
 
     vm.expectRevert(L2VoteAggregator.AlreadyVoted.selector);
-    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType(_support));
+    l2VoteAggregator.castVote(1, _voteType);
   }
 
   function testFuzz_RevertWhen_VoterHasNoWeight(uint96 _amount, uint8 _support) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
+	L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
       l2VoteAggregator.GOVERNOR_METADATA().getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
-    l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType(_support));
+    l2VoteAggregator.castVote(1, _voteType);
   }
 
   function testFuzz_CorrectlyCastVoteAgainst(uint96 _amount) public {
