@@ -29,13 +29,15 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
   function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,
-    bytes32 callerAddr,
+    bytes32 sourceAddress,
     uint16 sourceChain,
     bytes32 deliveryHash
-  ) public override onlyRelayer {
+  ) public override onlyRelayer isRegisteredSender(sourceChain, sourceAddress) {
     (uint256 proposalId,,,) = abi.decode(payload, (uint256, uint128, uint128, uint128));
     _jumpToActiveProposal(proposalId);
-    _receiveCastVoteWormholeMessages(payload, additionalVaas, callerAddr, sourceChain, deliveryHash);
+    _receiveCastVoteWormholeMessages(
+      payload, additionalVaas, sourceAddress, sourceChain, deliveryHash
+    );
   }
 
   function _createExampleProposal(address l1Erc20) internal returns (uint256) {
@@ -112,6 +114,7 @@ contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
   L1VotePoolHarness l1VotePool;
   GovernorMetadataMock l2GovernorMetadata;
   L1Block l1Block;
+  bytes32 l2VoteAggregatorWormholeAddress;
 
   event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight);
 
@@ -132,6 +135,8 @@ contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
     GovernorFlexibleVotingMock l1Governor =
       new GovernorFlexibleVotingMock("Testington Dao", ERC20VotesComp(address(l1Erc20)));
     l1VotePool = new L1VotePoolHarness(L1_CHAIN.wormholeRelayer, address(l1Governor));
+    l2VoteAggregatorWormholeAddress = bytes32(uint256(uint160(address(l2VoteAggregator))));
+    l1VotePool.setRegisteredSender(L2_CHAIN.wormholeChainId, l2VoteAggregatorWormholeAddress);
   }
 }
 
@@ -277,6 +282,10 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
   {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata.setRegisteredSender(
+      L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
+    );
+
     L2VoteAggregator aggregator =
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
@@ -285,7 +294,11 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
 
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
-      proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+      proposalCalldata,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
     );
     uint256 lastVotingBlock = aggregator.internalVotingPeriodEnd(proposalId);
     assertEq(lastVotingBlock, voteEnd - aggregator.CAST_VOTE_WINDOW());
@@ -298,6 +311,9 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
   {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata.setRegisteredSender(
+      L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
+    );
     L2VoteAggregator aggregator =
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
@@ -309,7 +325,11 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
-      proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+      proposalCalldata,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
     );
     uint256 lastVotingBlock = aggregator.internalVotingPeriodEnd(proposalId);
 
@@ -325,6 +345,10 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
   ) public {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata.setRegisteredSender(
+      L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
+    );
+
     L2VoteAggregator aggregator =
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
@@ -337,7 +361,11 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
-      proposalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
+      proposalCalldata,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
     );
 
     bool active = aggregator.proposalVoteActive(proposalId);

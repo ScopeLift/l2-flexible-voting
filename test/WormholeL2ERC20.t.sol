@@ -26,6 +26,7 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
     L1Block l1Block = new L1Block();
     l2Erc20 =
     new WormholeL2ERC20( "Hello", "WRLD", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    l2Erc20.setRegisteredSender(L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS);
   }
 
   function setUpTarget() public override {
@@ -33,6 +34,9 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
     IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     l1Erc20Bridge =
     new WormholeL1ERC20Bridge(address(l1Erc20), L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    l1Erc20Bridge.setRegisteredSender(
+      L2_CHAIN.wormholeChainId, bytes32(uint256(uint160(address(l2Erc20))))
+    );
   }
 }
 
@@ -68,7 +72,11 @@ contract ReceiveWormholeMessages is L2ERC20Test {
 
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2Erc20.receiveWormholeMessages(
-      abi.encode(account, l1Amount), new bytes[](0), bytes32(""), uint16(0), bytes32("")
+      abi.encode(account, l1Amount),
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
     );
     uint256 l2Amount = l2Erc20.balanceOf(account);
     assertEq(l2Amount, l1Amount, "Amount after receive is incorrect");
@@ -80,7 +88,26 @@ contract ReceiveWormholeMessages is L2ERC20Test {
     bytes memory payload = abi.encode(account, amount);
     vm.prank(caller);
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
-    l2Erc20.receiveWormholeMessages(payload, new bytes[](0), bytes32(""), uint16(0), bytes32(""));
+    l2Erc20.receiveWormholeMessages(
+      payload,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
+    );
+  }
+
+  function testFuzz_RevertIf_NotCalledByRegisteredSender(
+    address account,
+    uint256 amount,
+    bytes32 caller
+  ) public {
+    bytes memory payload = abi.encode(account, amount);
+    vm.prank(L2_CHAIN.wormholeRelayer);
+    vm.expectRevert(abi.encodeWithSelector(WormholeReceiver.UnregisteredSender.selector, caller));
+    l2Erc20.receiveWormholeMessages(
+      payload, new bytes[](0), caller, L1_CHAIN.wormholeChainId, bytes32("")
+    );
   }
 }
 
@@ -116,7 +143,11 @@ contract L1Unlock is L2ERC20Test {
     vm.recordLogs();
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2Erc20.receiveWormholeMessages(
-      abi.encode(account, amount), new bytes[](0), bytes32(""), uint16(0), bytes32("")
+      abi.encode(account, amount),
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
     );
 
     uint256 cost = l2Erc20.quoteDeliveryCost(L1_CHAIN.wormholeChainId);

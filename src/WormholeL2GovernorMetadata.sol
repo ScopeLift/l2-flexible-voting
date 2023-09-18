@@ -12,11 +12,13 @@ contract WormholeL2GovernorMetadata is L2GovernorMetadata, WormholeReceiver {
 
   /// @notice Receives a message from L1 and saves the proposal metadata.
   /// @param payload The payload that was sent to in the delivery request.
-  function receiveWormholeMessages(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32)
-    public
-    override
-    onlyRelayer
-  {
+  function receiveWormholeMessages(
+    bytes memory payload,
+    bytes[] memory,
+    bytes32 sourceAddress,
+    uint16 sourceChain,
+    bytes32
+  ) public override onlyRelayer isRegisteredSender(sourceChain, sourceAddress) {
     (uint256 proposalId, uint256 voteStart, uint256 voteEnd) =
       abi.decode(payload, (uint256, uint256, uint256));
 
