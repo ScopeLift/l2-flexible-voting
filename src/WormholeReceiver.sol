@@ -12,9 +12,15 @@ abstract contract WormholeReceiver is Ownable, WormholeBase {
   /// @dev Function was called with an unregistered sender address.
   error UnregisteredSender(bytes32 wormholeAddress);
 
+  /// @dev Message was already delivered by Wormhole.
+  error AlreadyProcessed(bytes32 deliveryHash);
+
   /// @dev A mapping of Wormhole chain ID to a mapping of wormhole serialized sender address to
   /// existence boolean.
   mapping(uint16 => mapping(bytes32 => bool)) public registeredSenders;
+
+  /// @dev A mapping of message hash to a boolean indicating delivery.
+  mapping(bytes32 => bool) public seenDeliveryVaaHashes;
 
   /// @notice The function the wormhole relayer calls when the DeliveryProvider competes a delivery.
   /// @param payload The payload that was sent to in the delivery request.
@@ -49,6 +55,12 @@ abstract contract WormholeReceiver is Ownable, WormholeBase {
     if (!isRegistered || sourceAddress == bytes32(uint256(uint160(address(0))))) {
       revert UnregisteredSender(sourceAddress);
     }
+    _;
+  }
+
+  modifier replayProtect(bytes32 deliveryHash) {
+    if (seenDeliveryVaaHashes[deliveryHash]) revert AlreadyProcessed(deliveryHash);
+    seenDeliveryVaaHashes[deliveryHash] = true;
     _;
   }
 }

@@ -23,6 +23,8 @@ contract WormholeReceiverTestHarness is WormholeReceiver {
     public
     isRegisteredSender(sourceChain, senderAddress)
   {}
+
+  function exposed_replayProtect(bytes32 deliveryHash) public replayProtect(deliveryHash) {}
 }
 
 contract WormholeReceiverTest is Test, Constants {
@@ -83,5 +85,16 @@ contract IsRegisteredSender is WormholeReceiverTest {
       abi.encodeWithSelector(WormholeReceiver.UnregisteredSender.selector, senderBytes)
     );
     receiver.isRegisteredSenderModifierFunc(sourceChain, senderBytes);
+  }
+}
+
+contract ReplayProtect is WormholeReceiverTest {
+  function testFuzz_RevertIf_SameDeliveryHashIsUsedTwice(bytes32 deliveryHash) public {
+    receiver.exposed_replayProtect(deliveryHash);
+
+    vm.expectRevert(
+      abi.encodeWithSelector(WormholeReceiver.AlreadyProcessed.selector, deliveryHash)
+    );
+    receiver.exposed_replayProtect(deliveryHash);
   }
 }

@@ -32,7 +32,13 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
     bytes32 sourceAddress,
     uint16 sourceChain,
     bytes32 deliveryHash
-  ) public override onlyRelayer isRegisteredSender(sourceChain, sourceAddress) {
+  )
+    public
+    override
+    onlyRelayer
+    isRegisteredSender(sourceChain, sourceAddress)
+    replayProtect(deliveryHash)
+  {
     (uint256 proposalId,,,) = abi.decode(payload, (uint256, uint128, uint128, uint128));
     _jumpToActiveProposal(proposalId);
     _receiveCastVoteWormholeMessages(

@@ -73,7 +73,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
       new bytes[](0),
       MOCK_WORMHOLE_SERIALIZED_ADDRESS,
       L1_CHAIN.wormholeChainId,
-      bytes32("")
+      bytes32("0x1")
     );
 
     L2GovernorMetadata.Proposal memory firstProposal =
