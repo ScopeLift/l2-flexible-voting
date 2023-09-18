@@ -31,8 +31,8 @@ contract WormholeL1VotePool is L1VotePool {
     _castVote(
       proposalId,
       ProposalVote(
-        forVotes - existingProposalVote.forVotes,
         againstVotes - existingProposalVote.againstVotes,
+        forVotes - existingProposalVote.forVotes,
         abstainVotes - existingProposalVote.abstainVotes
       )
     );

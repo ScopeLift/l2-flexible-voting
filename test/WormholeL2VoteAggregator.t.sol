@@ -162,7 +162,7 @@ contract Constructor is L2VoteAggregatorTest {
 contract CastVote is L2VoteAggregatorTest {
   function testFuzz_RevertWhen_BeforeProposalStart(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 3);
-	L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
+    L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -179,7 +179,7 @@ contract CastVote is L2VoteAggregatorTest {
   ) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
-	L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
+    L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     _proposalDuration = uint64(
       bound(_proposalDuration, l2VoteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number)
@@ -202,7 +202,7 @@ contract CastVote is L2VoteAggregatorTest {
   function testFuzz_RevertWhen_VoterHasAlreadyVoted(uint96 _amount, uint8 _support) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
-	L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
+    L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -219,7 +219,7 @@ contract CastVote is L2VoteAggregatorTest {
   function testFuzz_RevertWhen_VoterHasNoWeight(uint96 _amount, uint8 _support) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
-	L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
+    L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
       l2VoteAggregator.GOVERNOR_METADATA().getProposal(1);

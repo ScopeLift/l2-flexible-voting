@@ -203,7 +203,6 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
 
     vm.selectFork(targetFork);
     (uint128 l1Against, uint128 l1For, uint128 l1Abstain) = l1VotePool.proposalVotes(_proposalId);
-    l1VotePool.proposalVotes(_proposalId);
 
     assertEq(l1Against, _l2Against, "Against value was not bridged correctly");
     assertEq(l1For, _l2For, "For value was not bridged correctly");
