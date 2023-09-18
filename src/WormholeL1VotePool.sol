@@ -16,24 +16,24 @@ contract WormholeL1VotePool is L1VotePool {
     uint16,
     bytes32
   ) internal {
-    (uint256 proposalId, uint128 against, uint128 inFavor, uint128 abstain) =
+    (uint256 proposalId, uint128 againstVotes, uint128 forVotes, uint128 abstainVotes) =
       abi.decode(payload, (uint256, uint128, uint128, uint128));
 
     ProposalVote memory existingProposalVote = proposalVotes[proposalId];
     if (
-      existingProposalVote.against > against || existingProposalVote.inFavor > inFavor
-        || existingProposalVote.abstain > abstain
+      existingProposalVote.againstVotes > againstVotes || existingProposalVote.forVotes > forVotes
+        || existingProposalVote.abstainVotes > abstainVotes
     ) revert InvalidProposalVote();
 
     // Save proposal vote
-    proposalVotes[proposalId] = ProposalVote(inFavor, against, abstain);
+    proposalVotes[proposalId] = ProposalVote(againstVotes, forVotes, abstainVotes);
 
     _castVote(
       proposalId,
       ProposalVote(
-        inFavor - existingProposalVote.inFavor,
-        against - existingProposalVote.against,
-        abstain - existingProposalVote.abstain
+        forVotes - existingProposalVote.forVotes,
+        againstVotes - existingProposalVote.againstVotes,
+        abstainVotes - existingProposalVote.abstainVotes
       )
     );
   }

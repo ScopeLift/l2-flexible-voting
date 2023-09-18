@@ -65,14 +65,14 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
     return _proposalId;
   }
 
-  function createProposalVote(address l1Erc20, uint128 _against, uint128 _inFavor, uint128 _abstain)
+  function createProposalVote(address l1Erc20, uint128 _against, uint128 _for, uint128 _abstain)
     public
     returns (uint256)
   {
     uint256 _proposalId = _createExampleProposal(l1Erc20);
     _jumpToActiveProposal(_proposalId);
     _receiveCastVoteWormholeMessages(
-      abi.encode(_proposalId, _against, _inFavor, _abstain),
+      abi.encode(_proposalId, _against, _for, _abstain),
       new bytes[](0),
       bytes32(""),
       uint16(0),
@@ -106,10 +106,10 @@ contract L2VoteAggregatorHarness is WormholeL2VoteAggregator {
     )
   {}
 
-  function createProposalVote(uint256 proposalId, uint128 against, uint128 inFavor, uint128 abstain)
+  function createProposalVote(uint256 _proposalId, uint128 _against, uint128 _for, uint128 _abstain)
     public
   {
-    proposalVotes[proposalId] = ProposalVote(against, inFavor, abstain);
+    proposalVotes[_proposalId] = ProposalVote(_against, _for, _abstain);
   }
 }
 
@@ -181,6 +181,7 @@ contract CastVote is L2VoteAggregatorTest {
 
     _proposalDuration = uint64(
       bound(_proposalDuration, l2VoteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number)
+    );
 
     // In the setup we use a mock contract rather than the actual contract
     L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
@@ -193,7 +194,7 @@ contract CastVote is L2VoteAggregatorTest {
     // Our active check is inclusive so we need to add 1
     vm.roll(l2Proposal.voteStart + (_proposalDuration - l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
-    l2VoteAggregator.castVote(proposalId, L2VoteAggregator.VoteType(_support));
+    l2VoteAggregator.castVote(_proposalId, L2VoteAggregator.VoteType(_support));
   }
 
   function testFuzz_RevertWhen_VoterHasAlreadyVoted(uint96 _amount, uint8 _support) public {
@@ -257,7 +258,7 @@ contract CastVote is L2VoteAggregatorTest {
     assertEq(abstain, _amount, "Votes abstain is not correct");
   }
 
-  function testFuzz_CorrectlyCastVoteInFavor(uint96 _amount) public {
+  function testFuzz_CorrectlyCastVoteFor(uint96 _amount) public {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
 
@@ -269,22 +270,20 @@ contract CastVote is L2VoteAggregatorTest {
     emit VoteCast(address(this), 1, 1, _amount);
 
     l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType.For);
-    (, uint256 inFavor,) = l2VoteAggregator.proposalVotes(1);
+    (, uint256 forVotes,) = l2VoteAggregator.proposalVotes(1);
 
-    assertEq(inFavor, _amount, "Votes inFavor is not correct");
+    assertEq(forVotes, _amount, "Votes for is not correct");
   }
 }
 
 contract BridgeVote is L2VoteAggregatorTest {
-  function testFuzz_CorrectlyBridgeVoteAggregation(
-    uint32 _against,
-    uint32 _inFavor,
-    uint32 _abstain
-  ) public {
+  function testFuzz_CorrectlyBridgeVoteAggregation(uint32 _against, uint32 _for, uint32 _abstain)
+    public
+  {
     vm.selectFork(targetFork);
 
-    l1Erc20.approve(address(l1VotePool), uint96(_against) + uint96(_inFavor) + uint96(_abstain));
-    l1Erc20.mint(address(this), uint96(_against) + uint96(_inFavor) + uint96(_abstain));
+    l1Erc20.approve(address(l1VotePool), uint96(_against) + uint96(_for) + uint96(_abstain));
+    l1Erc20.mint(address(this), uint96(_against) + uint96(_for) + uint96(_abstain));
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
@@ -296,7 +295,7 @@ contract BridgeVote is L2VoteAggregatorTest {
     vm.recordLogs();
     vm.deal(address(this), 10 ether);
 
-    l2VoteAggregator.createProposalVote(_proposalId, _against, _inFavor, _abstain);
+    l2VoteAggregator.createProposalVote(_proposalId, _against, _for, _abstain);
     GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
       _proposalId, 3000
     );
@@ -305,10 +304,10 @@ contract BridgeVote is L2VoteAggregatorTest {
     performDelivery();
 
     vm.selectFork(targetFork);
-    (uint128 inFavor, uint128 against, uint128 abstain) = l1VotePool.proposalVotes(_proposalId);
+    (uint128 against, uint128 forVotes, uint128 abstain) = l1VotePool.proposalVotes(_proposalId);
 
     assertEq(against, _against, "Against value was not bridged correctly");
-    assertEq(inFavor, _inFavor, "inFavor value was not bridged correctly");
+    assertEq(forVotes, _for, "For value was not bridged correctly");
     assertEq(abstain, _abstain, "abstain value was not bridged correctly");
   }
 }
