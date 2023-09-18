@@ -12,32 +12,7 @@ import {WormholeL1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
 import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
-
-contract L1ERC20BridgeHarness is WormholeL1ERC20Bridge {
-  constructor(
-    address _l1Token,
-    address _l1Relayer,
-    address _l1Governor,
-    uint16 _sourceId,
-    uint16 _targetId
-  ) WormholeL1ERC20Bridge(_l1Token, _l1Relayer, _l1Governor, _sourceId, _targetId) {}
-
-  function withdraw(address account, uint256 amount) public {
-    _withdraw(account, amount);
-  }
-
-  function receiveWithdrawalWormholeMessages(
-    bytes memory payload,
-    bytes[] memory additionalVaas,
-    bytes32 callerAddr,
-    uint16 sourceChain,
-    bytes32 deliveryHash
-  ) public {
-    _receiveWithdrawalWormholeMessages(
-      payload, additionalVaas, callerAddr, sourceChain, deliveryHash
-    );
-  }
-}
+import {L1ERC20BridgeHarness} from "test/harness/L1ERC20BridgeHarness.sol";
 
 contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
   WormholeL2ERC20 l2Erc20;
@@ -135,7 +110,7 @@ contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
     assertEq(l1Erc20.balanceOf(address(l1Erc20Bridge)), _amount, "The Bridge balance is incorrect");
 
     bytes memory withdrawalCalldata = abi.encode(_account, _amount);
-    l1Erc20Bridge.receiveWithdrawalWormholeMessages(
+    l1Erc20Bridge.exposed_receiveWithdrawalWormholeMessages(
       withdrawalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
     assertEq(l1Erc20.balanceOf(address(_account)), _amount, "The account balance is incorrect");
@@ -161,7 +136,7 @@ contract _Withdraw is Test, Constants {
     l1Erc20.transfer(address(l1Erc20Bridge), _amount);
     assertEq(l1Erc20.balanceOf(address(l1Erc20Bridge)), _amount, "The Bridge balance is incorrect");
 
-    l1Erc20Bridge.withdraw(_account, _amount);
+    l1Erc20Bridge.exposed_withdraw(_account, _amount);
     assertEq(l1Erc20.balanceOf(address(_account)), _amount, "The account balance is incorrect");
   }
 }

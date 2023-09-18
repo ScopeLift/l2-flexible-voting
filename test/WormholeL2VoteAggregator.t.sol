@@ -10,108 +10,14 @@ import {L1Block} from "src/L1Block.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
-import {WormholeL1VotePool} from "src/WormholeL1VotePool.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
-import {WormholeBase} from "src/WormholeBase.sol";
-import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
-
-contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
-  constructor(address _relayer, address _l1Governor)
-    WormholeBase(_relayer)
-    WormholeL1VotePool(_l1Governor)
-  {}
-
-  function receiveWormholeMessages(
-    bytes memory payload,
-    bytes[] memory additionalVaas,
-    bytes32 sourceAddress,
-    uint16 sourceChain,
-    bytes32 deliveryHash
-  )
-    public
-    override
-    onlyRelayer
-    isRegisteredSender(sourceChain, sourceAddress)
-    replayProtect(deliveryHash)
-  {
-    (uint256 proposalId,,,) = abi.decode(payload, (uint256, uint128, uint128, uint128));
-    _jumpToActiveProposal(proposalId);
-    _receiveCastVoteWormholeMessages(
-      payload, additionalVaas, sourceAddress, sourceChain, deliveryHash
-    );
-  }
-
-  function _createExampleProposal(address l1Erc20) internal returns (uint256) {
-    bytes memory proposalCalldata = abi.encode(FakeERC20.mint.selector, address(governor), 100_000);
-
-    address[] memory targets = new address[](1);
-    bytes[] memory calldatas = new bytes[](1);
-    uint256[] memory values = new uint256[](1);
-
-    targets[0] = address(l1Erc20);
-    calldatas[0] = proposalCalldata;
-    values[0] = 0;
-
-    return governor.propose(targets, values, calldatas, "Proposal: To inflate token");
-  }
-
-  function createProposalVote(address l1Erc20) public returns (uint256) {
-    uint256 _proposalId = _createExampleProposal(l1Erc20);
-    return _proposalId;
-  }
-
-  function createProposalVote(address l1Erc20, uint128 _against, uint128 _inFavor, uint128 _abstain)
-    public
-    returns (uint256)
-  {
-    uint256 _proposalId = _createExampleProposal(l1Erc20);
-    _jumpToActiveProposal(_proposalId);
-    _receiveCastVoteWormholeMessages(
-      abi.encode(_proposalId, _against, _inFavor, _abstain),
-      new bytes[](0),
-      bytes32(""),
-      uint16(0),
-      bytes32("")
-    );
-    return _proposalId;
-  }
-
-  function _jumpToActiveProposal(uint256 proposalId) internal {
-    uint256 _deadline = governor.proposalDeadline(proposalId);
-    vm.roll(_deadline - 1);
-  }
-}
-
-contract L2VoteAggregatorHarness is WormholeL2VoteAggregator {
-  constructor(
-    address _votingToken,
-    address _relayer,
-    address _governorMetadata,
-    address _l1BlockAddress,
-    uint16 _sourceChain,
-    uint16 _targetChain
-  )
-    WormholeL2VoteAggregator(
-      _votingToken,
-      _relayer,
-      _governorMetadata,
-      _l1BlockAddress,
-      _sourceChain,
-      _targetChain
-    )
-  {}
-
-  function createProposalVote(uint256 proposalId, uint128 against, uint128 inFavor, uint128 abstain)
-    public
-  {
-    proposalVotes[proposalId] = ProposalVote(against, inFavor, abstain);
-  }
-}
+import {L1VotePoolHarness} from "test/harness/L1VotePoolHarness.sol";
+import {L2VoteAggregatorHarness} from "test/harness/L2VoteAggregatorHarness.sol";
 
 contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
   FakeERC20 l2Erc20;
@@ -141,8 +47,8 @@ contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
     GovernorFlexibleVotingMock l1Governor =
       new GovernorFlexibleVotingMock("Testington Dao", ERC20VotesComp(address(l1Erc20)));
     l1VotePool = new L1VotePoolHarness(L1_CHAIN.wormholeRelayer, address(l1Governor));
-    l2VoteAggregatorWormholeAddress = bytes32(uint256(uint160(address(l2VoteAggregator))));
-    l1VotePool.setRegisteredSender(L2_CHAIN.wormholeChainId, l2VoteAggregatorWormholeAddress);
+    // l2VoteAggregatorWormholeAddress = bytes32(uint256(uint160(address(l2VoteAggregator))));
+    // l1VotePool.setRegisteredSender(L2_CHAIN.wormholeChainId, l2VoteAggregatorWormholeAddress);
   }
 }
 
