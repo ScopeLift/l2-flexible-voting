@@ -172,27 +172,27 @@ contract CastVote is L2VoteAggregatorTest {
   function testFuzz_RevertWhen_AfterCastWindow(
     uint96 _amount,
     uint8 _support,
-    uint256 proposalId,
-    uint64 timeToProposalEnd
+    uint256 _proposalId,
+    uint64 _proposalDuration
   ) public {
     vm.assume(_support < 2);
     vm.assume(_amount != 0);
-    timeToProposalEnd = uint64(
-      bound(timeToProposalEnd, l2VoteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number)
+    _proposalDuration = uint64(
+      bound(_proposalDuration, l2VoteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number)
     );
 
     // In the setup we use a mock contract rather than the actual contract
     L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
       address(l2VoteAggregator.GOVERNOR_METADATA())
-    ).createProposal(proposalId, timeToProposalEnd);
+    ).createProposal(_proposalId, _proposalDuration);
 
     vm.roll(l2Proposal.voteStart - 1);
     l2Erc20.mint(address(this), _amount);
 
     // Our active check is inclusive so we need to add 1
-    vm.roll(l2Proposal.voteStart + (timeToProposalEnd - l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
+    vm.roll(l2Proposal.voteStart + (_proposalDuration - l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
-    l2VoteAggregator.castVote(proposalId, _support);
+    l2VoteAggregator.castVote(_proposalId, _support);
   }
 
   function testFuzz_RevertWhen_VoterHasAlreadyVoted(uint96 _amount, uint8 _support) public {
