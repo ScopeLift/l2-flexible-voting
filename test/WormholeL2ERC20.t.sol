@@ -89,6 +89,7 @@ contract ReceiveWormholeMessages is L2ERC20Test {
   function testFuzz_RevertIf_NotCalledByRelayer(address account, uint256 amount, address caller)
     public
   {
+    vm.assume(caller != L2_CHAIN.wormholeRelayer);
     bytes memory payload = abi.encode(account, amount);
     vm.prank(caller);
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);

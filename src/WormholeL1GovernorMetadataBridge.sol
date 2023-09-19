@@ -50,7 +50,9 @@ contract WormholeL1GovernorMetadataBridge is WormholeSender {
     if (voteStart == 0) revert InvalidProposalId();
     uint256 voteEnd = GOVERNOR.proposalDeadline(proposalId);
 
-    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
+    bool _cancelled = GOVERNOR.state(proposalId) == IGovernor.ProposalState.Canceled;
+
+    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, _cancelled);
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
     return WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,

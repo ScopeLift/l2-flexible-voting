@@ -9,6 +9,7 @@ abstract contract L2GovernorMetadata {
   struct Proposal {
     uint256 voteStart;
     uint256 voteEnd;
+    bool isCancelled;
   }
 
   /// @notice The id of the proposal mapped to the proposal metadata.
@@ -18,8 +19,11 @@ abstract contract L2GovernorMetadata {
   /// @param proposalId The id of the proposal.
   /// @param voteStart The block number or timestamp when voting starts.
   /// @param voteEnd The block number or timestamp when voting ends.
-  function _addProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd) internal virtual {
-    _proposals[proposalId] = Proposal(voteStart, voteEnd);
+  function _addProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCancelled)
+    internal
+    virtual
+  {
+    _proposals[proposalId] = Proposal(voteStart, voteEnd, isCancelled);
   }
 
   /// @notice Returns the proposal metadata for a given proposal id.
