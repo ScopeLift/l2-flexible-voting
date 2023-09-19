@@ -388,7 +388,6 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     l1Erc20.delegate(address(l1VotePool));
 
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
-    IGovernor.ProposalState state = l1VotePool.governor().state(_proposalId);
     l1VotePool.cancel(address(l1Erc20));
     l1VotePool._jumpToActiveProposal(_proposalId);
 

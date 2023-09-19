@@ -59,4 +59,8 @@ contract Constants is Test {
       rpcUrl: vm.envOr("AVALANCHE_FUJI_RPC_URL", string("https://rpc.ankr.com/polygon_mumbai"))
     });
   }
+
+  function _toWormholeAddress(address addr) internal pure returns (bytes32) {
+    return bytes32(uint256(uint160(addr)));
+  }
 }
