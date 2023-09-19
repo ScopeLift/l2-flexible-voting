@@ -26,6 +26,16 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
   /// @dev Contract is already initialized with an L2 token.
   error AlreadyInitialized();
 
+  event TokenBridged(
+    address indexed sender,
+    address indexed targetAddress,
+    uint256 indexed targetChain,
+    uint256 amount,
+    address targetToken
+  );
+
+  event Withdraw(address indexed account, uint256 amount);
+
   /// @param l1TokenAddress The address of the L1 token.
   /// @param _relayer The adddress of the Wormhole relayer.
   /// @param _governor The address of the L1 governor.
@@ -67,6 +77,8 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
 
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
     require(cost == msg.value, "Cost should be msg.Value");
+
+    emit TokenBridged(msg.sender, account, TARGET_CHAIN, amount, L2_TOKEN_ADDRESS);
 
     return WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,
@@ -114,5 +126,6 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
   /// @param amount The amount of tokens to withdraw.
   function _withdraw(address account, uint256 amount) internal {
     L1_TOKEN.safeTransfer(account, amount);
+    emit Withdraw(account, amount);
   }
 }

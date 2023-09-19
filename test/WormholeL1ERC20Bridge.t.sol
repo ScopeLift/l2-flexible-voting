@@ -4,9 +4,7 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
-
 import {L1Block} from "src/L1Block.sol";
-import {IERC20Mint} from "src/interfaces/IERC20Mint.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {WormholeL1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
 import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
@@ -44,6 +42,14 @@ contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
   WormholeL2ERC20 l2Erc20;
   FakeERC20 l1Erc20;
   WormholeL1ERC20Bridge l1Erc20Bridge;
+
+  event TokenBridged(
+    address indexed sender,
+    address indexed targetAddress,
+    uint256 indexed targetChain,
+    uint256 amount,
+    address targetToken
+  );
 
   constructor() {
     setForkChains(TESTNET, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
@@ -102,6 +108,10 @@ contract Deposit is L1ERC20BridgeTest {
     l1Erc20.mint(address(this), _amount);
     vm.deal(address(this), 1 ether);
 
+    vm.expectEmit();
+    emit TokenBridged(
+      address(this), address(this), L2_CHAIN.wormholeChainId, _amount, address(l2Erc20)
+    );
     l1Erc20Bridge.deposit{value: cost}(address(this), _amount);
 
     uint256 bridgeBalance = l1Erc20.balanceOf(address(l1Erc20Bridge));
@@ -117,6 +127,8 @@ contract Deposit is L1ERC20BridgeTest {
 
 // Top level receive is tested in WormholeL2ERC20 and L2VoteAggregator
 contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
+  event Withdraw(address indexed account, uint256 amount);
+
   function testForkFuzz_CorrectlyReceiveWithdrawal(
     address _account,
     uint96 _amount,
@@ -137,6 +149,8 @@ contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
     assertEq(l1Erc20.balanceOf(address(l1Erc20Bridge)), _amount, "The Bridge balance is incorrect");
 
     bytes memory withdrawalCalldata = abi.encode(_account, _amount);
+    vm.expectEmit();
+    emit Withdraw(_account, _amount);
     l1Erc20Bridge.receiveWithdrawalWormholeMessages(
       withdrawalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
@@ -145,6 +159,8 @@ contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
 }
 
 contract _Withdraw is Test, Constants {
+  event Withdraw(address indexed account, uint256 amount);
+
   function testFork_CorrectlyWithdrawTokens(address _account, uint96 _amount, address l2Erc20)
     public
   {
@@ -163,6 +179,8 @@ contract _Withdraw is Test, Constants {
     l1Erc20.transfer(address(l1Erc20Bridge), _amount);
     assertEq(l1Erc20.balanceOf(address(l1Erc20Bridge)), _amount, "The Bridge balance is incorrect");
 
+    vm.expectEmit();
+    emit Withdraw(_account, _amount);
     l1Erc20Bridge.withdraw(_account, _amount);
     assertEq(l1Erc20.balanceOf(address(_account)), _amount, "The account balance is incorrect");
   }

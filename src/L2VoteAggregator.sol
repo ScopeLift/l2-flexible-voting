@@ -67,7 +67,13 @@ abstract contract L2VoteAggregator {
   mapping(uint256 proposalId => ProposalVote) public proposalVotes;
 
   /// @dev Emitted when a vote is cast on L2.
-  event VoteCast(address indexed voter, uint256 proposalId, VoteType support, uint256 weight);
+  event VoteCast(
+    address indexed voter, uint256 indexed proposalId, VoteType support, uint256 weight
+  );
+
+  event VoteBridged(
+    uint256 indexed proposalId, uint256 voteAgainst, uint256 voteFor, uint256 voteAbstain
+  );
 
   /// @param _votingToken The token used to vote on proposals.
   /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
@@ -119,6 +125,7 @@ abstract contract L2VoteAggregator {
     bytes memory proposalCalldata =
       abi.encode(proposalId, vote.againstVotes, vote.forVotes, vote.abstainVotes);
     _bridgeVote(proposalCalldata);
+    emit VoteBridged(proposalId, vote.againstVotes, vote.forVotes, vote.abstainVotes);
   }
 
   function _bridgeVote(bytes memory proposalCalldata) internal virtual;

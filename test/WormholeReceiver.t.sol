@@ -30,6 +30,10 @@ contract WormholeReceiverTestHarness is WormholeReceiver {
 contract WormholeReceiverTest is Test, Constants {
   WormholeReceiverTestHarness receiver;
 
+  event RegisteredSenderSet(
+    address indexed owner, uint16 indexed sourceChain, bytes32 indexed sourceAddress
+  );
+
   function setUp() public {
     receiver = new WormholeReceiverTestHarness(L1_CHAIN.wormholeRelayer, msg.sender);
   }
@@ -57,6 +61,8 @@ contract SetRegisteredSender is WormholeReceiverTest {
     bytes32 senderBytes = bytes32(uint256(uint160(address(sender))));
     assertEq(receiver.owner(), msg.sender, "Owner is incorrect");
 
+    vm.expectEmit();
+    emit RegisteredSenderSet(receiver.owner(), sourceChain, senderBytes);
     vm.prank(receiver.owner());
     receiver.setRegisteredSender(sourceChain, senderBytes);
 
@@ -85,6 +91,8 @@ contract IsRegisteredSender is WormholeReceiverTest {
     bytes32 senderBytes = bytes32(uint256(uint160(address(sender))));
     assertEq(receiver.owner(), msg.sender, "Owner is incorrect");
 
+    vm.expectEmit();
+    emit RegisteredSenderSet(receiver.owner(), sourceChain, senderBytes);
     vm.prank(receiver.owner());
     receiver.setRegisteredSender(sourceChain, senderBytes);
     receiver.isRegisteredSenderModifierFunc(sourceChain, senderBytes);
