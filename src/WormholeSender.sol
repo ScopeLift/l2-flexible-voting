@@ -7,16 +7,16 @@ abstract contract WormholeSender is WormholeBase {
   /// @notice The chain id that is receiving the messages.
   uint16 public immutable TARGET_CHAIN;
 
-  /// @notice The chain id that is sending the messages.
-  uint16 public immutable SOURCE_CHAIN;
+  /// @notice The chain id where refunds will be sent.
+  uint16 public immutable REFUND_CHAIN;
 
   /// @notice The gas limit for cross chain transactions.
   uint256 constant GAS_LIMIT = 500_000;
 
+  /// @param _refundChain The chain id of the chain sending the messages.
   /// @param _targetChain The chain id of the chain receiving the messages.
-  /// @param _sourceChain The chain id of the chain sending the messages.
-  constructor(uint16 _sourceChain, uint16 _targetChain) {
-    SOURCE_CHAIN = _sourceChain;
+  constructor(uint16 _refundChain, uint16 _targetChain) {
+    REFUND_CHAIN = _refundChain;
     TARGET_CHAIN = _targetChain;
   }
 

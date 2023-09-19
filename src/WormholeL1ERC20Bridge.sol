@@ -68,7 +68,7 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
       mintCalldata,
       0, // no receiver value needed since we're just passing a message
       GAS_LIMIT,
-      SOURCE_CHAIN,
+      REFUND_CHAIN,
       msg.sender
     );
   }

@@ -49,7 +49,7 @@ contract Constructor is WormholeSenderTest {
       _wormholeRelayer,
       "Wormhole relayer is not set correctly"
     );
-    assertEq(newSender.SOURCE_CHAIN(), _sourceChain, "Source chain is not correctly set");
+    assertEq(newSender.REFUND_CHAIN(), _sourceChain, "Source chain is not correctly set");
     assertEq(newSender.TARGET_CHAIN(), _targetChain, "Target chain is not correctly set");
   }
 }
