@@ -18,8 +18,8 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @notice Used to indicate whether the contract has been initialized with the L2 token address.
   bool public INITIALIZED = false;
 
-  /// @notice The L1 token address.
-  address public L1_TOKEN_ADDRESS;
+  /// @notice The L1 bridge address.
+  address public L1_BRIDGE_ADDRESS;
 
   /// @dev Contract is already initialized with an L2 token.
   error AlreadyInitialized();
@@ -57,11 +57,11 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   }
 
   /// @notice Must be called before bridging tokens to L2.
-  /// @param l1TokenAddress The address of the L1 token for this L2 token.
-  function initialize(address l1TokenAddress) public {
+  /// @param l1BridgeAddress The address of the L1 token for this L2 token.
+  function initialize(address l1BridgeAddress) public {
     if (INITIALIZED) revert AlreadyInitialized();
     INITIALIZED = true;
-    L1_TOKEN_ADDRESS = l1TokenAddress;
+    L1_BRIDGE_ADDRESS = l1BridgeAddress;
   }
 
   /// @notice Receives a message from L1 and mints L2 tokens.
@@ -105,7 +105,7 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
     sequence = WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,
-      L1_TOKEN_ADDRESS,
+      L1_BRIDGE_ADDRESS,
       withdrawCalldata,
       0, // no receiver value needed since we're just passing a message
       GAS_LIMIT,

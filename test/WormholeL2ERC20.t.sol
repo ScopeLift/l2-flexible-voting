@@ -67,7 +67,7 @@ contract Constructor is L2ERC20Test {
 contract Initialize is L2ERC20Test {
   function testFork_CorrectlyInitializeL2Token(address l1Erc20Bridge) public {
     l2Erc20.initialize(l1Erc20Bridge);
-    assertEq(l2Erc20.L1_TOKEN_ADDRESS(), l1Erc20Bridge, "L1 bridge address is not setup correctly");
+    assertEq(l2Erc20.L1_BRIDGE_ADDRESS(), l1Erc20Bridge, "L1 bridge address is not setup correctly");
     assertEq(l2Erc20.INITIALIZED(), true, "L1 bridged isn't initialized");
   }
 
