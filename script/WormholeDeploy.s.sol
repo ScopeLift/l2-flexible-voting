@@ -50,8 +50,6 @@ contract Deploy is Script, Constants {
     // vm.cselectFork(L2_CHAIN.chainId);
     vm.selectFork(l2ForkId);
     vm.broadcast();
-    l2Token.setRegisteredSender(
-      L2_CHAIN.wormholeChainId, _toWormholeAddress(address(bridge))
-    );
+    l2Token.setRegisteredSender(L2_CHAIN.wormholeChainId, _toWormholeAddress(address(bridge)));
   }
 }
