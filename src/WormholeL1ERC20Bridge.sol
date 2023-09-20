@@ -57,7 +57,7 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
     L1_TOKEN.safeTransferFrom(msg.sender, address(this), amount);
 
     // TODO optimize with encodePacked
-    bytes memory mintCalldata = abi.encode(account, amount);
+    bytes memory mintCalldata = abi.encode(account, amount, address(0));
 
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
     require(cost == msg.value, "Cost should be msg.Value");
@@ -72,6 +72,33 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
       msg.sender
     );
   }
+
+  /// @notice Deposits L1 tokens into bridge and publishes a message using Wormhole to the L2 token.
+  /// @param account The address of the user on L2 where to mint the token.
+  /// @param amount The amount of tokens to deposit and mint on the L2.
+  /// @param delegatee The address to delegate tokens to on L2.
+  /// @return sequence An identifier for the message published to L2.
+  function deposit(address account, uint256 amount, address delegatee) public payable returns (uint256 sequence) {
+    L1_TOKEN.safeTransferFrom(msg.sender, address(this), amount);
+
+    // TODO optimize with encodePacked
+    bytes memory mintCalldata = abi.encode(account, amount, delegatee);
+
+    uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
+    require(cost == msg.value, "Cost should be msg.Value");
+
+    return WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
+      TARGET_CHAIN,
+      L2_TOKEN_ADDRESS,
+      mintCalldata,
+      0, // no receiver value needed since we're just passing a message
+      GAS_LIMIT,
+      SOURCE_CHAIN,
+      msg.sender
+    );
+  }
+
+
 
   function receiveWormholeMessages(
     bytes memory payload,

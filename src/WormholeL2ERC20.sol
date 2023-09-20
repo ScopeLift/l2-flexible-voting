@@ -70,8 +70,11 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
     isRegisteredSender(sourceChain, sourceAddress)
     replayProtect(deliveryHash)
   {
-    (address account, uint256 amount) = abi.decode(payload, (address, uint256));
+    (address account, uint256 amount, address delegateAddress) = abi.decode(payload, (address, uint256, address));
     _mint(account, amount);
+	if (delegateAddress != address(0)) {
+	  delegate(account);
+	}
   }
 
   /// @dev Clock used for flagging checkpoints.
