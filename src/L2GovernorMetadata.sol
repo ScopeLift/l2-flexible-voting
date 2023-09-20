@@ -12,7 +12,7 @@ abstract contract L2GovernorMetadata {
   }
 
   /// @notice The id of the proposal mapped to the proposal metadata.
-  mapping(uint256 proposalId => Proposal proposal) _proposals;
+  mapping(uint256 proposalId => Proposal) _proposals;
 
   /// @notice Add proposal to internal storage.
   /// @param proposalId The id of the proposal.
