@@ -324,7 +324,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
 
-	vm.prank(l2GovernorMetadata.owner());
+    vm.prank(l2GovernorMetadata.owner());
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
     );
@@ -355,7 +355,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
 
-	vm.prank(l2GovernorMetadata.owner());
+    vm.prank(l2GovernorMetadata.owner());
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
     );
@@ -390,7 +390,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
 
-	vm.prank(l2GovernorMetadata.owner());
+    vm.prank(l2GovernorMetadata.owner());
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
     );

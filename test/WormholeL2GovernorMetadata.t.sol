@@ -13,7 +13,7 @@ contract L2GovernorMetadataTest is Constants {
 
   function setUp() public {
     l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
-	vm.prank(l2GovernorMetadata.owner());
+    vm.prank(l2GovernorMetadata.owner());
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
     );
