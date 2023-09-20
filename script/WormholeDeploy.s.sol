@@ -12,7 +12,7 @@ import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
-/// @notice Deploy L1 bridge and corresponding token to be minted on L2
+/// @notice Deploy L1 bridge and corresponding token to be minted on L2.
 contract Deploy is Script, Constants {
   using stdJson for string;
 
@@ -30,7 +30,7 @@ contract Deploy is Script, Constants {
     WormholeL2ERC20 l2Token =
     new WormholeL2ERC20("Scopeapotomus", "SCOPE", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
-    uint256 l1ForkId = vm.createSelectFork(L1_CHAIN.rpcUrl);
+    vm.createSelectFork(L1_CHAIN.rpcUrl);
     vm.broadcast();
     FakeERC20 l1Token = new FakeERC20("Governance", "GOV");
 
@@ -47,9 +47,10 @@ contract Deploy is Script, Constants {
     vm.broadcast();
     bridge.initialize(address(l2Token));
 
-    // vm.cselectFork(L2_CHAIN.chainId);
     vm.selectFork(l2ForkId);
+
+	// Register bridge address on the L2 token
     vm.broadcast();
-    l2Token.setRegisteredSender(L2_CHAIN.wormholeChainId, _toWormholeAddress(address(bridge)));
+    l2Token.setRegisteredSender(L1_CHAIN.wormholeChainId, _toWormholeAddress(address(bridge)));
   }
 }
