@@ -1,4 +1,5 @@
 [profile.default]
+  evm_version = "paris"
   fs_permissions = [{ access = "read", path = "./broadcast" }]
   optimizer = true
   optimizer_runs = 10_000_000
@@ -7,7 +8,7 @@
     "openzeppelin/=lib/openzeppelin-contracts/contracts",
     "openzeppelin-flexible-voting/=lib/flexible-voting/lib/openzeppelin-contracts/contracts/",
   ]
-  solc_version = "0.8.16"
+  solc_version = "0.8.20"
   verbosity = 3
 
 [profile.ci]

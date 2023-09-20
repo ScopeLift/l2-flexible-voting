@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.20;
 
 import {ERC20VotesComp} from "openzeppelin/token/ERC20/extensions/ERC20VotesComp.sol";
 import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";

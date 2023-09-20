@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.20;
 
 /// @notice This contract is used by an L2VoteAggregator to store proposal metadata.
 /// It expects to receive proposal metadata from a valid L1 source.
@@ -12,7 +12,7 @@ abstract contract L2GovernorMetadata {
   }
 
   /// @notice The id of the proposal mapped to the proposal metadata.
-  mapping(uint256 => Proposal) _proposals;
+  mapping(uint256 proposalId => Proposal) _proposals;
 
   /// @notice Add proposal to internal storage.
   /// @param proposalId The id of the proposal.
