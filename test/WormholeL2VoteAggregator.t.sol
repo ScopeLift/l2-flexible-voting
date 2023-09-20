@@ -196,7 +196,7 @@ contract CastVote is L2VoteAggregatorTest {
     // Our active check is inclusive so we need to add 1
     vm.roll(l2Proposal.voteStart + (_proposalDuration - l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
-    l2VoteAggregator.castVote(_proposalId, L2VoteAggregator.VoteType(_voteType));
+    l2VoteAggregator.castVote(_proposalId, _voteType);
   }
 
   function testFuzz_RevertWhen_VoterHasAlreadyVoted(uint96 _amount, uint8 _support) public {
