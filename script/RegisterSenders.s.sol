@@ -62,8 +62,4 @@ contract RegisterSendingAddresses is Script, Constants {
       L2_CHAIN.wormholeChainId, _toWormholeAddress(l1BridgeAddr)
     );
   }
-
-  function _toWormholeAddress(address addr) internal pure returns (bytes32) {
-    return bytes32(uint256(uint160(addr)));
-  }
 }
