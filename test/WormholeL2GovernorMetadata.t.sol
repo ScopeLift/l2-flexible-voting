@@ -23,8 +23,7 @@ contract L2GovernorMetadataTest is Constants {
 contract Constructor is L2GovernorMetadataTest {
   function testFuzz_CorrectlySetsAllArgs(address wormholeCore) public {
     new WormholeL2GovernorMetadata(wormholeCore, msg.sender); // nothing to assert as there are no
-      // constructor
-      // args set
+      // constructor args set
   }
 }
 
