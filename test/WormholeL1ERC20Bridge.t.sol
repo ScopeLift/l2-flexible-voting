@@ -60,6 +60,7 @@ contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
     L1Block l1Block = new L1Block();
     l2Erc20 =
     new WormholeL2ERC20( "Hello", "WRLD", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, msg.sender);
+	vm.prank(l2Erc20.owner());
     l2Erc20.setRegisteredSender(
       L1_CHAIN.wormholeChainId, bytes32(uint256(uint160(address(l1Erc20Bridge))))
     );

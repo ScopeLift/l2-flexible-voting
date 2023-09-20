@@ -26,6 +26,7 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
     L1Block l1Block = new L1Block();
     l2Erc20 =
     new WormholeL2ERC20( "Hello", "WRLD", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, msg.sender);
+	vm.prank(l2Erc20.owner());
     l2Erc20.setRegisteredSender(L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS);
   }
 
@@ -34,6 +35,7 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
     IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
     l1Erc20Bridge =
     new WormholeL1ERC20Bridge(address(l1Erc20), L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, msg.sender);
+	vm.prank(l1Erc20Bridge.owner());
     l1Erc20Bridge.setRegisteredSender(
       L2_CHAIN.wormholeChainId, bytes32(uint256(uint160(address(l2Erc20))))
     );
