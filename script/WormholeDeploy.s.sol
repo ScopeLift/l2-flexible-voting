@@ -49,7 +49,7 @@ contract Deploy is Script, Constants {
 
     vm.selectFork(l2ForkId);
 
-	// Register bridge address on the L2 token
+    // Register bridge address on the L2 token
     vm.broadcast();
     l2Token.setRegisteredSender(L1_CHAIN.wormholeChainId, _toWormholeAddress(address(bridge)));
   }
