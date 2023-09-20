@@ -8,7 +8,13 @@ contract GovernorMetadataMock is WormholeL2GovernorMetadata {
     _proposals[1] = Proposal({voteStart: block.number, voteEnd: block.number + 3000});
   }
 
-  function getProposal(uint256) public view override returns (Proposal memory) {
-    return _proposals[1];
+  function createProposal(uint256 proposalId, uint128 timeToProposalEnd)
+    public
+    returns (Proposal memory)
+  {
+    Proposal memory proposal =
+      Proposal({voteStart: block.number, voteEnd: block.number + timeToProposalEnd});
+    _proposals[proposalId] = proposal;
+    return proposal;
   }
 }

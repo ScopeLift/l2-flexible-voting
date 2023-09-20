@@ -24,6 +24,13 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
     WormholeL1VotePool(_governor)
   {}
 
+  function _jumpToActiveProposal(uint256 proposalId) internal {
+    uint256 _deadline = governor.proposalDeadline(proposalId);
+    vm.roll(_deadline - 1);
+  }
+
+  /// @dev We need this function because when we call `performDelivery` the proposal is not active,
+  /// and it does not seem configurable in the wormhole sdk utilities.
   function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,
@@ -33,6 +40,21 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
   ) public override onlyRelayer isRegisteredSender(sourceChain, sourceAddress) {
     (uint256 proposalId,,,) = abi.decode(payload, (uint256, uint128, uint128, uint128));
     _jumpToActiveProposal(proposalId);
+    _receiveCastVoteWormholeMessages(
+      payload, additionalVaas, sourceAddress, sourceChain, deliveryHash
+    );
+  }
+
+  function receiveWormholeMessages(
+    bytes memory payload,
+    bytes[] memory additionalVaas,
+    bytes32 sourceAddress,
+    uint16 sourceChain,
+    bytes32 deliveryHash,
+    bool jump
+  ) public onlyRelayer isRegisteredSender(sourceChain, sourceAddress) {
+    (uint256 proposalId,,,) = abi.decode(payload, (uint256, uint128, uint128, uint128));
+    if (jump) _jumpToActiveProposal(proposalId);
     _receiveCastVoteWormholeMessages(
       payload, additionalVaas, sourceAddress, sourceChain, deliveryHash
     );
@@ -73,9 +95,14 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
     return _proposalId;
   }
 
-  function _jumpToActiveProposal(uint256 proposalId) internal {
+  function _jumpToProposalEnd(uint256 proposalId) external {
     uint256 _deadline = governor.proposalDeadline(proposalId);
-    vm.roll(_deadline - 1);
+    vm.roll(_deadline);
+  }
+
+  function _jumpToProposalEnd(uint256 proposalId, uint32 additionalBlocks) external {
+    uint256 _deadline = governor.proposalDeadline(proposalId);
+    vm.roll(_deadline + additionalBlocks);
   }
 }
 
@@ -153,10 +180,8 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
   ) public {
     vm.selectFork(targetFork);
 
-    l1Erc20.approve(
-      address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain)
-    );
-    l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain));
+    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2InFavor + _l2Abstain);
+    l1Erc20.mint(address(this), uint96(_l2Against) + _l2InFavor + _l2Abstain);
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
@@ -169,6 +194,9 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2Against, _l2InFavor, _l2Abstain);
+    GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
+      _proposalId, 3000
+    );
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
 
     performDelivery();
@@ -196,12 +224,8 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
 
     vm.selectFork(targetFork);
 
-    l1Erc20.approve(
-      address(l1VotePool), uint96(_l2NewAgainst) + uint96(_l2NewInFavor) + uint96(_l2NewAbstain)
-    );
-    l1Erc20.mint(
-      address(this), uint96(_l2NewAgainst) + uint96(_l2NewInFavor) + uint96(_l2NewAbstain)
-    );
+    l1Erc20.approve(address(l1VotePool), uint96(_l2NewAgainst) + _l2NewInFavor + _l2NewAbstain);
+    l1Erc20.mint(address(this), uint96(_l2NewAgainst) + _l2NewInFavor + _l2NewAbstain);
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
@@ -215,6 +239,9 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2NewAgainst, _l2NewInFavor, _l2NewAbstain);
+    GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
+      _proposalId, 3000
+    );
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
 
     performDelivery();
@@ -242,10 +269,8 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
 
     vm.selectFork(targetFork);
 
-    l1Erc20.approve(
-      address(l1VotePool), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain) + 1
-    );
-    l1Erc20.mint(address(this), uint96(_l2Against) + uint96(_l2InFavor) + uint96(_l2Abstain) + 1);
+    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2InFavor + _l2Abstain + 1);
+    l1Erc20.mint(address(this), uint96(_l2Against) + _l2InFavor + _l2Abstain + 1);
     l1Erc20.delegate(address(l1VotePool));
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
@@ -259,7 +284,73 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
       new bytes[](0),
       bytes32(uint256(uint160(address(l2VoteAggregator)))),
       L2_CHAIN.wormholeChainId,
-      bytes32("")
+      bytes32(""),
+      true
+    );
+  }
+
+  function testFuzz_RevertWhen_VoteBeforeProposalStart(
+    uint32 _l2Against,
+    uint32 _l2InFavor,
+    uint32 _l2Abstain,
+    uint32 _l2NewAgainst,
+    uint32 _l2NewInFavor,
+    uint32 _l2NewAbstain
+  ) public {
+    _l2NewAgainst = uint32(bound(_l2NewAgainst, 0, _l2Against));
+    _l2NewInFavor = uint32(bound(_l2NewInFavor, 0, _l2InFavor));
+    _l2NewAbstain = uint32(bound(_l2NewAbstain, 0, _l2Abstain));
+
+    vm.selectFork(targetFork);
+
+    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2InFavor + _l2Abstain);
+    l1Erc20.mint(address(this), uint96(_l2Against) + _l2InFavor + _l2Abstain);
+    l1Erc20.delegate(address(l1VotePool));
+
+    uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
+
+    vm.prank(L1_CHAIN.wormholeRelayer);
+    vm.expectRevert("Governor: vote not currently active");
+    l1VotePool.receiveWormholeMessages(
+      abi.encode(_proposalId, _l2NewAgainst, _l2NewInFavor, _l2NewAbstain),
+      new bytes[](0),
+      bytes32(uint256(uint160(address(l2VoteAggregator)))),
+      L2_CHAIN.wormholeChainId,
+      bytes32(""),
+      false
+    );
+  }
+
+  function testFuzz_RevertWhen_VoteAfterProposalEnd(
+    uint32 _l2Against,
+    uint32 _l2InFavor,
+    uint32 _l2Abstain,
+    uint32 _l2NewAgainst,
+    uint32 _l2NewInFavor,
+    uint32 _l2NewAbstain
+  ) public {
+    _l2NewAgainst = uint32(bound(_l2NewAgainst, 0, _l2Against));
+    _l2NewInFavor = uint32(bound(_l2NewInFavor, 0, _l2InFavor));
+    _l2NewAbstain = uint32(bound(_l2NewAbstain, 0, _l2Abstain));
+
+    vm.selectFork(targetFork);
+
+    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2InFavor + _l2Abstain);
+    l1Erc20.mint(address(this), uint96(_l2Against) + _l2InFavor + _l2Abstain);
+    l1Erc20.delegate(address(l1VotePool));
+
+    uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
+    l1VotePool._jumpToProposalEnd(_proposalId, 1);
+
+    vm.prank(L1_CHAIN.wormholeRelayer);
+    vm.expectRevert("Governor: vote not currently active");
+    l1VotePool.receiveWormholeMessages(
+      abi.encode(_proposalId, _l2NewAgainst, _l2NewInFavor, _l2NewAbstain),
+      new bytes[](0),
+      bytes32(uint256(uint160(address(l2VoteAggregator)))),
+      L2_CHAIN.wormholeChainId,
+      bytes32(""),
+      false
     );
   }
 }

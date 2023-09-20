@@ -160,13 +160,39 @@ contract Constructor is L2VoteAggregatorTest {
 }
 
 contract CastVote is L2VoteAggregatorTest {
-  function testFuzz_RevertWhen_ProposalIsInactive(uint96 _amount, uint8 _support) public {
+  function testFuzz_RevertWhen_BeforeProposalStart(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 2);
     l2Erc20.mint(address(this), _amount);
 
     vm.roll(block.number - 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
     l2VoteAggregator.castVote(1, _support);
+  }
+
+  function testFuzz_RevertWhen_AfterCastWindow(
+    uint96 _amount,
+    uint8 _support,
+    uint256 _proposalId,
+    uint64 _proposalDuration
+  ) public {
+    vm.assume(_support < 2);
+    vm.assume(_amount != 0);
+    _proposalDuration = uint64(
+      bound(_proposalDuration, l2VoteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number)
+    );
+
+    // In the setup we use a mock contract rather than the actual contract
+    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
+      address(l2VoteAggregator.GOVERNOR_METADATA())
+    ).createProposal(_proposalId, _proposalDuration);
+
+    vm.roll(l2Proposal.voteStart - 1);
+    l2Erc20.mint(address(this), _amount);
+
+    // Our active check is inclusive so we need to add 1
+    vm.roll(l2Proposal.voteStart + (_proposalDuration - l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
+    vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
+    l2VoteAggregator.castVote(_proposalId, _support);
   }
 
   function testFuzz_RevertWhen_VoterHasAlreadyVoted(uint96 _amount, uint8 _support) public {
@@ -269,6 +295,9 @@ contract BridgeVote is L2VoteAggregatorTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _against, _inFavor, _abstain);
+    GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
+      _proposalId, 3000
+    );
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
 
     performDelivery();
@@ -295,7 +324,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     L2VoteAggregator aggregator =
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
-    vm.assume(voteEnd > aggregator.CAST_VOTE_WINDOW());
+    voteEnd = bound(voteEnd, aggregator.CAST_VOTE_WINDOW(), type(uint256).max);
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
 
     vm.prank(L2_CHAIN.wormholeRelayer);
@@ -323,11 +352,9 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     L2VoteAggregator aggregator =
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
-    vm.assume(voteStart < block.number);
-    vm.assume(voteEnd > aggregator.CAST_VOTE_WINDOW());
-    vm.assume(voteEnd - aggregator.CAST_VOTE_WINDOW() > block.number); // Proposal must have a
-      // voting block before the cast
-      // period ends
+    voteStart = uint64(bound(voteStart, 0, block.number));
+    voteEnd = uint64(bound(voteEnd, block.number + aggregator.CAST_VOTE_WINDOW(), type(uint64).max));
+
     bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
