@@ -47,7 +47,7 @@ abstract contract L2VoteAggregator is EIP712 {
   /// @dev Contract is already initialized with an L2 token.
   error AlreadyInitialized();
 
-  /// @dev We do not support the method, but provide it to be compatible to 3rd party tooling.
+  /// @dev We do not support the method, but provide it to be compatible with 3rd party tooling.
   error UnsupportedMethod();
 
   /// @dev The voting options corresponding to those used in the Governor.
@@ -57,6 +57,7 @@ abstract contract L2VoteAggregator is EIP712 {
     Abstain
   }
 
+  /// @dev The states of a proposal on L2.
   enum ProposalState {
     Pending,
     Active,
@@ -103,32 +104,32 @@ abstract contract L2VoteAggregator is EIP712 {
   }
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
-  /// compatiblility with existing Governor tooling.
+  /// compatibility with existing Governor tooling.
   function votingDelay() public view virtual returns (uint256) {
     return 0;
   }
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
-  /// compatiblility with existing Governor tooling.
+  /// compatibility with existing Governor tooling.
   function votingPeriod() public view virtual returns (uint256) {
     return 0;
   }
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
-  /// compatiblility with existing Governor tooling.
+  /// compatibility with existing Governor tooling.
   function quorum(uint256) public view virtual returns (uint256) {
     return 0;
   }
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
-  /// compatiblility with existing Governor tooling.
+  /// compatibility with existing Governor tooling.
   function proposalThreshold() public view virtual returns (uint256) {
     return 0;
   }
 
   // @notice Shows the state of of a proposal on L2. We only support a subset of the Governor
   // proposal states. If the vote has not started the state is pending, if voting has started it is
-  // active, if it  has been cancelled then the state is cancelled, and if the voting has finished
+  // active, if it has been cancelled then the state is cancelled, and if the voting has finished
   // without it being cancelled we will mark it as expired. We use expired because users can no
   // longer vote and no other L2 action can be taken on the proposal.
   function state(uint256 proposalId) public view virtual returns (ProposalState) {
@@ -140,7 +141,7 @@ abstract contract L2VoteAggregator is EIP712 {
   }
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
-  /// compatiblility with existing Governor tooling.
+  /// compatibility with existing Governor tooling.
   function getVotes(address, uint256) public view virtual returns (uint256) {
     return 0;
   }
