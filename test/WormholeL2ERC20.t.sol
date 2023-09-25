@@ -18,6 +18,8 @@ contract L2ERC20Test is TestConstants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
   WormholeL1ERC20Bridge l1Erc20Bridge;
 
+  event Withdraw(address indexed account, uint256 amount);
+
   event TokenBridged(
     address indexed account,
     address indexed targetAddress,
@@ -25,8 +27,6 @@ contract L2ERC20Test is TestConstants, WormholeRelayerBasicTest {
     uint256 amount,
     address targetToken
   );
-
-  event Withdraw(address indexed account, uint256 amount);
 
   constructor() {
     setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
