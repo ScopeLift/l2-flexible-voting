@@ -13,3 +13,5 @@ out/
 # Coverage
 lcov.info
 notes.txt
+
+remappings.txt
