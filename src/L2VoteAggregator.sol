@@ -89,7 +89,7 @@ abstract contract L2VoteAggregator is EIP712 {
   /// @param _votingToken The token used to vote on proposals.
   /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
   /// @param _l1BlockAddress The address of the L1Block contract.
-  constructor(address _votingToken, address _governorMetadata, address _l1BlockAddress) {
+  constructor(address _votingToken, address _governorMetadata, address _l1BlockAddress)  EIP712("L2VoteAggregator", "1") {
     VOTING_TOKEN = ERC20Votes(_votingToken);
     GOVERNOR_METADATA = L2GovernorMetadata(_governorMetadata);
     L1_BLOCK = IL1Block(_l1BlockAddress);
@@ -237,6 +237,7 @@ abstract contract L2VoteAggregator is EIP712 {
       revert InvalidVoteType();
     }
     emit VoteCast(voter, proposalId, support, weight, reason);
+	return weight;
   }
 
   function proposalVoteActive(uint256 proposalId) public view returns (bool active) {

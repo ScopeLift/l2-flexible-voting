@@ -123,7 +123,7 @@ contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
   L1Block l1Block;
   bytes32 l2VoteAggregatorWormholeAddress;
 
-  event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight);
+  event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason);
 
   constructor() {
     setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
@@ -259,7 +259,7 @@ contract CastVote is L2VoteAggregatorTest {
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
-    emit VoteCast(address(this), 1, 0, _amount);
+    emit VoteCast(address(this), 1, 0, _amount, "");
 
     l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType.Against);
     (uint256 against,,) = l2VoteAggregator.proposalVotes(1);
@@ -275,7 +275,7 @@ contract CastVote is L2VoteAggregatorTest {
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
-    emit VoteCast(address(this), 1, 2, _amount);
+    emit VoteCast(address(this), 1, 2, _amount, "");
 
     l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType.Abstain);
     (,, uint256 abstain) = l2VoteAggregator.proposalVotes(1);
@@ -292,7 +292,7 @@ contract CastVote is L2VoteAggregatorTest {
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
-    emit VoteCast(address(this), 1, 1, _amount);
+    emit VoteCast(address(this), 1, 1, _amount, "");
 
     l2VoteAggregator.castVote(1, L2VoteAggregator.VoteType.For);
     (, uint256 forVotes,) = l2VoteAggregator.proposalVotes(1);
