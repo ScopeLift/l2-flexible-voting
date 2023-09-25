@@ -27,7 +27,9 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
       - name: Install Foundry
         run: |
-          echo ${{ vars }}
+          echo ${{ vars.L1_CHAIN_ID }}
+          echo ${{ vars.L2_CHAIN_ID }}
+          echo ${{ vars.TESTNET }}
           echo env
 
       - name: Build contracts
