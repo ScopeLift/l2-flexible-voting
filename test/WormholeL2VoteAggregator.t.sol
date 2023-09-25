@@ -123,7 +123,9 @@ contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
   L1Block l1Block;
   bytes32 l2VoteAggregatorWormholeAddress;
 
-  event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason);
+  event VoteCast(
+    address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
+  );
 
   constructor() {
     setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);

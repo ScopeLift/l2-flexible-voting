@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {SignatureChecker} from "openzeppelin/utils/cryptography/SignatureChecker.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {SafeCast} from "openzeppelin/utils/math/SafeCast.sol";
 import {EIP712} from "openzeppelin/utils/cryptography/EIP712.sol";
@@ -89,7 +88,9 @@ abstract contract L2VoteAggregator is EIP712 {
   /// @param _votingToken The token used to vote on proposals.
   /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
   /// @param _l1BlockAddress The address of the L1Block contract.
-  constructor(address _votingToken, address _governorMetadata, address _l1BlockAddress)  EIP712("L2VoteAggregator", "1") {
+  constructor(address _votingToken, address _governorMetadata, address _l1BlockAddress)
+    EIP712("L2VoteAggregator", "1")
+  {
     VOTING_TOKEN = ERC20Votes(_votingToken);
     GOVERNOR_METADATA = L2GovernorMetadata(_governorMetadata);
     L1_BLOCK = IL1Block(_l1BlockAddress);
@@ -237,7 +238,7 @@ abstract contract L2VoteAggregator is EIP712 {
       revert InvalidVoteType();
     }
     emit VoteCast(voter, proposalId, support, weight, reason);
-	return weight;
+    return weight;
   }
 
   function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
