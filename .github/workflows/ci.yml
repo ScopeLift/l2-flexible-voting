@@ -25,6 +25,10 @@ jobs:
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+      - name: Install Foundry
+        run: |
+          echo ${{ vars }}
+          echo env
 
       - name: Build contracts
         run: |
