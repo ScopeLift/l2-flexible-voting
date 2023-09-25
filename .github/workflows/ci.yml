@@ -25,13 +25,6 @@ jobs:
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-      - name: Echo variables
-        run: |
-          echo ${{ vars.L1_CHAIN }}
-          echo ${{ vars.L2_CHAIN }}
-          echo ${{ vars.TESTNET }}
-          echo env
-
       - name: Build contracts
         run: |
           forge --version
