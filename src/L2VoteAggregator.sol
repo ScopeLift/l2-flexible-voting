@@ -84,6 +84,40 @@ abstract contract L2VoteAggregator {
     L1_BRIDGE_ADDRESS = l1BridgeAddress;
   }
 
+  /// @notice This function does not make sense in the L2 context, but we have added it to have
+  /// compatiblility with existing Governor tooling.
+  function votingDelay() public view virtual returns (uint256) {
+    return 0;
+  }
+
+  /// @notice This function does not make sense in the L2 context, but we have added it to have
+  /// compatiblility with existing Governor tooling.
+  function votingPeriod() public view virtual returns (uint256) {
+    return 0;
+  }
+
+  /// @notice This function does not make sense in the L2 context, but we have added it to have
+  /// compatiblility with existing Governor tooling.
+  function quorum(uint256) public view virtual returns (uint256) {
+		  return 0;
+  }
+
+  /// @notice This function does not make sense in the L2 context, but we have added it to have
+  /// compatiblility with existing Governor tooling.
+  function proposalThreshold() public view virtual returns (uint256) {
+		  return 0;
+  }
+  
+  function state(uint256 proposalId) public view virtual override returns (
+    ProposalState
+) {
+		// if before start then pending
+		// between pending and internalEnd Active
+		// If cancelled then handle cancel
+		// if not cancelled and after internal end then expired
+}
+
+
   /// @notice Where a user can express their vote based on their L2 token voting power.
   /// @param proposalId The id of the proposal to vote on.
   /// @param support The type of vote to cast.
