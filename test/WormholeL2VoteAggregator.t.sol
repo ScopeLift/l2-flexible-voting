@@ -172,6 +172,22 @@ contract CastVote is L2VoteAggregatorTest {
     l2VoteAggregator.castVote(1, _voteType);
   }
 
+  function testFuzz_RevertWhen_ProposalCancelled(uint96 _amount, uint8 _support, uint256 _proposalId) public {
+    vm.assume(_amount != 0);
+    vm.assume(_support < 3);
+    L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
+    l2Erc20.mint(address(this), _amount);
+
+    // In the setup we use a mock contract rather than the actual contract
+    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
+      address(l2VoteAggregator.GOVERNOR_METADATA())
+    ).createProposal(_proposalId, 1000, true);
+
+    vm.roll(l2Proposal.voteStart + 1);
+    vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
+    l2VoteAggregator.castVote(_proposalId, _voteType);
+  }
+
   function testFuzz_RevertWhen_AfterCastWindow(
     uint96 _amount,
     uint8 _support,
