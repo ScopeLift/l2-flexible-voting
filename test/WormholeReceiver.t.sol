@@ -67,7 +67,9 @@ contract SetRegisteredSender is WormholeReceiverTest {
     );
   }
 
-  function testFuzz_RevertIf_OwnerIsNotTheCaller(uint16 sourceChain, address sender, address caller) public {
+  function testFuzz_RevertIf_OwnerIsNotTheCaller(uint16 sourceChain, address sender, address caller)
+    public
+  {
     vm.assume(caller != receiver.owner());
     bytes32 senderBytes = bytes32(uint256(uint160(address(sender))));
 
