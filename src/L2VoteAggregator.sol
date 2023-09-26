@@ -53,9 +53,9 @@ abstract contract L2VoteAggregator {
   /// @dev Data structure to store vote preferences expressed by depositors.
   // TODO: Does it matter if we use a uint128 vs a uint256?
   struct ProposalVote {
-    uint128 against;
-    uint128 inFavor;
-    uint128 abstain;
+    uint128 againstVotes;
+    uint128 forVotes;
+    uint128 abstainVotes;
   }
 
   /// @notice A mapping of proposal to a mapping of voter address to boolean indicating whether a
@@ -67,7 +67,7 @@ abstract contract L2VoteAggregator {
   mapping(uint256 proposalId => ProposalVote) public proposalVotes;
 
   /// @dev Emitted when a vote is cast on L2.
-  event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight);
+  event VoteCast(address indexed voter, uint256 proposalId, VoteType support, uint256 weight);
 
   /// @param _votingToken The token used to vote on proposals.
   /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
@@ -87,7 +87,7 @@ abstract contract L2VoteAggregator {
   /// @notice Where a user can express their vote based on their L2 token voting power.
   /// @param proposalId The id of the proposal to vote on.
   /// @param support The type of vote to cast.
-  function castVote(uint256 proposalId, uint8 support) public returns (uint256) {
+  function castVote(uint256 proposalId, VoteType support) public returns (uint256) {
     if (!proposalVoteActive(proposalId)) revert ProposalInactive();
     if (_proposalVotersHasVoted[proposalId][msg.sender]) revert AlreadyVoted();
     _proposalVotersHasVoted[proposalId][msg.sender] = true;
@@ -96,12 +96,12 @@ abstract contract L2VoteAggregator {
     uint256 weight = VOTING_TOKEN.getPastVotes(msg.sender, proposal.voteStart);
     if (weight == 0) revert NoWeight();
 
-    if (support == uint8(VoteType.Against)) {
-      proposalVotes[proposalId].against += SafeCast.toUint128(weight);
-    } else if (support == uint8(VoteType.For)) {
-      proposalVotes[proposalId].inFavor += SafeCast.toUint128(weight);
-    } else if (support == uint8(VoteType.Abstain)) {
-      proposalVotes[proposalId].abstain += SafeCast.toUint128(weight);
+    if (support == VoteType.Against) {
+      proposalVotes[proposalId].againstVotes += SafeCast.toUint128(weight);
+    } else if (support == VoteType.For) {
+      proposalVotes[proposalId].forVotes += SafeCast.toUint128(weight);
+    } else if (support == VoteType.Abstain) {
+      proposalVotes[proposalId].abstainVotes += SafeCast.toUint128(weight);
     } else {
       revert InvalidVoteType();
     }
@@ -116,7 +116,8 @@ abstract contract L2VoteAggregator {
 
     ProposalVote memory vote = proposalVotes[proposalId];
 
-    bytes memory proposalCalldata = abi.encode(proposalId, vote.against, vote.inFavor, vote.abstain);
+    bytes memory proposalCalldata =
+      abi.encode(proposalId, vote.againstVotes, vote.forVotes, vote.abstainVotes);
     _bridgeVote(proposalCalldata);
   }
 

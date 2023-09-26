@@ -15,9 +15,9 @@ abstract contract L1VotePool {
 
   /// @dev Contains the distribution of a proposal vote.
   struct ProposalVote {
-    uint128 inFavor;
-    uint128 against;
-    uint128 abstain;
+    uint128 againstVotes;
+    uint128 forVotes;
+    uint128 abstainVotes;
   }
 
   /// @notice A mapping of proposal id to the proposal vote distribution.
@@ -31,7 +31,7 @@ abstract contract L1VotePool {
   /// @notice Casts vote to the L1 Governor.
   /// @param proposalId The id of the proposal being cast.
   function _castVote(uint256 proposalId, ProposalVote memory vote) internal {
-    bytes memory votes = abi.encodePacked(vote.against, vote.inFavor, vote.abstain);
+    bytes memory votes = abi.encodePacked(vote.againstVotes, vote.forVotes, vote.abstainVotes);
 
     // This param is ignored by the governor when voting with fractional
     // weights. It makes no difference what vote type this is.
