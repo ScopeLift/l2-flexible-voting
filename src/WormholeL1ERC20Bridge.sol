@@ -36,8 +36,14 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
     address _relayer,
     address _governor,
     uint16 _sourceChain,
-    uint16 _targetChain
-  ) WormholeL1VotePool(_governor) WormholeBase(_relayer) WormholeSender(_sourceChain, _targetChain) {
+    uint16 _targetChain,
+    address _owner
+  )
+    WormholeL1VotePool(_governor)
+    WormholeBase(_relayer)
+    WormholeSender(_sourceChain, _targetChain)
+    WormholeReceiver(_owner)
+  {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
   }
 

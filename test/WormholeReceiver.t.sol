@@ -8,7 +8,7 @@ import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {Constants} from "test/Constants.sol";
 
 contract WormholeReceiverTestHarness is WormholeReceiver {
-  constructor(address _relayer) WormholeBase(_relayer) {}
+  constructor(address _relayer, address _owner) WormholeBase(_relayer) WormholeReceiver(_owner) {}
   function receiveWormholeMessages(
     bytes memory payload,
     bytes[] memory additionalVaas,
@@ -31,13 +31,13 @@ contract WormholeReceiverTest is Test, Constants {
   WormholeReceiverTestHarness receiver;
 
   function setUp() public {
-    receiver = new WormholeReceiverTestHarness(L1_CHAIN.wormholeRelayer);
+    receiver = new WormholeReceiverTestHarness(L1_CHAIN.wormholeRelayer, msg.sender);
   }
 }
 
 contract OnlyRelayer is Test, Constants {
   function testFuzz_SucceedIfCalledByWormholeRelayer(address relayer) public {
-    WormholeReceiverTestHarness receiver = new WormholeReceiverTestHarness(relayer);
+    WormholeReceiverTestHarness receiver = new WormholeReceiverTestHarness(relayer, msg.sender);
 
     vm.prank(relayer);
     receiver.onlyRelayerModifierFunc();
@@ -45,7 +45,7 @@ contract OnlyRelayer is Test, Constants {
 
   function testFuzz_RevertIf_NotCalledByWormholeRelayer(address relayer) public {
     vm.assume(relayer != address(this));
-    WormholeReceiverTestHarness receiver = new WormholeReceiverTestHarness(relayer);
+    WormholeReceiverTestHarness receiver = new WormholeReceiverTestHarness(relayer, msg.sender);
 
     vm.expectRevert(WormholeReceiver.OnlyRelayerAllowed.selector);
     receiver.onlyRelayerModifierFunc();
@@ -55,6 +55,9 @@ contract OnlyRelayer is Test, Constants {
 contract SetRegisteredSender is WormholeReceiverTest {
   function testFuzz_SuccessfullySetRegisteredSender(uint16 sourceChain, address sender) public {
     bytes32 senderBytes = bytes32(uint256(uint160(address(sender))));
+    assertEq(receiver.owner(), msg.sender, "Owner is incorrect");
+
+    vm.prank(receiver.owner());
     receiver.setRegisteredSender(sourceChain, senderBytes);
 
     assertEq(
@@ -63,12 +66,26 @@ contract SetRegisteredSender is WormholeReceiverTest {
       "Registered sender on source chain is not correct"
     );
   }
+
+  function testFuzz_RevertIf_OwnerIsNotTheCaller(uint16 sourceChain, address sender, address caller)
+    public
+  {
+    vm.assume(caller != receiver.owner());
+    bytes32 senderBytes = bytes32(uint256(uint160(address(sender))));
+
+    vm.expectRevert(bytes("Ownable: caller is not the owner"));
+    vm.prank(caller);
+    receiver.setRegisteredSender(sourceChain, senderBytes);
+  }
 }
 
 contract IsRegisteredSender is WormholeReceiverTest {
   function testFuzz_SuccessfullyCallWithRegisteredSender(uint16 sourceChain, address sender) public {
     vm.assume(sender != address(0));
     bytes32 senderBytes = bytes32(uint256(uint160(address(sender))));
+    assertEq(receiver.owner(), msg.sender, "Owner is incorrect");
+
+    vm.prank(receiver.owner());
     receiver.setRegisteredSender(sourceChain, senderBytes);
     receiver.isRegisteredSenderModifierFunc(sourceChain, senderBytes);
   }

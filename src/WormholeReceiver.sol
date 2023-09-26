@@ -22,6 +22,10 @@ abstract contract WormholeReceiver is Ownable, WormholeBase {
   /// @dev A mapping of message hash to a boolean indicating delivery.
   mapping(bytes32 => bool) public seenDeliveryVaaHashes;
 
+  constructor(address owner) Ownable() {
+    transferOwnership(owner);
+  }
+
   /// @notice The function the wormhole relayer calls when the DeliveryProvider competes a delivery.
   /// @param payload The payload that was sent to in the delivery request.
   /// @param additionalVaas The additional VAAs that requested to be relayed.
