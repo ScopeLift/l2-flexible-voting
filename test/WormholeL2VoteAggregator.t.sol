@@ -172,7 +172,11 @@ contract CastVote is L2VoteAggregatorTest {
     l2VoteAggregator.castVote(1, _voteType);
   }
 
-  function testFuzz_RevertWhen_ProposalCancelled(uint96 _amount, uint8 _support, uint256 _proposalId) public {
+  function testFuzz_RevertWhen_ProposalCancelled(
+    uint96 _amount,
+    uint8 _support,
+    uint256 _proposalId
+  ) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);

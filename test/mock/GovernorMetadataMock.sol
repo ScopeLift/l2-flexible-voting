@@ -34,5 +34,4 @@ contract GovernorMetadataMock is WormholeL2GovernorMetadata {
     _proposals[proposalId] = proposal;
     return proposal;
   }
-
 }

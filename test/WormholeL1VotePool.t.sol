@@ -5,6 +5,7 @@ import {Vm, Test} from "forge-std/Test.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
 import {ERC20VotesComp} from
   "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
+import {IGovernor} from "openzeppelin/governance/Governor.sol";
 
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L1Block} from "src/L1Block.sol";
@@ -25,7 +26,7 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
     WormholeReceiver(msg.sender)
   {}
 
-  function _jumpToActiveProposal(uint256 proposalId) internal {
+  function _jumpToActiveProposal(uint256 proposalId) public {
     uint256 _deadline = governor.proposalDeadline(proposalId);
     vm.roll(_deadline - 1);
   }
@@ -59,6 +60,21 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
     _receiveCastVoteWormholeMessages(
       payload, additionalVaas, sourceAddress, sourceChain, deliveryHash
     );
+  }
+
+  function cancel(address l1Erc20) public returns (uint256) {
+    bytes memory proposalCalldata = abi.encode(FakeERC20.mint.selector, address(governor), 100_000);
+
+    address[] memory targets = new address[](1);
+    bytes[] memory calldatas = new bytes[](1);
+    uint256[] memory values = new uint256[](1);
+
+    targets[0] = address(l1Erc20);
+    calldatas[0] = proposalCalldata;
+    values[0] = 0;
+
+    return
+      governor.cancel(targets, values, calldatas, keccak256(bytes("Proposal: To inflate token")));
   }
 
   function _createExampleProposal(address l1Erc20) internal returns (uint256) {
@@ -340,6 +356,41 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
 
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
     l1VotePool._jumpToProposalEnd(_proposalId, 1);
+
+    vm.prank(L1_CHAIN.wormholeRelayer);
+    vm.expectRevert("Governor: vote not currently active");
+    l1VotePool.receiveWormholeMessages(
+      abi.encode(_proposalId, _l2NewAgainst, _l2NewFor, _l2NewAbstain),
+      new bytes[](0),
+      bytes32(uint256(uint160(address(l2VoteAggregator)))),
+      L2_CHAIN.wormholeChainId,
+      bytes32(""),
+      false
+    );
+  }
+
+  function testFuzz_RevertWhen_BridgeReceivedWhenCancelled(
+    uint32 _l2Against,
+    uint32 _l2For,
+    uint32 _l2Abstain,
+    uint32 _l2NewAgainst,
+    uint32 _l2NewFor,
+    uint32 _l2NewAbstain
+  ) public {
+    _l2NewAgainst = uint32(bound(_l2NewAgainst, 0, _l2Against));
+    _l2NewFor = uint32(bound(_l2NewFor, 0, _l2For));
+    _l2NewAbstain = uint32(bound(_l2NewAbstain, 0, _l2Abstain));
+
+    vm.selectFork(targetFork);
+
+    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2For + _l2Abstain);
+    l1Erc20.mint(address(this), uint96(_l2Against) + _l2For + _l2Abstain);
+    l1Erc20.delegate(address(l1VotePool));
+
+    uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
+    IGovernor.ProposalState state = l1VotePool.governor().state(_proposalId);
+    l1VotePool.cancel(address(l1Erc20));
+    l1VotePool._jumpToActiveProposal(_proposalId);
 
     vm.prank(L1_CHAIN.wormholeRelayer);
     vm.expectRevert("Governor: vote not currently active");
