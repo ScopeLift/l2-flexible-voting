@@ -72,7 +72,12 @@ contract ProposalThreshold is L2VoteAggregatorBase {
   }
 }
 
-// State tests
+contract Quorum is L2VoteAggregatorBase {
+  function test_CorrectlyReturnProposalThreshold() public {
+    uint256 quorum = voteAggregator.quorum(1);
+    assertEq(quorum, 0, "Quorum should be 0 as we do not support this method.");
+  }
+}
 
 contract GetVotes is L2VoteAggregatorBase {
   function test_CorrectlyReturnGetVotes(address addr, uint256 blockNumber) public {
@@ -548,6 +553,7 @@ contract CastVoteBySig is L2VoteAggregatorBase {
     uint256 proposalId = 1;
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.Abstain;
 
+    vm.prank(voterAddress);
     l2Erc20.mint(voterAddress, _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
@@ -584,7 +590,7 @@ contract CastVoteBySig is L2VoteAggregatorBase {
 
     (uint8 _v, bytes32 _r, bytes32 _s) = _signVoteMessage(proposalId, uint8(_voteType));
 
-    voteAggregator.castVoteWithReason(1, _voteType, _v, _r, _s);
+    voteAggregator.castVoteBySig(1, _voteType, _v, _r, _s);
     (, uint256 forVotes,) = voteAggregator.proposalVotes(1);
 
     assertEq(forVotes, _amount, "Votes for is not correct");
