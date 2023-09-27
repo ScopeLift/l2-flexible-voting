@@ -61,11 +61,53 @@ contract GetVotes is L2VoteAggregatorBase {
 }
 
 contract State is L2VoteAggregatorBase {
-   function testFuzz_ReturnStatusBeforeVoteStart(uint256 _proposalId, uint128 _against, uint128 _for, uint128 _abstain) public {
+   function testFuzz_ReturnStatusBeforeVoteStart(uint256 _proposalId, uint32 _timeToProposalEnd) public {
      vm.assume(_proposalId != 0);
-     voteAggregator.createProposalVote(_proposalId, _against, _for, _abstain);     /// use metadata to create the proposaljj
+     vm.assume(_proposalId != 1);
+     vm.assume(_timeToProposalEnd > voteAggregator.CAST_VOTE_WINDOW());
+
+     vm.roll(block.number + 1);
+     GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(_proposalId, _timeToProposalEnd);
+
+     vm.roll(block.number - 1);
      L2VoteAggregator.ProposalState state = voteAggregator.state(_proposalId);
      assertEq(uint8(state), uint8(L2VoteAggregator.ProposalState.Pending), "The status before vote start should be pending");
+  }
+
+   function testFuzz_ReturnStatusWhileVoteActive(uint256 _proposalId, uint32 _timeToProposalEnd) public {
+     vm.assume(_proposalId != 0);
+     vm.assume(_proposalId != 1);
+     vm.assume(_timeToProposalEnd > voteAggregator.CAST_VOTE_WINDOW());
+
+     GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(_proposalId, _timeToProposalEnd);
+
+     vm.roll(block.number + _timeToProposalEnd - voteAggregator.CAST_VOTE_WINDOW()); // Proposal is active
+     L2VoteAggregator.ProposalState state = voteAggregator.state(_proposalId);
+     assertEq(uint8(state), uint8(L2VoteAggregator.ProposalState.Active), "The status before vote start should be active");
+  }
+
+   function testFuzz_ReturnStatusWhileIsCancelled(uint256 _proposalId, uint32 _timeToProposalEnd) public {
+     vm.assume(_proposalId != 0);
+     vm.assume(_proposalId != 1);
+     _timeToProposalEnd = uint32(bound(_timeToProposalEnd, voteAggregator.CAST_VOTE_WINDOW(), type(uint32).max));
+
+     GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(_proposalId, _timeToProposalEnd, true);
+
+     vm.roll(block.number + _timeToProposalEnd - voteAggregator.CAST_VOTE_WINDOW()); // Proposal is cancelled
+     L2VoteAggregator.ProposalState state = voteAggregator.state(_proposalId);
+     assertEq(uint8(state), uint8(L2VoteAggregator.ProposalState.Cancelled), "The status before vote start should be cancelled");
+  }
+
+   function testFuzz_ReturnStatusWhileIsExpired(uint256 _proposalId, uint32 _timeToProposalEnd) public {
+     vm.assume(_proposalId != 0);
+     vm.assume(_proposalId != 1);
+     _timeToProposalEnd = uint32(bound(_timeToProposalEnd, voteAggregator.CAST_VOTE_WINDOW(), type(uint32).max));
+
+     GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(_proposalId, _timeToProposalEnd, false);
+
+     vm.roll(block.number + _timeToProposalEnd); // Proposal is expired
+     L2VoteAggregator.ProposalState state = voteAggregator.state(_proposalId);
+     assertEq(uint8(state), uint8(L2VoteAggregator.ProposalState.Expired), "The status before vote start should be expired");
   }
 }
 
