@@ -174,7 +174,8 @@ abstract contract L2VoteAggregator is EIP712 {
     return _castVote(proposalId, msg.sender, support, "");
   }
 
-  /// @notice Where a user can express their vote based on their L2 token voting power, and provide a reason.
+  /// @notice Where a user can express their vote based on their L2 token voting power, and provide
+  /// a reason.
   /// @param proposalId The id of the proposal to vote on.
   /// @param support The type of vote to cast.
   /// @param reason The reason the vote was cast.
@@ -186,7 +187,8 @@ abstract contract L2VoteAggregator is EIP712 {
     return _castVote(proposalId, msg.sender, support, reason);
   }
 
-  /// @notice Where a user can express their vote based on their L2 token voting power using  a signature.
+  /// @notice Where a user can express their vote based on their L2 token voting power using  a
+  /// signature.
   /// @param proposalId The id of the proposal to vote on.
   /// @param support The type of vote to cast.
   function castVoteBySig(uint256 proposalId, VoteType support, uint8 v, bytes32 r, bytes32 s)
