@@ -9,20 +9,19 @@ import {Constants} from "test/Constants.sol";
 
 /// @dev This script will create an L1 and L2 governor metadata contract, and have the L1 contract
 /// pass a proposal to the L2 metadata contract.
-contract SendProposalToL2 is Script, Constants {
+contract WormholeSendProposalToL2 is Script, Constants {
   using stdJson for string;
 
   function run() public {
-    string memory governorMetadataDeploy =
-      "broadcast/multi/DeployGovernorMetadata.s.sol-latest/run.json";
-    string memory json = vm.readFile(governorMetadataDeploy);
-    address governorMock = json.readAddress(".deployments[1].transactions[0].contractAddress");
+    string memory deployFile = "broadcast/multi/WormholeL2FlexibleVotingDeploy.s.sol-latest/run.json"; // multi deployment
+    string memory deployJson = vm.readFile(deployFile);
 
-    string memory tokenFile = "broadcast/DeployFakeERC20.s.sol/43113/run-latest.json";
-    string memory tokenJson = vm.readFile(tokenFile);
-    address governorErc20 = tokenJson.readAddress(".transactions[0].contractAddress");
+
+    address governorMock = deployJson.readAddress(".deployments[0].transactions[1].contractAddress");
+
+    address governorErc20 = deployJson.readAddress(".deployments[0].transactions[2].contractAddress");
     address l1GovernorMetadataBridge =
-      json.readAddress(".deployments[1].transactions[2].contractAddress");
+      deployJson.readAddress(".deployments[0].transactions[3].contractAddress");
 
     setFallbackToDefaultRpcUrls(false);
     vm.createSelectFork(L1_CHAIN.rpcUrl);
@@ -50,6 +49,6 @@ contract SendProposalToL2 is Script, Constants {
 
     // Bridge proposal from the L1 to the L2
     vm.broadcast();
-    metadataBridge.bridge{value: cost}(proposalId);
+    metadataBridge.bridgeProposalMetadata{value: cost}(proposalId);
   }
 }

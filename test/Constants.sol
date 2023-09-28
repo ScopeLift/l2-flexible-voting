@@ -50,13 +50,13 @@ contract Constants is Test {
       wormholeChainId: 6,
       wormholeRelayer: 0xA3cF45939bD6260bcFe3D66bc73d60f19e49a8BB,
       chainId: 43_113,
-      rpcUrl: vm.envOr("POLYGON_MUMBAI_RPC_URL", string("https://api.avax-test.network/ext/bc/C/rpc"))
+      rpcUrl: vm.envOr("AVALANCHE_FUJI_RPC_URL", string("https://api.avax-test.network/ext/bc/C/rpc"))
     });
     chainInfos[80_001] = ChainConfig({
       wormholeChainId: 5,
       wormholeRelayer: 0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0,
       chainId: 80_001,
-      rpcUrl: vm.envOr("AVALANCHE_FUJI_RPC_URL", string("https://rpc.ankr.com/polygon_mumbai"))
+      rpcUrl: vm.envOr("POLYGON_MUMBAI_RPC_URL", string("https://rpc.ankr.com/polygon_mumbai"))
     });
   }
 
