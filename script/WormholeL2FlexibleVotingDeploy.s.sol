@@ -1,19 +1,8 @@
-// Chains can be set through environment variable
-// Constructor args as well
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
 import {WormholeL1GovernorMetadataBridge} from "src/WormholeL1GovernorMetadataBridge.sol";
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
-
-// Steps
-// 1. Deploy L1 token
-// 2. Deploy L1 bridge
-// 3. Deploy L1 Metadata
-// 4. Deploy L2 Token
-// 5. Deploy L2 Vote aggregator
-// 6. Deploy L2 Governor Metadata
 
 import {Script, stdJson} from "forge-std/Script.sol";
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
@@ -27,7 +16,7 @@ import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {Constants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
-/// @notice Deploy L1 bridge and corresponding token to be minted on L2
+/// @notice Deploy all the necessary components for the L2 Flexible Voting
 contract WormholeL2FlexibleVotingDeploy is Script, Constants {
   using stdJson for string;
 
@@ -56,19 +45,17 @@ contract WormholeL2FlexibleVotingDeploy is Script, Constants {
     }
 
     // Create L1 bridge that mints the L2 token
-    // TODO Make owner and token environment variables
     vm.broadcast();
     WormholeL1ERC20Bridge l1TokenBridge =
     new WormholeL1ERC20Bridge(L1_TOKEN_ADDRESS, L1_CHAIN.wormholeRelayer, GOVERNOR_ADDRESS, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, CONTRACT_OWNER);
 
+    // Create L1 metadata bridge that sends proposal metadata to L2
     vm.broadcast();
     WormholeL1GovernorMetadataBridge l1MetadataBridge =
     new WormholeL1GovernorMetadataBridge(GOVERNOR_ADDRESS, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
 
     uint256 l1ForkId = vm.createSelectFork(L2_CHAIN.rpcUrl);
 
-    // Create L1 block contract=
-    // TODO: Make L1 block configurable
     if (L1_BLOCK_ADDRESS == address(0)) {
       vm.broadcast();
       L1Block l1Block = new L1Block();
@@ -76,7 +63,6 @@ contract WormholeL2FlexibleVotingDeploy is Script, Constants {
     }
 
     // Deploy the L2 metadata contract
-    // TODO: Add Ownrer as a configurable variable
     vm.broadcast();
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, CONTRACT_OWNER);
