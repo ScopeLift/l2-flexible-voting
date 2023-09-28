@@ -13,13 +13,14 @@ contract WormholeSendProposalToL2 is Script, Constants {
   using stdJson for string;
 
   function run() public {
-    string memory deployFile = "broadcast/multi/WormholeL2FlexibleVotingDeploy.s.sol-latest/run.json"; // multi deployment
+    string memory deployFile =
+      "broadcast/multi/WormholeL2FlexibleVotingDeploy.s.sol-latest/run.json"; // multi deployment
     string memory deployJson = vm.readFile(deployFile);
-
 
     address governorMock = deployJson.readAddress(".deployments[0].transactions[1].contractAddress");
 
-    address governorErc20 = deployJson.readAddress(".deployments[0].transactions[2].contractAddress");
+    address governorErc20 =
+      deployJson.readAddress(".deployments[0].transactions[2].contractAddress");
     address l1GovernorMetadataBridge =
       deployJson.readAddress(".deployments[0].transactions[3].contractAddress");
 
