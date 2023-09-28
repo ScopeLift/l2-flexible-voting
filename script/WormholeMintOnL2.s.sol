@@ -14,11 +14,13 @@ contract WormholeMintOnL2 is Script, Constants {
   using stdJson for string;
 
   function run() public {
-    string memory deployFile = "broadcast/multi/WormholeL2FlexibleVotingDeploy.s.sol-latest/run.json"; // multi deployment
+    string memory deployFile =
+      "broadcast/multi/WormholeL2FlexibleVotingDeploy.s.sol-latest/run.json"; // multi deployment
     string memory deployJson = vm.readFile(deployFile);
 
     // Get L1 bridge token address
-    address deployedL1Token = deployJson.readAddress(".deployments[0].transactions[0].contractAddress");
+    address deployedL1Token =
+      deployJson.readAddress(".deployments[0].transactions[0].contractAddress");
 
     // Get L1 bridge address
     address l1Bridge = deployJson.readAddress(".deployments[0].transactions[2].contractAddress");
