@@ -22,7 +22,7 @@ contract WormholeL2FlexibleVotingDeploy is Script, Constants {
 
   function run() public {
     setFallbackToDefaultRpcUrls(false);
-    vm.createSelectFork(L1_CHAIN.rpcUrl);
+
     address GOVERNOR_ADDRESS = vm.envOr("DEPLOY_GOVERNOR", address(0));
     address L1_TOKEN_ADDRESS = vm.envOr("L1_TOKEN_ADDRESS", address(0));
     address L1_BLOCK_ADDRESS = vm.envOr("L1_BLOCK_ADDRESS", address(0));
@@ -30,6 +30,7 @@ contract WormholeL2FlexibleVotingDeploy is Script, Constants {
     string memory L2_TOKEN_NAME = vm.envOr("L2_TOKEN_NAME", string("Scopeapotomus"));
     string memory L2_TOKEN_SYMBOL = vm.envOr("L2_TOKEN_SYMBOL", string("SCOPE"));
 
+    uint256 l1ForkId = vm.createSelectFork(L1_CHAIN.rpcUrl);
     // Deploy L1 token on is not provided
     if (L1_TOKEN_ADDRESS == address(0)) {
       vm.broadcast();
@@ -54,7 +55,7 @@ contract WormholeL2FlexibleVotingDeploy is Script, Constants {
     WormholeL1GovernorMetadataBridge l1MetadataBridge =
     new WormholeL1GovernorMetadataBridge(GOVERNOR_ADDRESS, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
 
-    uint256 l1ForkId = vm.createSelectFork(L2_CHAIN.rpcUrl);
+    vm.createSelectFork(L2_CHAIN.rpcUrl);
 
     if (L1_BLOCK_ADDRESS == address(0)) {
       vm.broadcast();
