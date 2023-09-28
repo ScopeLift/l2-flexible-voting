@@ -31,9 +31,10 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
   function testFuzz_CorrectlySaveProposalMetadata(
     uint256 proposalId,
     uint256 l1VoteStart,
-    uint256 l1VoteEnd
+    uint256 l1VoteEnd,
+    bool isCancelled
   ) public {
-    bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd);
+    bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd, isCancelled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       payload,
@@ -45,19 +46,23 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     L2GovernorMetadata.Proposal memory l2Proposal = l2GovernorMetadata.getProposal(proposalId);
     assertEq(l2Proposal.voteStart, l1VoteStart, "Vote start has been incorrectly set");
     assertEq(l2Proposal.voteEnd, l1VoteEnd, "Vote start has been incorrectly set");
+    assertEq(l2Proposal.isCancelled, isCancelled, "Canceled status of the vote is incorrect");
   }
 
   function testFuzz_CorrectlySaveProposalMetadataForTwoProposals(
     uint256 firstProposalId,
     uint256 firstVoteStart,
     uint256 firstVoteEnd,
+    bool firstCancelled,
     uint256 secondProposalId,
     uint256 secondVoteStart,
-    uint256 secondVoteEnd
+    uint256 secondVoteEnd,
+    bool secondCancelled
   ) public {
     vm.assume(firstProposalId != secondProposalId);
 
-    bytes memory firstPayload = abi.encode(firstProposalId, firstVoteStart, firstVoteEnd);
+    bytes memory firstPayload =
+      abi.encode(firstProposalId, firstVoteStart, firstVoteEnd, firstCancelled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       firstPayload,
@@ -67,7 +72,8 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
       bytes32("")
     );
 
-    bytes memory secondPayload = abi.encode(secondProposalId, secondVoteStart, secondVoteEnd);
+    bytes memory secondPayload =
+      abi.encode(secondProposalId, secondVoteStart, secondVoteEnd, secondCancelled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       secondPayload,
@@ -85,6 +91,11 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     assertEq(
       firstProposal.voteEnd, firstVoteEnd, "First proposal vote start has been incorrectly set"
     );
+    assertEq(
+      firstProposal.isCancelled,
+      firstCancelled,
+      "First proposal cancelled status has been incorrectly set"
+    );
 
     L2GovernorMetadata.Proposal memory secondProposal =
       l2GovernorMetadata.getProposal(secondProposalId);
@@ -96,6 +107,43 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     assertEq(
       secondProposal.voteEnd, secondVoteEnd, "Second proposal vote start has been incorrectly set"
     );
+    assertEq(
+      secondProposal.isCancelled,
+      secondCancelled,
+      "Second proposal cancelled status has been incorrectly set"
+    );
+  }
+
+  function testFuzz_CorrectlyUpdateProposalToCancelled(
+    uint256 proposalId,
+    uint256 voteStart,
+    uint256 voteEnd
+  ) public {
+    bytes memory payload = abi.encode(proposalId, voteStart, voteEnd, false);
+    vm.prank(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata.receiveWormholeMessages(
+      payload,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
+    );
+
+    bytes memory secondPayload = abi.encode(proposalId, voteStart, voteEnd, true);
+    vm.prank(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata.receiveWormholeMessages(
+      secondPayload,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("0x1")
+    );
+
+    L2GovernorMetadata.Proposal memory proposal = l2GovernorMetadata.getProposal(proposalId);
+
+    assertEq(proposal.voteStart, voteStart, "Proposal vote start has been incorrectly set");
+    assertEq(proposal.voteEnd, voteEnd, "Proposal vote start has been incorrectly set");
+    assertEq(proposal.isCancelled, true, "Cancelled status has been incorrectly set");
   }
 
   function testFuzz_RevertIf_NotCalledByRelayer(

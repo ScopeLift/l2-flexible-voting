@@ -142,6 +142,6 @@ abstract contract L2VoteAggregator {
 
     // TODO: Check if this is inclusive
     return L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId)
-      && L1_BLOCK.number() >= proposal.voteStart;
+      && L1_BLOCK.number() >= proposal.voteStart && !proposal.isCancelled;
   }
 }

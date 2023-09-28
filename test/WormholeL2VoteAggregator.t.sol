@@ -172,6 +172,26 @@ contract CastVote is L2VoteAggregatorTest {
     l2VoteAggregator.castVote(1, _voteType);
   }
 
+  function testFuzz_RevertWhen_ProposalCancelled(
+    uint96 _amount,
+    uint8 _support,
+    uint256 _proposalId
+  ) public {
+    vm.assume(_amount != 0);
+    vm.assume(_support < 3);
+    L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
+    l2Erc20.mint(address(this), _amount);
+
+    // In the setup we use a mock contract rather than the actual contract
+    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
+      address(l2VoteAggregator.GOVERNOR_METADATA())
+    ).createProposal(_proposalId, 1000, true);
+
+    vm.roll(l2Proposal.voteStart + 1);
+    vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
+    l2VoteAggregator.castVote(_proposalId, _voteType);
+  }
+
   function testFuzz_RevertWhen_AfterCastWindow(
     uint96 _amount,
     uint8 _support,
@@ -318,9 +338,12 @@ contract BridgeVote is L2VoteAggregatorTest {
 }
 
 contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
-  function testFuzz_InternalVotingPeriod(uint256 proposalId, uint256 voteStart, uint256 voteEnd)
-    public
-  {
+  function testFuzz_InternalVotingPeriod(
+    uint256 proposalId,
+    uint256 voteStart,
+    uint256 voteEnd,
+    bool isCancelled
+  ) public {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
 
@@ -333,7 +356,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
     voteEnd = bound(voteEnd, aggregator.CAST_VOTE_WINDOW(), type(uint256).max);
-    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
+    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, isCancelled);
 
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
@@ -366,7 +389,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     voteStart = uint64(bound(voteStart, 0, block.number));
     voteEnd = uint64(bound(voteEnd, block.number + aggregator.CAST_VOTE_WINDOW(), type(uint64).max));
 
-    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
+    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, false);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata,
@@ -385,7 +408,8 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
   function testFuzz_ProposalVoteIsInactiveBefore(
     uint256 proposalId,
     uint64 voteStart,
-    uint64 voteEnd
+    uint64 voteEnd,
+    bool isCancelled
   ) public {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
@@ -398,13 +422,44 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     L2VoteAggregator aggregator =
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
-    vm.assume(voteStart > 0); // Underflow because we subtract 1
-    vm.assume(voteStart > block.number); // Block number must
-    vm.assume(voteEnd > aggregator.CAST_VOTE_WINDOW()); // Without we have an underflow
+    vm.assume(voteStart > 0); // Prevent underflow because we subtract 1
+    vm.assume(voteStart > block.number); // Block number must be greater than vote start
+    vm.assume(voteEnd > aggregator.CAST_VOTE_WINDOW()); //  Prevent underflow
     vm.assume(voteEnd - aggregator.CAST_VOTE_WINDOW() > voteStart); // Proposal must have a voting
       // block before the cast
 
-    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd);
+    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, isCancelled);
+    vm.prank(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadata.receiveWormholeMessages(
+      proposalCalldata,
+      new bytes[](0),
+      MOCK_WORMHOLE_SERIALIZED_ADDRESS,
+      L1_CHAIN.wormholeChainId,
+      bytes32("")
+    );
+
+    bool active = aggregator.proposalVoteActive(proposalId);
+    assertFalse(active, "Proposal is supposed to be inactive");
+  }
+
+  function testFuzz_ProposalVoteIsCancelled(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
+    public
+  {
+    WormholeL2GovernorMetadata l2GovernorMetadata =
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
+    vm.prank(l2GovernorMetadata.owner());
+    l2GovernorMetadata.setRegisteredSender(
+      L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
+    );
+
+    L2VoteAggregator aggregator =
+    new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+
+    vm.assume(voteStart > 0); // Prevent underflow because we subtract 1
+    vm.assume(voteStart > block.number); // Block number must be greater than vote start
+    vm.assume(voteEnd > aggregator.CAST_VOTE_WINDOW()); // Prevent underflow
+
+    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, true);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata,
