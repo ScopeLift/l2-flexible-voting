@@ -112,6 +112,6 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
       REFUND_CHAIN,
       msg.sender
     );
-    emit TokenBridged(msg.sender, account, TARGET_CHAIN, amount, L1_TOKEN_ADDRESS);
+    emit TokenBridged(msg.sender, account, TARGET_CHAIN, amount, L1_BRIDGE_ADDRESS);
   }
 }
