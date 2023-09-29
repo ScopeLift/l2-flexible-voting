@@ -24,6 +24,14 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @dev Contract is already initialized with an L2 token.
   error AlreadyInitialized();
 
+  event TokenBridged(
+    address indexed account,
+    address indexed targetAddress,
+    uint16 targetChain,
+    uint256 amount,
+    address targetToken
+  );
+
   /// @param _name The name of the ERC20 token.
   /// @param _symbol The symbol of the ERC20 token.
   /// @param _relayer The address of the Wormhole relayer.
@@ -95,7 +103,7 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
     _burn(msg.sender, amount);
     bytes memory withdrawCalldata = abi.encode(account, amount);
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
-    return WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
+    sequence = WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,
       L1_TOKEN_ADDRESS,
       withdrawCalldata,
@@ -104,5 +112,6 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
       REFUND_CHAIN,
       msg.sender
     );
+    emit TokenBridged(msg.sender, account, TARGET_CHAIN, amount, L1_TOKEN_ADDRESS);
   }
 }

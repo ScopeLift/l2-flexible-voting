@@ -18,6 +18,16 @@ contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
   WormholeL1ERC20Bridge l1Erc20Bridge;
 
+  event TokenBridged(
+    address indexed account,
+    address indexed targetAddress,
+    uint16 targetChain,
+    uint256 amount,
+    address targetToken
+  );
+
+  event Withdraw(address indexed account, uint256 amount);
+
   constructor() {
     setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
@@ -160,9 +170,12 @@ contract L1Unlock is L2ERC20Test {
 
     uint256 cost = l2Erc20.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
     vm.deal(account, 1 ether);
+    vm.expectEmit();
+    emit TokenBridged(account, account, L1_CHAIN.wormholeChainId, amount, address(l1Erc20Bridge));
     vm.prank(account);
     l2Erc20.l1Unlock{value: cost}(account, amount);
 
+    emit Withdraw(account, amount);
     performDelivery();
 
     vm.selectFork(targetFork);

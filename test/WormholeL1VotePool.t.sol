@@ -155,6 +155,17 @@ contract L1VotePoolTest is Constants, WormholeRelayerBasicTest {
   FakeERC20 l2Erc20;
   FakeERC20 l1Erc20;
 
+  event VoteCast(
+    address indexed voter,
+    uint256 indexed proposalId,
+    uint256 voteAgainst,
+    uint256 voteFor,
+    uint256 voteAbstain
+  );
+  event VoteBridged(
+    uint256 indexed proposalId, uint256 voteAgainst, uint256 voteFor, uint256 voteAbstain
+  );
+
   constructor() {
     setForkChains(TESTNET, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
@@ -196,6 +207,7 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     uint32 _l2Abstain
   ) public {
     vm.selectFork(targetFork);
+    vm.assume(uint96(_l2Against) + _l2For + _l2Abstain != 0);
 
     l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2For + _l2Abstain);
     l1Erc20.mint(address(this), uint96(_l2Against) + _l2For + _l2Abstain);
@@ -214,8 +226,12 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
       _proposalId, 3000
     );
+    vm.expectEmit();
+    emit VoteBridged(_proposalId, _l2Against, _l2For, _l2Abstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
 
+    vm.expectEmit();
+    emit VoteCast(L1_CHAIN.wormholeRelayer, _proposalId, _l2Against, _l2For, _l2Abstain);
     performDelivery();
 
     vm.selectFork(targetFork);
@@ -258,8 +274,18 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
       _proposalId, 3000
     );
+    vm.expectEmit();
+    emit VoteBridged(_proposalId, _l2NewAgainst, _l2NewFor, _l2NewAbstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
 
+    vm.expectEmit();
+    emit VoteCast(
+      L1_CHAIN.wormholeRelayer,
+      _proposalId,
+      _l2NewAgainst - _l2Against,
+      _l2NewFor - _l2For,
+      _l2NewAbstain - _l2Abstain
+    );
     performDelivery();
 
     vm.selectFork(targetFork);

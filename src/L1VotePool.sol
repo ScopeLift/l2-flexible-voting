@@ -7,6 +7,14 @@ abstract contract L1VotePool {
   /// @notice The address of the L1 Governor contract.
   IGovernor public governor;
 
+  event VoteCast(
+    address indexed voter,
+    uint256 indexed proposalId,
+    uint256 voteAgainst,
+    uint256 voteFor,
+    uint256 voteAbstain
+  );
+
   /// @dev Thrown when proposal does not exist.
   error MissingProposal();
 
@@ -41,5 +49,7 @@ abstract contract L1VotePool {
     governor.castVoteWithReasonAndParams(
       proposalId, unusedSupportParam, "rolled-up vote from governance L2 token holders", votes
     );
+
+    emit VoteCast(msg.sender, proposalId, vote.againstVotes, vote.forVotes, vote.abstainVotes);
   }
 }

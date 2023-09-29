@@ -24,6 +24,15 @@ contract WormholeL1GovernorMetadataBridge is WormholeSender {
   /// @dev Contract is already initialized with an L2 token.
   error AlreadyInitialized();
 
+  event ProposalMetadataBridged(
+    uint16 indexed targetChain,
+    address indexed targetGovernor,
+    uint256 indexed proposalId,
+    uint256 voteStart,
+    uint256 voteEnd,
+    bool isCancelled
+  );
+
   /// @param _governor The address of the L1 governor contract.
   /// @param _relayer The address of the L1 Wormhole relayer contract.
   /// @param _sourceChain The chain id sending the wormhole messages.
@@ -50,11 +59,12 @@ contract WormholeL1GovernorMetadataBridge is WormholeSender {
     if (voteStart == 0) revert InvalidProposalId();
     uint256 voteEnd = GOVERNOR.proposalDeadline(proposalId);
 
-    bool _cancelled = GOVERNOR.state(proposalId) == IGovernor.ProposalState.Canceled;
+    bool isCancelled = GOVERNOR.state(proposalId) == IGovernor.ProposalState.Canceled;
 
-    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, _cancelled);
+    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, isCancelled);
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
-    return WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
+
+    sequence = WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,
       L2_GOVERNOR_ADDRESS,
       proposalCalldata,
@@ -62,6 +72,9 @@ contract WormholeL1GovernorMetadataBridge is WormholeSender {
       GAS_LIMIT,
       REFUND_CHAIN,
       msg.sender
+    );
+    emit ProposalMetadataBridged(
+      TARGET_CHAIN, L2_GOVERNOR_ADDRESS, proposalId, voteStart, voteEnd, isCancelled
     );
   }
 }

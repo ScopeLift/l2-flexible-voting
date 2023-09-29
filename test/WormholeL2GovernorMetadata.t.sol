@@ -11,6 +11,10 @@ import {WormholeReceiver} from "src/WormholeReceiver.sol";
 contract L2GovernorMetadataTest is Constants {
   WormholeL2GovernorMetadata l2GovernorMetadata;
 
+  event ProposalAdded(
+    uint256 indexed proposalId, uint256 voteStart, uint256 voteEnd, bool isCancelled
+  );
+
   function setUp() public {
     l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
     vm.prank(l2GovernorMetadata.owner());
@@ -35,6 +39,8 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     bool isCancelled
   ) public {
     bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd, isCancelled);
+    vm.expectEmit();
+    emit ProposalAdded(proposalId, l1VoteStart, l1VoteEnd, isCancelled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       payload,
@@ -63,6 +69,8 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
 
     bytes memory firstPayload =
       abi.encode(firstProposalId, firstVoteStart, firstVoteEnd, firstCancelled);
+    vm.expectEmit();
+    emit ProposalAdded(firstProposalId, firstVoteStart, firstVoteEnd, firstCancelled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       firstPayload,
@@ -74,6 +82,8 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
 
     bytes memory secondPayload =
       abi.encode(secondProposalId, secondVoteStart, secondVoteEnd, secondCancelled);
+    vm.expectEmit();
+    emit ProposalAdded(secondProposalId, secondVoteStart, secondVoteEnd, secondCancelled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       secondPayload,

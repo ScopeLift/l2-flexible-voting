@@ -22,11 +22,16 @@ abstract contract WormholeReceiver is Ownable, WormholeBase {
   /// @dev A mapping of message hash to a boolean indicating delivery.
   mapping(bytes32 => bool) public seenDeliveryVaaHashes;
 
+  event RegisteredSenderSet(
+    address indexed owner, uint16 indexed sourceChain, bytes32 indexed sourceAddress
+  );
+
   constructor(address owner) Ownable() {
     transferOwnership(owner);
   }
 
   /// @notice The function the wormhole relayer calls when the DeliveryProvider competes a delivery.
+  /// @dev Implementation should emit `WormholeMessageReceived`.
   /// @param payload The payload that was sent to in the delivery request.
   /// @param additionalVaas The additional VAAs that requested to be relayed.
   /// @param sourceAddress Address that requested this delivery.
@@ -45,6 +50,7 @@ abstract contract WormholeReceiver is Ownable, WormholeBase {
   /// @param sourceAddress The source address for receiving a wormhole message.
   function setRegisteredSender(uint16 sourceChain, bytes32 sourceAddress) public onlyOwner {
     registeredSenders[sourceChain][sourceAddress] = true;
+    emit RegisteredSenderSet(msg.sender, sourceChain, sourceAddress);
   }
 
   /// @dev Revert when the msg.sender is not the wormhole relayer.

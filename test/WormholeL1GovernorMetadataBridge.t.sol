@@ -2,7 +2,6 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {Governor, IGovernor} from "openzeppelin/governance/Governor.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
 
@@ -18,6 +17,18 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   GovernorMock governorMock;
   WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge;
   WormholeL2GovernorMetadata l2GovernorMetadata;
+
+  event ProposalAdded(
+    uint256 indexed proposalId, uint256 voteStart, uint256 voteEnd, bool isCancelled
+  );
+  event ProposalMetadataBridged(
+    uint16 indexed targetChain,
+    address indexed targetGovernor,
+    uint256 indexed proposalId,
+    uint256 voteStart,
+    uint256 voteEnd,
+    bool isCancelled
+  );
 
   constructor() {
     setForkChains(TESTNET, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
@@ -73,7 +84,7 @@ contract Initialize is L1GovernorMetadataBridgeTest {
 contract BridgeProposalMetadata is L1GovernorMetadataBridgeTest {
   function testFork_CorrectlyBridgeProposal(uint224 _amount) public {
     l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
-    uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(L1_CHAIN.wormholeChainId);
+    uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(L2_CHAIN.wormholeChainId);
     vm.recordLogs();
 
     bytes memory proposalCalldata =
@@ -91,10 +102,21 @@ contract BridgeProposalMetadata is L1GovernorMetadataBridgeTest {
     uint256 proposalId =
       governorMock.propose(targets, values, calldatas, "Proposal: To inflate governance token");
 
+    vm.expectEmit();
+    emit ProposalMetadataBridged(
+      L2_CHAIN.wormholeChainId,
+      address(l2GovernorMetadata),
+      proposalId,
+      governorMock.proposalSnapshot(proposalId),
+      governorMock.proposalDeadline(proposalId),
+      false
+    );
     l1GovernorMetadataBridge.bridgeProposalMetadata{value: cost}(proposalId);
     uint256 l1VoteStart = governorMock.proposalSnapshot(proposalId);
     uint256 l1VoteEnd = governorMock.proposalDeadline(proposalId);
 
+    vm.expectEmit();
+    emit ProposalAdded(proposalId, l1VoteStart, l1VoteEnd, false);
     performDelivery();
 
     vm.selectFork(targetFork);
