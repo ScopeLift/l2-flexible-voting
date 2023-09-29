@@ -30,18 +30,35 @@ contract WormholeL2VoteAggregatorRouter {
   }
 
   function _castVote(bytes calldata msgData) internal {
-    if (msgData.length != 49) revert InvalidCalldata();
+    if (msgData.length != 4) revert InvalidCalldata();
     uint16 proposalId = uint16(bytes2(msgData[1:3]));
     uint8 support = uint8(bytes1(msgData[3:4]));
     L2_VOTE_AGGREGATOR.castVote(proposalId, L2VoteAggregator.VoteType(support));
   }
 
-  // proposalId
-  // funcId
-  // 1. castVote
+  function _castVoteWithReason(bytes calldata msgData) internal {
+    if (msgData.length != 36) revert InvalidCalldata();
+    uint16 proposalId = uint16(bytes2(msgData[1:3]));
+    uint8 support = uint8(bytes1(msgData[3:4]));
+	string memory reason = string(msgData[4:36]);
+    L2_VOTE_AGGREGATOR.castVoteWithReason(proposalId, L2VoteAggregator.VoteType(support), reason);
+  }
+
+  function _castVoteBySig(bytes calldata msgData) internal {
+    if (msgData.length != 69) revert InvalidCalldata();
+    uint16 proposalId = uint16(bytes2(msgData[1:3]));
+    uint8 support = uint8(bytes1(msgData[3:4]));
+	uint8 v = uint8(bytes1(msgData[4:5]));
+	bytes32 r = bytes32(msgData[5:37]);
+	bytes32 s = bytes32(msgData[37:69]);
+    L2_VOTE_AGGREGATOR.castVoteBySig(proposalId, L2VoteAggregator.VoteType(support), v, r, s);
+  }
+
   fallback() external payable {
     uint8 funcId = uint8(bytes1(msg.data[0:1]));
 	if (funcId == 1) _castVote(msg.data);
+	else if (funcId == 2) _castVoteWithReason(msg.data);
+	else if (funcId == 3) _castVoteBySig(msg.data);
 	else revert FunctionDoesNotExist();
   }
 }
