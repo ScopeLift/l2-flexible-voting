@@ -17,7 +17,7 @@ contract WormholeL2GovernorMetadata is L2GovernorMetadata, WormholeReceiver {
   /// @notice Receives a message from L1 and saves the proposal metadata.
   /// @param payload The payload that was sent to in the delivery request.
   function receiveWormholeMessages(
-    bytes memory payload,
+    bytes calldata payload,
     bytes[] memory,
     bytes32 sourceAddress,
     uint16 sourceChain,

@@ -38,7 +38,7 @@ abstract contract WormholeReceiver is Ownable, WormholeBase {
   /// @param sourceChain Chain that the delivery was requested from.
   /// @param deliveryHash Unique identifier of this delivery request.
   function receiveWormholeMessages(
-    bytes memory payload,
+    bytes calldata payload,
     bytes[] memory additionalVaas,
     bytes32 sourceAddress,
     uint16 sourceChain,

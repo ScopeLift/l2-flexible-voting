@@ -86,7 +86,7 @@ contract ReceiveWormholeMessages is L2ERC20Test {
 
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2Erc20.receiveWormholeMessages(
-      abi.encode(account, l1Amount),
+      abi.encodePacked(account, l1Amount),
       new bytes[](0),
       MOCK_WORMHOLE_SERIALIZED_ADDRESS,
       L1_CHAIN.wormholeChainId,
@@ -96,7 +96,7 @@ contract ReceiveWormholeMessages is L2ERC20Test {
     assertEq(l2Amount, l1Amount, "Amount after receive is incorrect");
   }
 
-  function testFuzz_RevertIf_NotCalledByRelayer(address account, uint256 amount, address caller)
+  function testFuzz_RevertIf_NotCalledByRelayer(address account, uint224 amount, address caller)
     public
   {
     vm.assume(caller != L2_CHAIN.wormholeRelayer);
@@ -149,7 +149,7 @@ contract CLOCK_MODE is L2ERC20Test {
 }
 
 contract L1Unlock is L2ERC20Test {
-  function testForkFuzz_CorrectlyWithdrawToken(address account, uint96 amount) public {
+  function testForkFuzz_CorrectlyWithdrawToken(address account, uint224 amount) public {
     vm.assume(account != address(0));
 
     vm.selectFork(targetFork);
@@ -161,7 +161,7 @@ contract L1Unlock is L2ERC20Test {
     vm.recordLogs();
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2Erc20.receiveWormholeMessages(
-      abi.encode(account, amount),
+      abi.encodePacked(account, amount),
       new bytes[](0),
       MOCK_WORMHOLE_SERIALIZED_ADDRESS,
       L1_CHAIN.wormholeChainId,
