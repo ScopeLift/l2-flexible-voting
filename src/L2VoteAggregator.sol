@@ -148,7 +148,7 @@ abstract contract L2VoteAggregator is EIP712 {
     else return ProposalState.Expired;
   }
 
-  /// @notice This function does not make sense in the L2 context, but we have added it to have
+  /// @notice This function does not make sense in the L2 context because it requires an L2 block as the second parameter rather than an L1 block. We added it to have
   /// compatibility with existing Governor tooling.
   function getVotes(address, uint256) external view virtual returns (uint256) {
     return 0;
