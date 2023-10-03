@@ -57,7 +57,7 @@ contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
   bytes32 l2VoteAggregatorWormholeAddress;
 
   event VoteCast(
-    address indexed voter, uint256 indexed proposalId, uint8 support, uint256 weight, string reason
+    address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
   );
 
   event VoteCast(

@@ -87,11 +87,7 @@ abstract contract L2VoteAggregator is EIP712 {
 
   /// @dev Emitted when a vote is cast on L2.
   event VoteCast(
-    address indexed voter,
-    uint256 indexed proposalId,
-    VoteType support,
-    uint256 weight,
-    string reason
+    address indexed voter, uint256 proposalId, VoteType support, uint256 weight, string reason
   );
 
   event VoteBridged(
@@ -161,7 +157,7 @@ abstract contract L2VoteAggregator is EIP712 {
   /// @notice This function does not make sense in the L2 context, but we have added it to have
   /// compatibility with existing Governor tooling.
   function propose(address[] memory, uint256[] memory, bytes[] memory, string memory)
-    external 
+    external
     virtual
     returns (uint256)
   {

@@ -36,7 +36,7 @@ contract L2VoteAggregatorBase is Test, Constants {
   L2VoteAggregatorHarness voteAggregator;
 
   event VoteCast(
-    address indexed voter, uint256 indexed proposalId, uint8 support, uint256 weight, string reason
+    address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
   );
 
   FakeERC20 l2Erc20;
