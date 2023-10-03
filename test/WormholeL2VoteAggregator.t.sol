@@ -152,7 +152,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     uint256 proposalId,
     uint256 voteStart,
     uint256 voteEnd,
-    bool isCancelled
+    bool isCanceled
   ) public {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
@@ -166,7 +166,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     new WormholeL2VoteAggregator(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
     voteEnd = bound(voteEnd, aggregator.CAST_VOTE_WINDOW(), type(uint256).max);
-    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, isCancelled);
+    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, isCanceled);
 
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
@@ -219,7 +219,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     uint256 proposalId,
     uint64 voteStart,
     uint64 voteEnd,
-    bool isCancelled
+    bool isCanceled
   ) public {
     WormholeL2GovernorMetadata l2GovernorMetadata =
       new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
@@ -238,7 +238,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     vm.assume(voteEnd - aggregator.CAST_VOTE_WINDOW() > voteStart); // Proposal must have a voting
       // block before the cast
 
-    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, isCancelled);
+    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, isCanceled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       proposalCalldata,
@@ -252,7 +252,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     assertFalse(active, "Proposal is supposed to be inactive");
   }
 
-  function testFuzz_ProposalVoteIsCancelled(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
+  function testFuzz_ProposalVoteIsCanceled(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
     public
   {
     WormholeL2GovernorMetadata l2GovernorMetadata =

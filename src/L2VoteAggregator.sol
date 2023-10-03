@@ -61,8 +61,12 @@ abstract contract L2VoteAggregator is EIP712 {
   enum ProposalState {
     Pending,
     Active,
-    Cancelled,
-    Expired
+    Canceled,
+    INVALID_Defeated,
+    INVALID_Succeeded,
+    INVALID_Queued,
+    Expired,
+    INVALID_Executed
   }
 
   /// @dev Data structure to store vote preferences expressed by depositors.
@@ -137,14 +141,14 @@ abstract contract L2VoteAggregator is EIP712 {
 
   // @notice Shows the state of of a proposal on L2. We only support a subset of the Governor
   // proposal states. If the vote has not started the state is pending, if voting has started it is
-  // active, if it has been cancelled then the state is cancelled, and if the voting has finished
-  // without it being cancelled we will mark it as expired. We use expired because users can no
+  // active, if it has been canceled then the state is canceled, and if the voting has finished
+  // without it being canceled we will mark it as expired. We use expired because users can no
   // longer vote and no other L2 action can be taken on the proposal.
   function state(uint256 proposalId) public view virtual returns (ProposalState) {
     L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
     if (VOTING_TOKEN.clock() < proposal.voteStart) return ProposalState.Pending;
     else if (proposalVoteActive(proposalId)) return ProposalState.Active;
-    else if (proposal.isCancelled) return ProposalState.Cancelled;
+    else if (proposal.isCanceled) return ProposalState.Canceled;
     else return ProposalState.Expired;
   }
 
@@ -269,6 +273,6 @@ abstract contract L2VoteAggregator is EIP712 {
 
     // TODO: Check if this is inclusive
     return L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId)
-      && L1_BLOCK.number() >= proposal.voteStart && !proposal.isCancelled;
+      && L1_BLOCK.number() >= proposal.voteStart && !proposal.isCanceled;
   }
 }

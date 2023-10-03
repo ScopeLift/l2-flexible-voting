@@ -30,7 +30,7 @@ contract WormholeL1GovernorMetadataBridge is WormholeSender {
     uint256 indexed proposalId,
     uint256 voteStart,
     uint256 voteEnd,
-    bool isCancelled
+    bool isCanceled
   );
 
   /// @param _governor The address of the L1 governor contract.
@@ -59,9 +59,9 @@ contract WormholeL1GovernorMetadataBridge is WormholeSender {
     if (voteStart == 0) revert InvalidProposalId();
     uint256 voteEnd = GOVERNOR.proposalDeadline(proposalId);
 
-    bool isCancelled = GOVERNOR.state(proposalId) == IGovernor.ProposalState.Canceled;
+    bool isCanceled = GOVERNOR.state(proposalId) == IGovernor.ProposalState.Canceled;
 
-    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, isCancelled);
+    bytes memory proposalCalldata = abi.encode(proposalId, voteStart, voteEnd, isCanceled);
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
 
     sequence = WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
@@ -74,7 +74,7 @@ contract WormholeL1GovernorMetadataBridge is WormholeSender {
       msg.sender
     );
     emit ProposalMetadataBridged(
-      TARGET_CHAIN, L2_GOVERNOR_ADDRESS, proposalId, voteStart, voteEnd, isCancelled
+      TARGET_CHAIN, L2_GOVERNOR_ADDRESS, proposalId, voteStart, voteEnd, isCanceled
     );
   }
 }

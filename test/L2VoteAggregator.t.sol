@@ -129,7 +129,7 @@ contract State is L2VoteAggregatorBase {
     );
   }
 
-  function testFuzz_ReturnStatusWhileIsCancelled(uint256 _proposalId, uint32 _timeToProposalEnd)
+  function testFuzz_ReturnStatusWhileIsCanceled(uint256 _proposalId, uint32 _timeToProposalEnd)
     public
   {
     vm.assume(_proposalId != 1); // Hardcoded proposal in mock
@@ -141,12 +141,10 @@ contract State is L2VoteAggregatorBase {
     );
 
     vm.roll(block.number + _timeToProposalEnd - voteAggregator.CAST_VOTE_WINDOW()); // Proposal is
-      // cancelled
+      // canceled
     L2VoteAggregator.ProposalState state = voteAggregator.state(_proposalId);
     assertEq(
-      uint8(state),
-      uint8(L2VoteAggregator.ProposalState.Cancelled),
-      "The status should be cancelled"
+      uint8(state), uint8(L2VoteAggregator.ProposalState.Canceled), "The status should be canceled"
     );
   }
 
@@ -179,11 +177,9 @@ contract CastVote is L2VoteAggregatorBase {
     voteAggregator.castVote(1, _voteType);
   }
 
-  function testFuzz_RevertWhen_ProposalCancelled(
-    uint96 _amount,
-    uint8 _support,
-    uint256 _proposalId
-  ) public {
+  function testFuzz_RevertWhen_ProposalCanceled(uint96 _amount, uint8 _support, uint256 _proposalId)
+    public
+  {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
@@ -324,7 +320,7 @@ contract CastVoteWithReason is L2VoteAggregatorBase {
     voteAggregator.castVoteWithReason(1, _voteType, reason);
   }
 
-  function testFuzz_RevertWhen_ProposalCancelled(
+  function testFuzz_RevertWhen_ProposalCanceled(
     uint96 _amount,
     uint8 _support,
     uint256 _proposalId,
@@ -497,11 +493,9 @@ contract CastVoteBySig is L2VoteAggregatorBase {
     voteAggregator.castVoteBySig(1, _voteType, _v, _r, _s);
   }
 
-  function testFuzz_RevertWhen_ProposalCancelled(
-    uint96 _amount,
-    uint8 _support,
-    uint256 _proposalId
-  ) public {
+  function testFuzz_RevertWhen_ProposalCanceled(uint96 _amount, uint8 _support, uint256 _proposalId)
+    public
+  {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
@@ -669,11 +663,9 @@ contract _CastVote is L2VoteAggregatorBase {
     voteAggregator.exposed_castVote(1, address(this), _voteType, "");
   }
 
-  function testFuzz_RevertWhen_ProposalCancelled(
-    uint96 _amount,
-    uint8 _support,
-    uint256 _proposalId
-  ) public {
+  function testFuzz_RevertWhen_ProposalCanceled(uint96 _amount, uint8 _support, uint256 _proposalId)
+    public
+  {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);

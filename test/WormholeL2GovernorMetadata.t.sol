@@ -12,7 +12,7 @@ contract L2GovernorMetadataTest is Constants {
   WormholeL2GovernorMetadata l2GovernorMetadata;
 
   event ProposalAdded(
-    uint256 indexed proposalId, uint256 voteStart, uint256 voteEnd, bool isCancelled
+    uint256 indexed proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled
   );
 
   function setUp() public {
@@ -36,11 +36,11 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     uint256 proposalId,
     uint256 l1VoteStart,
     uint256 l1VoteEnd,
-    bool isCancelled
+    bool isCanceled
   ) public {
-    bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd, isCancelled);
+    bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd, isCanceled);
     vm.expectEmit();
-    emit ProposalAdded(proposalId, l1VoteStart, l1VoteEnd, isCancelled);
+    emit ProposalAdded(proposalId, l1VoteStart, l1VoteEnd, isCanceled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       payload,
@@ -52,25 +52,25 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     L2GovernorMetadata.Proposal memory l2Proposal = l2GovernorMetadata.getProposal(proposalId);
     assertEq(l2Proposal.voteStart, l1VoteStart, "Vote start has been incorrectly set");
     assertEq(l2Proposal.voteEnd, l1VoteEnd, "Vote start has been incorrectly set");
-    assertEq(l2Proposal.isCancelled, isCancelled, "Canceled status of the vote is incorrect");
+    assertEq(l2Proposal.isCanceled, isCanceled, "Canceled status of the vote is incorrect");
   }
 
   function testFuzz_CorrectlySaveProposalMetadataForTwoProposals(
     uint256 firstProposalId,
     uint256 firstVoteStart,
     uint256 firstVoteEnd,
-    bool firstCancelled,
+    bool firstCanceled,
     uint256 secondProposalId,
     uint256 secondVoteStart,
     uint256 secondVoteEnd,
-    bool secondCancelled
+    bool secondCanceled
   ) public {
     vm.assume(firstProposalId != secondProposalId);
 
     bytes memory firstPayload =
-      abi.encode(firstProposalId, firstVoteStart, firstVoteEnd, firstCancelled);
+      abi.encode(firstProposalId, firstVoteStart, firstVoteEnd, firstCanceled);
     vm.expectEmit();
-    emit ProposalAdded(firstProposalId, firstVoteStart, firstVoteEnd, firstCancelled);
+    emit ProposalAdded(firstProposalId, firstVoteStart, firstVoteEnd, firstCanceled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       firstPayload,
@@ -81,9 +81,9 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     );
 
     bytes memory secondPayload =
-      abi.encode(secondProposalId, secondVoteStart, secondVoteEnd, secondCancelled);
+      abi.encode(secondProposalId, secondVoteStart, secondVoteEnd, secondCanceled);
     vm.expectEmit();
-    emit ProposalAdded(secondProposalId, secondVoteStart, secondVoteEnd, secondCancelled);
+    emit ProposalAdded(secondProposalId, secondVoteStart, secondVoteEnd, secondCanceled);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
       secondPayload,
@@ -102,8 +102,8 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
       firstProposal.voteEnd, firstVoteEnd, "First proposal vote start has been incorrectly set"
     );
     assertEq(
-      firstProposal.isCancelled,
-      firstCancelled,
+      firstProposal.isCanceled,
+      firstCanceled,
       "First proposal cancelled status has been incorrectly set"
     );
 
@@ -118,13 +118,13 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
       secondProposal.voteEnd, secondVoteEnd, "Second proposal vote start has been incorrectly set"
     );
     assertEq(
-      secondProposal.isCancelled,
-      secondCancelled,
+      secondProposal.isCanceled,
+      secondCanceled,
       "Second proposal cancelled status has been incorrectly set"
     );
   }
 
-  function testFuzz_CorrectlyUpdateProposalToCancelled(
+  function testFuzz_CorrectlyUpdateProposalToCanceled(
     uint256 proposalId,
     uint256 voteStart,
     uint256 voteEnd
@@ -153,7 +153,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
 
     assertEq(proposal.voteStart, voteStart, "Proposal vote start has been incorrectly set");
     assertEq(proposal.voteEnd, voteEnd, "Proposal vote start has been incorrectly set");
-    assertEq(proposal.isCancelled, true, "Cancelled status has been incorrectly set");
+    assertEq(proposal.isCanceled, true, "Canceled status has been incorrectly set");
   }
 
   function testFuzz_RevertIf_NotCalledByRelayer(
