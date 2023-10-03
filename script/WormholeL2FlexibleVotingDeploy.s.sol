@@ -15,7 +15,6 @@ import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
 import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {ScriptConstants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
-import {console2} from "forge-std/console2.sol";
 
 /// @notice Deploy all the necessary components for the L2 Flexible Voting
 contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
@@ -27,10 +26,9 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     address governorAddress = vm.envOr("DEPLOY_GOVERNOR", address(0));
     address l1TokenAddress = vm.envOr("L1_TOKEN_ADDRESS", address(0));
     address l1BlockAddress = vm.envOr("L1_BLOCK_ADDRESS", address(0));
-    address CONTRACT_OWNER = vm.envOr("CONTRACT_OWNER", msg.sender);
+    address contractOwner = vm.envOr("CONTRACT_OWNER", msg.sender);
     string memory l2TokenName = vm.envOr("L2_TOKEN_NAME", string("Scopeapotomus"));
     string memory l2TokenSymbol = vm.envOr("L2_TOKEN_SYMBOL", string("SCOPE"));
-    console2.logAddress(msg.sender);
 
     uint256 l1ForkId = vm.createSelectFork(L1_CHAIN.rpcUrl);
     // Deploy L1 token on is not provided
@@ -50,7 +48,7 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     // Create L1 bridge that mints the L2 token
     vm.broadcast();
     WormholeL1ERC20Bridge l1TokenBridge =
-    new WormholeL1ERC20Bridge(l1TokenAddress, L1_CHAIN.wormholeRelayer, governorAddress, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, CONTRACT_OWNER);
+    new WormholeL1ERC20Bridge(l1TokenAddress, L1_CHAIN.wormholeRelayer, governorAddress, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, contractOwner);
 
     // Create L1 metadata bridge that sends proposal metadata to L2
     vm.broadcast();
@@ -68,12 +66,12 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     // Deploy the L2 metadata contract
     vm.broadcast();
     WormholeL2GovernorMetadata l2GovernorMetadata =
-      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, CONTRACT_OWNER);
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, contractOwner);
 
     // Create L2 ERC20Votes token
     vm.broadcast();
     WormholeL2ERC20 l2Token =
-    new WormholeL2ERC20(l2TokenName, l2TokenSymbol, L2_CHAIN.wormholeRelayer, l1BlockAddress, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, CONTRACT_OWNER);
+    new WormholeL2ERC20(l2TokenName, l2TokenSymbol, L2_CHAIN.wormholeRelayer, l1BlockAddress, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, contractOwner);
 
     // Deploy the L2 vote aggregator
     vm.broadcast();
