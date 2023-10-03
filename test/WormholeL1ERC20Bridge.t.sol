@@ -8,7 +8,7 @@ import {L1Block} from "src/L1Block.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {WormholeL1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
 import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
-import {Constants} from "test/Constants.sol";
+import {TestConstants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
 contract L1ERC20BridgeHarness is WormholeL1ERC20Bridge {
@@ -38,7 +38,7 @@ contract L1ERC20BridgeHarness is WormholeL1ERC20Bridge {
   }
 }
 
-contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
+contract L1ERC20BridgeTest is TestConstants, WormholeRelayerBasicTest {
   WormholeL2ERC20 l2Erc20;
   FakeERC20 l1Erc20;
   WormholeL1ERC20Bridge l1Erc20Bridge;
@@ -73,7 +73,7 @@ contract L1ERC20BridgeTest is Constants, WormholeRelayerBasicTest {
   }
 }
 
-contract Constructor is Test, Constants {
+contract Constructor is Test, TestConstants {
   function testForkFuzz_CorrectlySetAllArgs(address l1Erc) public {
     FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
@@ -126,7 +126,7 @@ contract Deposit is L1ERC20BridgeTest {
 }
 
 // Top level receive is tested in WormholeL2ERC20 and L2VoteAggregator
-contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
+contract _ReceiveWithdrawalWormholeMessages is Test, TestConstants {
   event Withdraw(address indexed account, uint256 amount);
 
   function testForkFuzz_CorrectlyReceiveWithdrawal(
@@ -158,7 +158,7 @@ contract _ReceiveWithdrawalWormholeMessages is Test, Constants {
   }
 }
 
-contract _Withdraw is Test, Constants {
+contract _Withdraw is Test, TestConstants {
   event Withdraw(address indexed account, uint256 amount);
 
   function testFork_CorrectlyWithdrawTokens(address _account, uint96 _amount, address l2Erc20)

@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 
 import {WormholeBase} from "src/WormholeBase.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
-import {Constants} from "test/Constants.sol";
+import {TestConstants} from "test/Constants.sol";
 
 contract WormholeReceiverTestHarness is WormholeReceiver {
   constructor(address _relayer, address _owner) WormholeBase(_relayer) WormholeReceiver(_owner) {}
@@ -27,7 +27,7 @@ contract WormholeReceiverTestHarness is WormholeReceiver {
   function exposed_replayProtect(bytes32 deliveryHash) public replayProtect(deliveryHash) {}
 }
 
-contract WormholeReceiverTest is Test, Constants {
+contract WormholeReceiverTest is Test, TestConstants {
   WormholeReceiverTestHarness receiver;
 
   event RegisteredSenderSet(
@@ -39,7 +39,7 @@ contract WormholeReceiverTest is Test, Constants {
   }
 }
 
-contract OnlyRelayer is Test, Constants {
+contract OnlyRelayer is Test, TestConstants {
   function testFuzz_SucceedIfCalledByWormholeRelayer(address relayer) public {
     WormholeReceiverTestHarness receiver = new WormholeReceiverTestHarness(relayer, msg.sender);
 

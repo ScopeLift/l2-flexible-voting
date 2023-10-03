@@ -4,26 +4,25 @@ pragma solidity ^0.8.20;
 import {Script, stdJson} from "forge-std/Script.sol";
 import {IERC20Mint} from "src/interfaces/IERC20Mint.sol";
 import {IL1ERC20Bridge} from "src/interfaces/IL1ERC20Bridge.sol";
-import {Constants} from "test/Constants.sol";
+import {ScriptConstants} from "test/Constants.sol";
 import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
 
 /// @dev A script to test that the L1 bridging functionality works. It will call the bridge on L1
 /// which will call the mint function on the L2 token.
-contract MintOnL2 is Script, Constants {
+contract WormholeMintOnL2 is Script, ScriptConstants {
   using stdJson for string;
 
   function run() public {
-    // Get L1 bridge token address
-    string memory tokenFile = "broadcast/DeployFakeERC20.s.sol/43113/run-latest.json";
-    string memory tokenJson = vm.readFile(tokenFile);
+    string memory deployFile =
+      "broadcast/multi/WormholeL2FlexibleVotingDeploy.s.sol-latest/run.json"; // multi deployment
+    string memory deployJson = vm.readFile(deployFile);
 
-    address deployedL1Token = tokenJson.readAddress(".transactions[0].contractAddress");
+    // Get L1 bridge token address
+    address deployedL1Token =
+      deployJson.readAddress(".deployments[0].transactions[0].contractAddress");
 
     // Get L1 bridge address
-    string memory bridgeFile = "broadcast/multi/Deploy.s.sol-latest/run.json";
-    string memory bridgeJson = vm.readFile(bridgeFile);
-
-    address l1Bridge = bridgeJson.readAddress(".deployments[1].transactions[1].contractAddress");
+    address l1Bridge = deployJson.readAddress(".deployments[0].transactions[2].contractAddress");
 
     setFallbackToDefaultRpcUrls(false);
 

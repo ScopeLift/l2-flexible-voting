@@ -9,10 +9,10 @@ import {WormholeL1GovernorMetadataBridge} from "src/WormholeL1GovernorMetadataBr
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
-import {Constants} from "test/Constants.sol";
+import {TestConstants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
-contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
+contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
   GovernorMock governorMock;
   WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge;
@@ -50,7 +50,7 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   }
 }
 
-contract Constructor is Test, Constants {
+contract Constructor is Test, TestConstants {
   function testFork_CorrectlySetAllArgs(address governorMock) public {
     WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge =
     new WormholeL1GovernorMetadataBridge(governorMock, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);

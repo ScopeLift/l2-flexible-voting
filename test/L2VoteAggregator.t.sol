@@ -8,7 +8,7 @@ import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 
-import {Constants} from "test/Constants.sol";
+import {TestConstants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 
 contract L2VoteAggregatorHarness is L2VoteAggregator {
@@ -32,7 +32,7 @@ contract L2VoteAggregatorHarness is L2VoteAggregator {
   }
 }
 
-contract L2VoteAggregatorBase is Test, Constants {
+contract L2VoteAggregatorBase is Test, TestConstants {
   L2VoteAggregatorHarness voteAggregator;
 
   event VoteCast(
