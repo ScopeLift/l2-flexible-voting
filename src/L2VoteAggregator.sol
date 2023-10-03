@@ -117,25 +117,25 @@ abstract contract L2VoteAggregator is EIP712 {
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
   /// compatibility with existing Governor tooling.
-  function votingDelay() public view virtual returns (uint256) {
+  function votingDelay() external view virtual returns (uint256) {
     return 0;
   }
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
   /// compatibility with existing Governor tooling.
-  function votingPeriod() public view virtual returns (uint256) {
+  function votingPeriod() external view virtual returns (uint256) {
     return 0;
   }
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
   /// compatibility with existing Governor tooling.
-  function quorum(uint256) public view virtual returns (uint256) {
+  function quorum(uint256) external view virtual returns (uint256) {
     return 0;
   }
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
   /// compatibility with existing Governor tooling.
-  function proposalThreshold() public view virtual returns (uint256) {
+  function proposalThreshold() external view virtual returns (uint256) {
     return 0;
   }
 
@@ -144,7 +144,7 @@ abstract contract L2VoteAggregator is EIP712 {
   // active, if it has been canceled then the state is canceled, and if the voting has finished
   // without it being canceled we will mark it as expired. We use expired because users can no
   // longer vote and no other L2 action can be taken on the proposal.
-  function state(uint256 proposalId) public view virtual returns (ProposalState) {
+  function state(uint256 proposalId) external view virtual returns (ProposalState) {
     L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
     if (VOTING_TOKEN.clock() < proposal.voteStart) return ProposalState.Pending;
     else if (proposalVoteActive(proposalId)) return ProposalState.Active;
@@ -154,14 +154,14 @@ abstract contract L2VoteAggregator is EIP712 {
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
   /// compatibility with existing Governor tooling.
-  function getVotes(address, uint256) public view virtual returns (uint256) {
+  function getVotes(address, uint256) external view virtual returns (uint256) {
     return 0;
   }
 
   /// @notice This function does not make sense in the L2 context, but we have added it to have
   /// compatibility with existing Governor tooling.
   function propose(address[] memory, uint256[] memory, bytes[] memory, string memory)
-    public
+    external 
     virtual
     returns (uint256)
   {
@@ -171,7 +171,7 @@ abstract contract L2VoteAggregator is EIP712 {
   /// @notice This function does not make sense in the L2 context, but we have added it to have
   /// compatibility with existing Governor tooling.
   function execute(address[] memory, uint256[] memory, bytes[] memory, bytes32)
-    public
+    external
     payable
     virtual
     returns (uint256)
