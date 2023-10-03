@@ -16,14 +16,14 @@ import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {ScriptConstants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
-/// @notice Deploy all the necessary components for the L2 Flexible Voting
+/// @notice Deploy all the necessary components for L2 Flexible Voting.
 contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
   using stdJson for string;
 
   function run() public {
     setFallbackToDefaultRpcUrls(false);
 
-    address governorAddress = vm.envOr("DEPLOY_GOVERNOR", address(0));
+    address governorAddress = vm.envOr("L1_GOVERNOR_ADDRESS", address(0));
     address l1TokenAddress = vm.envOr("L1_TOKEN_ADDRESS", address(0));
     address l1BlockAddress = vm.envOr("L1_BLOCK_ADDRESS", address(0));
     address contractOwner = vm.envOr("CONTRACT_OWNER", msg.sender);

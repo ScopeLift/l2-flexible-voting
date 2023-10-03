@@ -106,15 +106,30 @@ scopelint check
 
 This repository contains a series of Foundry scripts which can be used to deploy and exercise the contracts on testnets or real networks.
 
-* __Deploy.s.sol__ - Deploy L1 bridge and corresponding token to be minted on L2
-* __DeployFakeERC20.s.sol__ - Deploys an ERC20 on any chain. It is used to create a token for the L1 Governor when testing
-* __DeployGovernorMetadata.s.sol__ - Deploy the L2 GovernorMetadata contract along with the L1 GovernorMetadata bridge
-* __DeployVoteAggregator.s.sol__ - Deploys an L2 vote aggregator contract to test collecting votes on L2
-* __MintOnL2.s.sol__ - Calls the bridge on L1 which will call the mint function on the L2 token.
-* __SendProposalToL2.s.sol__ - Create an L1 and L2 governor metadata contract, and have the L1 contract pass a proposal to the L2 metadata contract.
+* __WormholeL2FlexibleVotingDeploy.s.sol__ - Deploys all of the components needed to setup up L2 Flexible Voting.
+* __WormholeMintOnL2.s.sol__ - Calls the bridge on L1 which will call the mint function on the L2 token.
+* __WormholeSendProposalToL2.s.sol__ - Create an L1 and L2 governor metadata contract, and have the L1 contract pass a proposal to the L2 metadata contract.
 
 These scripts are meant for end-to-end testing on real networks. They should not be used as-is for production deployments.
 
+### Deploying L2 Flexible Voting
+
+The script used to deploy all of the components for L2 Flexible Voting is in `WormholeL2FlexibleVotingDeploy.s.sol`. Some environment variables that should be set when deploying to production are:
+
+- `L1_GOVERNOR_ADDRESS`: The address of the Governor on Layer 1. If this is left blank a mock Governor will be deployed.
+- `L1_TOKEN_ADDRESS`: The address of an `ERC20Votes` compatible token which is used by the L1 Governor. If this is left blank then a mock L1 token will be deployed.
+- `L1_BLOCK_ADDRESS`: The address of the contract on L2 that tracks the L1 block time. If using Optimism the contract address can be found [here](https://community.optimism.io/docs/protocol/protocol-2.0/#l1block). Other L2's like [Arbitrum](https://docs.arbitrum.io/time) may use the L1 block number when calling `block.number` and would require a custom contract. If this is left blank we deploy a mock `L1Block` contract.
+- `CONTRACT_OWNER`: The address that is used for the owner of ownable contracts. This defaults to `msg.sender` when blank. We recommend consulting [Forge's best practices](https://docs.arbitrum.io/time) when deploying.
+- `L2_TOKEN_NAME`: The name of the L2 token that will be deployed. If this is left blank an example name will be used.
+- `L2_TOKEN_SYMBOL`: The symbol of the L2 token that will be deployed. If this is left blank an example symbol will be used.
+
+We recommend filling in all of these values when deploying to production. 
+
+To deploy run the below with a preferred private key solution.
+
+```sh
+forge script script/WormholeL2FlexibleVotingDeploy.s.sol:WormholeL2FlexibleVotingDeploy --broadcast
+```
 ## License
 
 This project is available under the [MIT](LICENSE.txt) license.
