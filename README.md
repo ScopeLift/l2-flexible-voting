@@ -110,7 +110,7 @@ This repository contains a series of Foundry scripts which can be used to deploy
 * __WormholeMintOnL2.s.sol__ - Calls the bridge on L1 which will call the mint function on the L2 token.
 * __WormholeSendProposalToL2.s.sol__ - Create an L1 and L2 governor metadata contract, and have the L1 contract pass a proposal to the L2 metadata contract.
 
-These scripts are meant for end-to-end testing on real networks. They should not be used as-is for production deployments.
+While `WormholeL2FlexibleVotingDeploy.s.sol` can be used for production deployments, the other scripts are meant for end-to-end testing on real networks. 
 
 ### Deploying L2 Flexible Voting
 
