@@ -5,10 +5,10 @@ import {Test} from "forge-std/Test.sol";
 
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
-import {Constants} from "test/Constants.sol";
+import {TestConstants} from "test/Constants.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
-contract L2GovernorMetadataTest is Constants {
+contract L2GovernorMetadataTest is TestConstants {
   WormholeL2GovernorMetadata l2GovernorMetadata;
 
   event ProposalAdded(

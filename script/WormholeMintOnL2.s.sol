@@ -4,12 +4,12 @@ pragma solidity ^0.8.20;
 import {Script, stdJson} from "forge-std/Script.sol";
 import {IERC20Mint} from "src/interfaces/IERC20Mint.sol";
 import {IL1ERC20Bridge} from "src/interfaces/IL1ERC20Bridge.sol";
-import {Constants} from "test/Constants.sol";
+import {ScriptConstants} from "test/Constants.sol";
 import {IWormholeRelayer} from "wormhole/interfaces/relayer/IWormholeRelayer.sol";
 
 /// @dev A script to test that the L1 bridging functionality works. It will call the bridge on L1
 /// which will call the mint function on the L2 token.
-contract WormholeMintOnL2 is Script, Constants {
+contract WormholeMintOnL2 is Script, ScriptConstants {
   using stdJson for string;
 
   function run() public {

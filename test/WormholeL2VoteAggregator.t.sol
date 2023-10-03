@@ -16,7 +16,7 @@ import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
-import {Constants} from "test/Constants.sol";
+import {TestConstants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
 import {L1VotePoolHarness} from "test/harness/L1VotePoolHarness.sol";
@@ -47,7 +47,7 @@ contract L2VoteAggregatorHarness is WormholeL2VoteAggregator {
   }
 }
 
-contract L2VoteAggregatorTest is Constants, WormholeRelayerBasicTest {
+contract L2VoteAggregatorTest is TestConstants, WormholeRelayerBasicTest {
   FakeERC20 l2Erc20;
   L2VoteAggregatorHarness l2VoteAggregator;
   FakeERC20 l1Erc20;

@@ -9,11 +9,11 @@ import {WormholeL1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {L1Block} from "src/L1Block.sol";
 import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
-import {Constants} from "test/Constants.sol";
+import {TestConstants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
-contract L2ERC20Test is Constants, WormholeRelayerBasicTest {
+contract L2ERC20Test is TestConstants, WormholeRelayerBasicTest {
   WormholeL2ERC20 l2Erc20;
   FakeERC20 l1Erc20;
   WormholeL1ERC20Bridge l1Erc20Bridge;

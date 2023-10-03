@@ -7,7 +7,7 @@ import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRe
 
 import {WormholeBase} from "src/WormholeBase.sol";
 import {WormholeSender} from "src/WormholeSender.sol";
-import {Constants} from "test/Constants.sol";
+import {TestConstants} from "test/Constants.sol";
 
 contract WormholeSenderHarness is WormholeSender {
   constructor(address _relayer, uint16 _sourceChain, uint16 _targetChain)
@@ -20,7 +20,7 @@ contract WormholeSenderHarness is WormholeSender {
   }
 }
 
-contract WormholeSenderTest is Constants, WormholeRelayerBasicTest {
+contract WormholeSenderTest is TestConstants, WormholeRelayerBasicTest {
   WormholeSender wormholeSender;
 
   constructor() {
