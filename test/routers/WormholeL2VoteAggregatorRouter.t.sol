@@ -11,7 +11,7 @@ import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
-import {Constants} from "test/Constants.sol";
+import {TestConstants} from "test/Constants.sol";
 
 // Use this is the sig tests
 contract WormholeL2VoteAggregatorRouterHarness is WormholeL2VoteAggregatorRouter {
@@ -53,7 +53,7 @@ contract WormholeL2VoteAggregatorRouterHarness is WormholeL2VoteAggregatorRouter
   }
 }
 
-contract WormholeL2ERC20RouterTest is Test, Constants {
+contract WormholeL2ERC20RouterTest is Test, TestConstants {
   WormholeL2VoteAggregatorRouter router;
   FakeERC20 l2Erc20;
   GovernorMetadataMock l2GovernorMetadataMock;
@@ -62,7 +62,7 @@ contract WormholeL2ERC20RouterTest is Test, Constants {
   WormholeL2VoteAggregatorRouterHarness routerHarness;
 
   event VoteCast(
-    address indexed voter, uint256 indexed proposalId, uint8 support, uint256 weight, string reason
+    address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
   );
 
   function setUp() public {
