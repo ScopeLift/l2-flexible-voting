@@ -395,7 +395,7 @@ contract _ReceiveCastVoteWormholeMessages is L1VotePoolTest {
     );
   }
 
-  function testFuzz_RevertWhen_BridgeReceivedWhenCancelled(
+  function testFuzz_RevertWhen_BridgeReceivedWhenCanceled(
     uint32 _l2Against,
     uint32 _l2For,
     uint32 _l2Abstain,

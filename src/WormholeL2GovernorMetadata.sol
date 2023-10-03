@@ -29,9 +29,9 @@ contract WormholeL2GovernorMetadata is L2GovernorMetadata, WormholeReceiver {
     isRegisteredSender(sourceChain, sourceAddress)
     replayProtect(deliveryHash)
   {
-    (uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCancelled) =
+    (uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled) =
       abi.decode(payload, (uint256, uint256, uint256, bool));
 
-    _addProposal(proposalId, voteStart, voteEnd, isCancelled);
+    _addProposal(proposalId, voteStart, voteEnd, isCanceled);
   }
 }

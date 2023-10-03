@@ -19,7 +19,7 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
   WormholeL2GovernorMetadata l2GovernorMetadata;
 
   event ProposalAdded(
-    uint256 indexed proposalId, uint256 voteStart, uint256 voteEnd, bool isCancelled
+    uint256 indexed proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled
   );
   event ProposalMetadataBridged(
     uint16 indexed targetChain,
@@ -27,7 +27,7 @@ contract L1GovernorMetadataBridgeTest is Constants, WormholeRelayerBasicTest {
     uint256 indexed proposalId,
     uint256 voteStart,
     uint256 voteEnd,
-    bool isCancelled
+    bool isCanceled
   );
 
   constructor() {
