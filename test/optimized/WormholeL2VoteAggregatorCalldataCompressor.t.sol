@@ -4,7 +4,8 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 
 import {L1Block} from "src/L1Block.sol";
-import {WormholeL2VoteAggregatorRouter} from "src/routers/WormholeL2VoteAggregatorRouter.sol";
+import {WormholeL2VoteAggregatorCalldataCompressor} from
+  "src/optimized/WormholeL2VoteAggregatorCalldataCompressor.sol";
 import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
@@ -16,7 +17,9 @@ import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {TestConstants} from "test/Constants.sol";
 
 // Use this is the sig tests
-contract WormholeL2VoteAggregatorRouterHarness is WormholeL2VoteAggregatorRouter {
+contract WormholeL2VoteAggregatorCalldataCompressorHarness is
+  WormholeL2VoteAggregatorCalldataCompressor
+{
   constructor(
     address _votingToken,
     address _relayer,
@@ -25,7 +28,7 @@ contract WormholeL2VoteAggregatorRouterHarness is WormholeL2VoteAggregatorRouter
     uint16 _sourceChain,
     uint16 _targetChain
   )
-    WormholeL2VoteAggregatorRouter(
+    WormholeL2VoteAggregatorCalldataCompressor(
       _votingToken,
       _relayer,
       _governorMetadata,
@@ -55,13 +58,13 @@ contract WormholeL2VoteAggregatorRouterHarness is WormholeL2VoteAggregatorRouter
   }
 }
 
-contract WormholeL2ERC20RouterTest is Test, TestConstants {
-  WormholeL2VoteAggregatorRouter router;
+contract WormholeL2ERC20CalldataCompressorTest is Test, TestConstants {
+  WormholeL2VoteAggregatorCalldataCompressor router;
   FakeERC20 l2Erc20;
   GovernorMetadataOptimizedMock l2GovernorMetadataMock;
   address voterAddress;
   uint256 privateKey;
-  WormholeL2VoteAggregatorRouterHarness routerHarness;
+  WormholeL2VoteAggregatorCalldataCompressorHarness routerHarness;
 
   event VoteCast(
     address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
@@ -73,9 +76,9 @@ contract WormholeL2ERC20RouterTest is Test, TestConstants {
     l2GovernorMetadataMock = new GovernorMetadataOptimizedMock(L2_CHAIN.wormholeRelayer);
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     router =
-    new WormholeL2VoteAggregatorRouter(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadataMock), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorCalldataCompressor(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadataMock), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
     routerHarness =
-    new WormholeL2VoteAggregatorRouterHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadataMock), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorCalldataCompressorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadataMock), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function _signVoteMessage(uint256 _proposalId, uint8 _support)
@@ -95,7 +98,7 @@ contract WormholeL2ERC20RouterTest is Test, TestConstants {
   }
 }
 
-contract Fallback is WormholeL2ERC20RouterTest {
+contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   function testFuzz_RevertIf_CastVoteMsgDataIsTooLong(
     uint16 _proposalId,
     uint32 _timeToEnd,
@@ -111,7 +114,7 @@ contract Fallback is WormholeL2ERC20RouterTest {
       l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
-    vm.expectRevert(abi.encode(WormholeL2VoteAggregatorRouter.InvalidCalldata.selector));
+    vm.expectRevert(abi.encode(WormholeL2VoteAggregatorCalldataCompressor.InvalidCalldata.selector));
     (bool ok,) = address(router).call(
       abi.encodePacked(uint8(1), uint256(_proposalId), L2VoteAggregator.VoteType.For)
     );
@@ -133,7 +136,7 @@ contract Fallback is WormholeL2ERC20RouterTest {
       l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
-    vm.expectRevert(abi.encode(WormholeL2VoteAggregatorRouter.InvalidCalldata.selector));
+    vm.expectRevert(abi.encode(WormholeL2VoteAggregatorCalldataCompressor.InvalidCalldata.selector));
     (bool ok,) = address(router).call(
       abi.encodePacked(uint8(1), uint8(_proposalId), L2VoteAggregator.VoteType.For)
     );
@@ -409,7 +412,7 @@ contract Fallback is WormholeL2ERC20RouterTest {
 
     (uint8 _v, bytes32 _r, bytes32 _s) = _signVoteMessage(_proposalId, uint8(_voteType));
 
-    vm.expectRevert(abi.encode(WormholeL2VoteAggregatorRouter.InvalidCalldata.selector));
+    vm.expectRevert(abi.encode(WormholeL2VoteAggregatorCalldataCompressor.InvalidCalldata.selector));
     (bool ok,) = address(routerHarness).call(
       abi.encodePacked(uint8(3), uint8(_proposalId), _voteType, _v, _r, _s)
     );
@@ -436,7 +439,7 @@ contract Fallback is WormholeL2ERC20RouterTest {
     vm.roll(l2Proposal.voteStart + 1);
     (uint8 _v, bytes32 _r, bytes32 _s) = _signVoteMessage(_proposalId, uint8(_voteType));
 
-    vm.expectRevert(abi.encode(WormholeL2VoteAggregatorRouter.InvalidCalldata.selector));
+    vm.expectRevert(abi.encode(WormholeL2VoteAggregatorCalldataCompressor.InvalidCalldata.selector));
     (bool ok,) = address(routerHarness).call(
       abi.encodePacked(uint8(3), uint24(_proposalId), _voteType, _v, _r, _s)
     );

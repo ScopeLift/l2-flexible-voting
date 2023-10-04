@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {WormholeL2GovernorMetadataOptimized} from
-  "src/routers/WormholeL2GovernorMetadataOptimized.sol";
+  "src/optimized/WormholeL2GovernorMetadataOptimized.sol";
 
 contract WormholeL2GovernorMetadataOptimizedHarness is WormholeL2GovernorMetadataOptimized {
   constructor(address _core, address _owner) WormholeL2GovernorMetadataOptimized(_core, _owner) {}

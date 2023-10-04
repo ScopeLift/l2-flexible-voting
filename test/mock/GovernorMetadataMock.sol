@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {WormholeL2GovernorMetadataOptimized} from
-  "src/routers/WormholeL2GovernorMetadataOptimized.sol";
+  "src/optimized/WormholeL2GovernorMetadataOptimized.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 
 abstract contract GovernorMetadataMockBase is L2GovernorMetadata {

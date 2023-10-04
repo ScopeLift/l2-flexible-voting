@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 
-contract WormholeL2VoteAggregatorRouter is WormholeL2VoteAggregator {
+contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator {
   /// @dev Thrown when calldata is invalid for the provided function ID.
   error InvalidCalldata();
 

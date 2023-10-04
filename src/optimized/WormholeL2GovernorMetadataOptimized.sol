@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 
 contract WormholeL2GovernorMetadataOptimized is WormholeL2GovernorMetadata {
@@ -10,7 +11,6 @@ contract WormholeL2GovernorMetadataOptimized is WormholeL2GovernorMetadata {
   /// @notice The ID of the proposal mapped to an internal proposal ID.
   mapping(uint256 governorProposalId => uint16) public optimizedProposalIds;
 
-  /// @inheritdoc WormholeL2GovernorMetadata
   constructor(address _relayer, address _owner) WormholeL2GovernorMetadata(_relayer, _owner) {}
 
   /// @inheritdoc L2GovernorMetadata
