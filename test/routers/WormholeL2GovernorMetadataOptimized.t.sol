@@ -7,11 +7,6 @@ import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {WormholeL2GovernorMetadataOptimizedHarness} from
   "test/harness/optimized/WormholeL2GovernorMetadataOptimizedHarness.sol";
 import {TestConstants} from "test/Constants.sol";
-import {WormholeReceiver} from "src/WormholeReceiver.sol";
-
-// Test one proposal works
-// test two proposals
-// What if the same id is bridged twice
 
 contract WormholeL2GovernorMetadataOptimizedTest is TestConstants {
   WormholeL2GovernorMetadataOptimizedHarness l2GovernorMetadata;
@@ -38,7 +33,7 @@ contract _AddProposal is WormholeL2GovernorMetadataOptimizedTest {
     uint256 internalProposalId = l2GovernorMetadata.optimizedProposalIds(proposalId);
 
     assertEq(l2Proposal.voteStart, l1VoteStart, "Vote start has been incorrectly set");
-    assertEq(l2Proposal.voteEnd, l1VoteEnd, "Vote start has been incorrectly set");
+    assertEq(l2Proposal.voteEnd, l1VoteEnd, "Vote end has been incorrectly set");
     assertEq(l2Proposal.isCanceled, isCanceled, "Canceled status of the vote is incorrect");
     assertEq(internalProposalId, 1, "Internal id is incorrect");
   }

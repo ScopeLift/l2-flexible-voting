@@ -4,14 +4,16 @@ pragma solidity ^0.8.20;
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 
 contract WormholeL2GovernorMetadataOptimized is WormholeL2GovernorMetadata {
-  /// @notice
-  uint16 internal _proposalId = 1;
+  /// @notice The internal proposal ID which is used by calldata optimized cast methods.
+  uint16 internal _nextInternalProposalId = 1;
 
-  /// @notice The id of the proposal mapped to the proposal metadata.
+  /// @notice The ID of the proposal mapped to an internal proposal ID.
   mapping(uint256 governorProposalId => uint16) public optimizedProposalIds;
 
+  /// @inheritdoc WormholeL2GovernorMetadata
   constructor(address _relayer, address _owner) WormholeL2GovernorMetadata(_relayer, _owner) {}
 
+  /// @inheritdoc L2GovernorMetadata
   function _addProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled)
     internal
     virtual
@@ -20,8 +22,8 @@ contract WormholeL2GovernorMetadataOptimized is WormholeL2GovernorMetadata {
     super._addProposal(proposalId, voteStart, voteEnd, isCanceled);
     uint16 internalId = optimizedProposalIds[proposalId];
     if (internalId == 0) {
-      optimizedProposalIds[proposalId] = _proposalId;
-      ++_proposalId;
+      optimizedProposalIds[proposalId] = _nextInternalProposalId;
+      ++_nextInternalProposalId;
     }
   }
 }

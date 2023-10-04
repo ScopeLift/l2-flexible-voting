@@ -23,6 +23,7 @@ abstract contract L2GovernorMetadata {
   /// @param proposalId The id of the proposal.
   /// @param voteStart The block number or timestamp when voting starts.
   /// @param voteEnd The block number or timestamp when voting ends.
+  /// @param isCanceled Whether or not the proposal has been canceled.
   function _addProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled)
     internal
     virtual
