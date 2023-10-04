@@ -395,7 +395,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     uint16 _proposalId,
     uint32 _timeToEnd,
     uint96 _amount,
-	string calldata _reason
+    string calldata _reason
   ) public {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);

@@ -47,40 +47,6 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
     revert UnsupportedFunction();
   }
 
-  /// @dev Wrap the default `castVote` method in a method that optimizes the calldata.
-  /// @param _msgData Optimized calldata for the `castVote` method. We restrict proposalId to a
-  /// `uint16` rather than the default `uint256`.
-  function _castVote(bytes calldata _msgData) internal {
-    if (_msgData.length != 4) revert InvalidCalldata();
-    uint16 proposalId = uint16(bytes2(_msgData[1:3])); // Supports max id of 65,535
-    uint8 support = uint8(bytes1(_msgData[3:4]));
-    castVote(proposalId, L2VoteAggregator.VoteType(support));
-  }
-
-  /// @dev Wrap the default `castVoteWithReason` method in a method that optimizes the calldata.
-  /// @param _msgData Optimized calldata for the `castVoteWithReason` method. We restrict proposalId
-  /// to a `uint16` rather than the default `uint256`.
-  function _castVoteWithReason(bytes calldata _msgData) internal {
-    if (_msgData.length < 4) revert InvalidCalldata();
-    uint16 proposalId = uint16(bytes2(_msgData[1:3]));
-    uint8 support = uint8(bytes1(_msgData[3:4]));
-    string calldata reason = string(_msgData[4:]);
-    castVoteWithReason(proposalId, L2VoteAggregator.VoteType(support), reason);
-  }
-
-  /// @dev Wrap the default `castVoteBySig` method in a method that optimizes the calldata.
-  /// @param _msgData Optimized calldata for the `castVoteBySig` method. We restrict proposalId to a
-  /// `uint16` rather than the default `uint256`.
-  function _castVoteBySig(bytes calldata _msgData) internal {
-    if (_msgData.length != 69) revert InvalidCalldata();
-    uint16 proposalId = uint16(bytes2(_msgData[1:3]));
-    uint8 support = uint8(bytes1(_msgData[3:4]));
-    uint8 v = uint8(bytes1(_msgData[4:5]));
-    bytes32 r = bytes32(_msgData[5:37]);
-    bytes32 s = bytes32(_msgData[37:69]);
-    castVoteBySig(proposalId, L2VoteAggregator.VoteType(support), v, r, s);
-  }
-
   /// @notice Casts a vote on L2 using a calldata optimized signature. Each cast vote method has a
   /// different ID documented below.
   ///
@@ -93,5 +59,55 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
     else if (funcId == 2) _castVoteWithReason(msg.data);
     else if (funcId == 3) _castVoteBySig(msg.data);
     else revert FunctionDoesNotExist();
+  }
+
+  /// @dev Wrap the default `castVote` method in a method that optimizes the calldata.
+  /// @param _msgData Optimized calldata for the `castVote` method. We restrict proposalId to a
+  /// `uint16` rather than the default `uint256`.
+  ///
+  /// bytes 0-1: method id
+  /// bytes 1-3: proposal Id as a uint16
+  /// bytes 3-4: voters support value as a uint8
+  function _castVote(bytes calldata _msgData) internal {
+    if (_msgData.length != 4) revert InvalidCalldata();
+    uint16 proposalId = uint16(bytes2(_msgData[1:3])); // Supports max id of 65,535
+    uint8 support = uint8(bytes1(_msgData[3:4]));
+    castVote(proposalId, L2VoteAggregator.VoteType(support));
+  }
+
+  /// @dev Wrap the default `castVoteWithReason` method in a method that optimizes the calldata.
+  /// @param _msgData Optimized calldata for the `castVoteWithReason` method. We restrict proposalId
+  /// to a `uint16` rather than the default `uint256`.
+  ///
+  /// bytes 0-1: method id
+  /// bytes 1-3: proposal Id as a uint16
+  /// bytes 3-4: voters support value as a uint8
+  /// bytes 4+: reason string
+  function _castVoteWithReason(bytes calldata _msgData) internal {
+    if (_msgData.length < 4) revert InvalidCalldata();
+    uint16 proposalId = uint16(bytes2(_msgData[1:3]));
+    uint8 support = uint8(bytes1(_msgData[3:4]));
+    string calldata reason = string(_msgData[4:]);
+    castVoteWithReason(proposalId, L2VoteAggregator.VoteType(support), reason);
+  }
+
+  /// @dev Wrap the default `castVoteBySig` method in a method that optimizes the calldata.
+  /// @param _msgData Optimized calldata for the `castVoteBySig` method. We restrict proposalId to a
+  /// `uint16` rather than the default `uint256`.
+  ///
+  /// bytes 0-1: method id
+  /// bytes 1-3: proposal Id as a uint16
+  /// bytes 3-4: voters support value as a uint8
+  /// bytes 4-5: the v value of the signature
+  /// bytes 5-37: the r value of the signature
+  /// bytes 37-69: the s value of the signature
+  function _castVoteBySig(bytes calldata _msgData) internal {
+    if (_msgData.length != 69) revert InvalidCalldata();
+    uint16 proposalId = uint16(bytes2(_msgData[1:3]));
+    uint8 support = uint8(bytes1(_msgData[3:4]));
+    uint8 v = uint8(bytes1(_msgData[4:5]));
+    bytes32 r = bytes32(_msgData[5:37]);
+    bytes32 s = bytes32(_msgData[37:69]);
+    castVoteBySig(proposalId, L2VoteAggregator.VoteType(support), v, r, s);
   }
 }
