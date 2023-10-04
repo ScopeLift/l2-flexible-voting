@@ -61,6 +61,7 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
   /// @param _msgData Optimized calldata for the `castVoteWithReason` method. We restrict proposalId
   /// to a `uint16` rather than the default `uint256`.
   function _castVoteWithReason(bytes calldata _msgData) internal {
+    if (_msgData.length < 4) revert InvalidCalldata();
     uint16 proposalId = uint16(bytes2(_msgData[1:3]));
     uint8 support = uint8(bytes1(_msgData[3:4]));
     string calldata reason = string(_msgData[4:]);

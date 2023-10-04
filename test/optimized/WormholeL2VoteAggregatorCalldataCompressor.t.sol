@@ -391,6 +391,33 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     assertEq(_against, _amount, "Votes against is not correct");
   }
 
+  function testFuzz_RevertIf_CastVoteWithReasonMsgDataIsTooShort(
+    uint16 _proposalId,
+    uint32 _timeToEnd,
+    uint96 _amount,
+	string calldata _reason
+  ) public {
+    _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
+    vm.assume(_amount != 0);
+    vm.assume(_proposalId > 1);
+
+    L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.Abstain;
+
+    vm.prank(voterAddress);
+    l2Erc20.mint(voterAddress, _amount);
+
+    GovernorMetadataMock.Proposal memory l2Proposal =
+      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+
+    vm.roll(l2Proposal.voteStart + 1);
+
+    vm.expectRevert(abi.encode(WormholeL2VoteAggregatorCalldataCompressor.InvalidCalldata.selector));
+    (bool ok,) = address(routerHarness).call(
+      abi.encodePacked(uint8(2), uint8(_proposalId), _voteType, _reason)
+    );
+    assertFalse(ok, "Call did not revert as expected");
+  }
+
   function testFuzz_RevertIf_CastVoteBySigMsgDataIsTooShort(
     uint16 _proposalId,
     uint32 _timeToEnd,
