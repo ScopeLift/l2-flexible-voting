@@ -103,7 +103,7 @@ contract L1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
     uint256 _proposalId = _createExampleProposal(l1Erc20);
     _jumpToActiveProposal(_proposalId);
     _receiveCastVoteWormholeMessages(
-      abi.encode(_proposalId, _against, _for, _abstain),
+      abi.encodePacked(_proposalId, _against, _for, _abstain),
       new bytes[](0),
       bytes32(""),
       uint16(0),
