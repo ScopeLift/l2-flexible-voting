@@ -8,7 +8,9 @@ import {WormholeL2VoteAggregatorRouter} from "src/routers/WormholeL2VoteAggregat
 import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
-import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
+import {
+  GovernorMetadataOptimizedMock, GovernorMetadataMock
+} from "test/mock/GovernorMetadataMock.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {TestConstants} from "test/Constants.sol";
@@ -56,7 +58,7 @@ contract WormholeL2VoteAggregatorRouterHarness is WormholeL2VoteAggregatorRouter
 contract WormholeL2ERC20RouterTest is Test, TestConstants {
   WormholeL2VoteAggregatorRouter router;
   FakeERC20 l2Erc20;
-  GovernorMetadataMock l2GovernorMetadataMock;
+  GovernorMetadataOptimizedMock l2GovernorMetadataMock;
   address voterAddress;
   uint256 privateKey;
   WormholeL2VoteAggregatorRouterHarness routerHarness;
@@ -68,7 +70,7 @@ contract WormholeL2ERC20RouterTest is Test, TestConstants {
   function setUp() public {
     (voterAddress, privateKey) = makeAddrAndKey("voter");
     L1Block l1Block = new L1Block();
-    l2GovernorMetadataMock = new GovernorMetadataMock(L2_CHAIN.wormholeRelayer);
+    l2GovernorMetadataMock = new GovernorMetadataOptimizedMock(L2_CHAIN.wormholeRelayer);
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     router =
     new WormholeL2VoteAggregatorRouter(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadataMock), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
