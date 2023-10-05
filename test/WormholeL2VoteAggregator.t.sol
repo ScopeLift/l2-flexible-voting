@@ -17,36 +17,11 @@ import {TestConstants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
 import {L1VotePoolHarness} from "test/harness/L1VotePoolHarness.sol";
-
-contract L2VoteAggregatorHarness is WormholeL2VoteAggregator {
-  constructor(
-    address _votingToken,
-    address _relayer,
-    address _governorMetadata,
-    address _l1BlockAddress,
-    uint16 _sourceChain,
-    uint16 _targetChain
-  )
-    WormholeL2VoteAggregator(
-      _votingToken,
-      _relayer,
-      _governorMetadata,
-      _l1BlockAddress,
-      _sourceChain,
-      _targetChain
-    )
-  {}
-
-  function createProposalVote(uint256 _proposalId, uint128 _against, uint128 _for, uint128 _abstain)
-    public
-  {
-    proposalVotes[_proposalId] = ProposalVote(_against, _for, _abstain);
-  }
-}
+import {WormholeL2VoteAggregatorHarness} from "test/harness/WormholeL2VoteAggregatorHarness.sol";
 
 contract L2VoteAggregatorTest is TestConstants, WormholeRelayerBasicTest {
   FakeERC20 l2Erc20;
-  L2VoteAggregatorHarness l2VoteAggregator;
+  WormholeL2VoteAggregatorHarness l2VoteAggregator;
   FakeERC20 l1Erc20;
   L1VotePoolHarness l1VotePool;
   GovernorMetadataMock l2GovernorMetadata;
@@ -77,7 +52,7 @@ contract L2VoteAggregatorTest is TestConstants, WormholeRelayerBasicTest {
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     l1Block = new L1Block();
     l2VoteAggregator =
-    new L2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {
@@ -95,7 +70,7 @@ contract Constructor is L2VoteAggregatorTest {
     L1Block l1Block = new L1Block();
     GovernorMetadataMock l2GovernorMetadata = new GovernorMetadataMock(L2_CHAIN.wormholeRelayer);
     WormholeL2VoteAggregator l2VoteAggregator =
-    new L2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
     assertEq(address(l1Block), address(l2VoteAggregator.L1_BLOCK()));
     assertEq(address(address(l2Erc20)), address(l2VoteAggregator.VOTING_TOKEN()));
