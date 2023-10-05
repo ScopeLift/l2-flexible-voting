@@ -6,7 +6,7 @@ import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 
 contract WormholeL2GovernorMetadataOptimized is WormholeL2GovernorMetadata {
   /// @notice The internal proposal ID which is used by calldata optimized cast methods.
-  uint16 internal _nextInternalProposalId = 1;
+  uint16 internal nextInternalProposalId = 1;
 
   /// @notice The ID of the proposal mapped to an internal proposal ID.
   mapping(uint256 governorProposalId => uint16) public optimizedProposalIds;
@@ -22,8 +22,8 @@ contract WormholeL2GovernorMetadataOptimized is WormholeL2GovernorMetadata {
     super._addProposal(proposalId, voteStart, voteEnd, isCanceled);
     uint16 internalId = optimizedProposalIds[proposalId];
     if (internalId == 0) {
-      optimizedProposalIds[proposalId] = _nextInternalProposalId;
-      ++_nextInternalProposalId;
+      optimizedProposalIds[proposalId] = nextInternalProposalId;
+      ++nextInternalProposalId;
     }
   }
 }
