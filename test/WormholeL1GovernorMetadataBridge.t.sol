@@ -10,6 +10,7 @@ import {FakeERC20} from "src/FakeERC20.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {TestConstants} from "test/Constants.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
 
 contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest {
@@ -18,8 +19,16 @@ contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest
   WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge;
   WormholeL2GovernorMetadata l2GovernorMetadata;
 
-  event ProposalAdded(
-    uint256 indexed proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled
+  event ProposalCreated(
+    uint256 proposalId,
+    address proposer,
+    address[] targets,
+    uint256[] values,
+    string[] signatures,
+    bytes[] calldatas,
+    uint256 startBlock,
+    uint256 endBlock,
+    string description
   );
   event ProposalMetadataBridged(
     uint16 indexed targetChain,
@@ -116,7 +125,17 @@ contract BridgeProposalMetadata is L1GovernorMetadataBridgeTest {
     uint256 l1VoteEnd = governorMock.proposalDeadline(proposalId);
 
     vm.expectEmit();
-    emit ProposalAdded(proposalId, l1VoteStart, l1VoteEnd, false);
+    emit ProposalCreated(
+      proposalId,
+      address(0),
+      new address[](0),
+      new uint256[](0),
+      new string[](0),
+      new bytes[](0),
+      l1VoteStart,
+      l1VoteEnd,
+      string.concat("Mainnet proposal ", Strings.toString(proposalId))
+    );
     performDelivery();
 
     vm.selectFork(targetFork);

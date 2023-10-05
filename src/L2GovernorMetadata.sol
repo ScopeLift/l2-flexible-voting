@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts/utils/Strings.sol";
+
 /// @notice This contract is used by an L2VoteAggregator to store proposal metadata.
 /// It expects to receive proposal metadata from a valid L1 source.
 /// Derived contracts are responsible for processing and validating incoming metadata.
@@ -15,9 +17,19 @@ abstract contract L2GovernorMetadata {
   /// @notice The id of the proposal mapped to the proposal metadata.
   mapping(uint256 proposalId => Proposal) _proposals;
 
-  event ProposalAdded(
-    uint256 indexed proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled
+  event ProposalCreated(
+    uint256 proposalId,
+    address proposer,
+    address[] targets,
+    uint256[] values,
+    string[] signatures,
+    bytes[] calldatas,
+    uint256 startBlock,
+    uint256 endBlock,
+    string description
   );
+
+  event ProposalCanceled(uint256 proposalId);
 
   /// @notice Add proposal to internal storage.
   /// @param proposalId The id of the proposal.
@@ -28,7 +40,21 @@ abstract contract L2GovernorMetadata {
     virtual
   {
     _proposals[proposalId] = Proposal(voteStart, voteEnd, isCanceled);
-    emit ProposalAdded(proposalId, voteStart, voteEnd, isCanceled);
+    if (isCanceled) {
+      emit ProposalCanceled(proposalId);
+    } else {
+      emit ProposalCreated(
+        proposalId,
+        address(0),
+        new address[](0),
+        new uint256[](0),
+        new string[](0),
+        new bytes[](0),
+        voteStart,
+        voteEnd,
+        string.concat("Mainnet proposal ", Strings.toString(proposalId))
+      );
+    }
   }
 
   /// @notice Returns the proposal metadata for a given proposal id.
