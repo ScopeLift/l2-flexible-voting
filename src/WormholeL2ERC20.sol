@@ -67,7 +67,7 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @notice Receives a message from L1 and mints L2 tokens.
   /// @param payload The payload that was sent to in the delivery request.
   function receiveWormholeMessages(
-    bytes memory payload,
+    bytes calldata payload,
     bytes[] memory,
     bytes32 sourceAddress,
     uint16 sourceChain,
@@ -80,8 +80,7 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
     isRegisteredSender(sourceChain, sourceAddress)
     replayProtect(deliveryHash)
   {
-    (address account, uint256 amount) = abi.decode(payload, (address, uint256));
-    _mint(account, amount);
+    _mint(address(bytes20(payload[:20])), uint224(bytes28(payload[20:48])));
   }
 
   /// @dev Clock used for flagging checkpoints.
@@ -101,7 +100,7 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
   /// @param amount The amount of tokens to be unlocked.
   function l1Unlock(address account, uint256 amount) external payable returns (uint256 sequence) {
     _burn(msg.sender, amount);
-    bytes memory withdrawCalldata = abi.encode(account, amount);
+    bytes memory withdrawCalldata = abi.encodePacked(account, amount);
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
     sequence = WORMHOLE_RELAYER.sendPayloadToEvm{value: cost}(
       TARGET_CHAIN,

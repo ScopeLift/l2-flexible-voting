@@ -17,14 +17,14 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
   /// @notice Token address which is minted on L2.
   address public L2_TOKEN_ADDRESS;
 
-  /// @notice A unique number used to send messages.
-  uint32 public nonce;
-
   /// @notice Used to indicate whether the contract has been initialized with the L2 token address.
   bool public INITIALIZED = false;
 
   /// @dev Contract is already initialized with an L2 token.
   error AlreadyInitialized();
+
+  /// @dev The value sent to the relayer must match the cost of the message.
+  error CostValueMismatch();
 
   event TokenBridged(
     address indexed sender,
@@ -69,14 +69,13 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
   /// @param account The address of the user on L2 where to mint the token.
   /// @param amount The amount of tokens to deposit and mint on the L2.
   /// @return sequence An identifier for the message published to L2.
-  function deposit(address account, uint256 amount) public payable returns (uint256 sequence) {
+  function deposit(address account, uint224 amount) public payable returns (uint256 sequence) {
     L1_TOKEN.safeTransferFrom(msg.sender, address(this), amount);
 
-    // TODO optimize with encodePacked
-    bytes memory mintCalldata = abi.encode(account, amount);
+    bytes memory mintCalldata = abi.encodePacked(account, amount);
 
     uint256 cost = quoteDeliveryCost(TARGET_CHAIN);
-    require(cost == msg.value, "Cost should be msg.Value");
+    if (cost != msg.value) revert CostValueMismatch();
 
     emit TokenBridged(msg.sender, account, TARGET_CHAIN, amount, L2_TOKEN_ADDRESS);
 
@@ -92,7 +91,7 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
   }
 
   function receiveWormholeMessages(
-    bytes memory payload,
+    bytes calldata payload,
     bytes[] memory additionalVaas,
     bytes32 sourceAddress,
     uint16 sourceChain,
@@ -110,15 +109,15 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
 
   /// @notice Receives an encoded withdrawal message from the L2
   /// @param payload The payload that was sent to in the delivery request.
+  /// @dev Expect payload to be a packed 20 byte address followed by a 32 byte amount.
   function _receiveWithdrawalWormholeMessages(
-    bytes memory payload,
+    bytes calldata payload,
     bytes[] memory,
     bytes32,
     uint16,
     bytes32
   ) internal {
-    (address account, uint256 amount) = abi.decode(payload, (address, uint256));
-    _withdraw(account, amount);
+    _withdraw(address(bytes20(payload[:20])), uint256(bytes32(payload[20:52])));
   }
 
   /// @notice Withdraws deposited tokens to an account.

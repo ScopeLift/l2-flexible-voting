@@ -5,7 +5,11 @@ import {IGovernor} from "openzeppelin/governance/Governor.sol";
 
 abstract contract L1VotePool {
   /// @notice The address of the L1 Governor contract.
-  IGovernor public governor;
+  IGovernor public immutable GOVERNOR;
+
+  // This param is ignored by the governor when voting with fractional
+  // weights. It makes no difference what vote type this is.
+  uint8 constant UNUSED_SUPPORT_PARAM = uint8(1);
 
   event VoteCast(
     address indexed voter,
@@ -33,7 +37,7 @@ abstract contract L1VotePool {
 
   /// @param _governor The address of the L1 Governor contract.
   constructor(address _governor) {
-    governor = IGovernor(_governor);
+    GOVERNOR = IGovernor(_governor);
   }
 
   /// @notice Casts vote to the L1 Governor.
@@ -41,13 +45,9 @@ abstract contract L1VotePool {
   function _castVote(uint256 proposalId, ProposalVote memory vote) internal {
     bytes memory votes = abi.encodePacked(vote.againstVotes, vote.forVotes, vote.abstainVotes);
 
-    // This param is ignored by the governor when voting with fractional
-    // weights. It makes no difference what vote type this is.
-    uint8 unusedSupportParam = uint8(1);
-
     // TODO: string should probably mention chain
-    governor.castVoteWithReasonAndParams(
-      proposalId, unusedSupportParam, "rolled-up vote from governance L2 token holders", votes
+    GOVERNOR.castVoteWithReasonAndParams(
+      proposalId, UNUSED_SUPPORT_PARAM, "rolled-up vote from governance L2 token holders", votes
     );
 
     emit VoteCast(msg.sender, proposalId, vote.againstVotes, vote.forVotes, vote.abstainVotes);

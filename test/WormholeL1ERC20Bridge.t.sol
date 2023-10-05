@@ -26,7 +26,7 @@ contract L1ERC20BridgeHarness is WormholeL1ERC20Bridge {
   }
 
   function receiveWithdrawalWormholeMessages(
-    bytes memory payload,
+    bytes calldata payload,
     bytes[] memory additionalVaas,
     bytes32 callerAddr,
     uint16 sourceChain,
@@ -148,7 +148,7 @@ contract _ReceiveWithdrawalWormholeMessages is Test, TestConstants {
     l1Erc20.transfer(address(l1Erc20Bridge), _amount);
     assertEq(l1Erc20.balanceOf(address(l1Erc20Bridge)), _amount, "The Bridge balance is incorrect");
 
-    bytes memory withdrawalCalldata = abi.encode(_account, _amount);
+    bytes memory withdrawalCalldata = abi.encodePacked(_account, uint256(_amount));
     vm.expectEmit();
     emit Withdraw(_account, _amount);
     l1Erc20Bridge.receiveWithdrawalWormholeMessages(
@@ -161,7 +161,7 @@ contract _ReceiveWithdrawalWormholeMessages is Test, TestConstants {
 contract _Withdraw is Test, TestConstants {
   event Withdraw(address indexed account, uint256 amount);
 
-  function testFork_CorrectlyWithdrawTokens(address _account, uint96 _amount, address l2Erc20)
+  function testFork_CorrectlyWithdrawTokens(address _account, uint224 _amount, address l2Erc20)
     public
   {
     vm.assume(_account != address(0));
