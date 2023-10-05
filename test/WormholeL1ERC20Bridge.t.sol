@@ -73,7 +73,7 @@ contract L1ERC20BridgeTest is TestConstants, WormholeRelayerBasicTest {
   }
 }
 
-contract Constructor is Test, TestConstants {
+contract Constructor is TestConstants {
   function testForkFuzz_CorrectlySetAllArgs(address l1Erc) public {
     FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
     IGovernor gov = new GovernorMock("Testington Dao", l1Erc20);
@@ -106,7 +106,6 @@ contract Deposit is L1ERC20BridgeTest {
 
     l1Erc20.approve(address(l1Erc20Bridge), _amount);
     l1Erc20.mint(address(this), _amount);
-    vm.deal(address(this), 1 ether);
 
     vm.expectEmit();
     emit TokenBridged(

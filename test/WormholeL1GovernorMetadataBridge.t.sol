@@ -38,6 +38,7 @@ contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest
     uint256 voteEnd,
     bool isCanceled
   );
+  event ProposalCanceled(uint256 proposalId);
 
   constructor() {
     setForkChains(TESTNET, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
@@ -142,6 +143,51 @@ contract BridgeProposalMetadata is L1GovernorMetadataBridgeTest {
     L2GovernorMetadata.Proposal memory l2Proposal = l2GovernorMetadata.getProposal(proposalId);
     assertEq(l2Proposal.voteStart, l1VoteStart, "voteStart is incorrect");
     assertEq(l2Proposal.voteEnd, l1VoteEnd, "voteEnd is incorrect");
+    assertEq(l2Proposal.isCanceled, false, "isCanceled is incorrect");
+  }
+
+  function testFork_CorrectlyBridgeCanceledProposal(uint224 _amount) public {
+    l1GovernorMetadataBridge.initialize(address(l2GovernorMetadata));
+    uint256 cost = l1GovernorMetadataBridge.quoteDeliveryCost(L2_CHAIN.wormholeChainId);
+    vm.recordLogs();
+
+    bytes memory proposalCalldata =
+      abi.encode(FakeERC20.mint.selector, address(governorMock), _amount);
+
+    address[] memory targets = new address[](1);
+    bytes[] memory calldatas = new bytes[](1);
+    uint256[] memory values = new uint256[](1);
+
+    targets[0] = address(l1Erc20);
+    calldatas[0] = proposalCalldata;
+    values[0] = 0;
+
+    // Create proposal
+    uint256 proposalId =
+      governorMock.propose(targets, values, calldatas, "Proposal: To inflate governance token");
+    governorMock.cancel(
+      targets, values, calldatas, keccak256(bytes("Proposal: To inflate governance token"))
+    );
+
+    vm.expectEmit();
+    emit ProposalMetadataBridged(
+      L2_CHAIN.wormholeChainId,
+      address(l2GovernorMetadata),
+      proposalId,
+      governorMock.proposalSnapshot(proposalId),
+      governorMock.proposalDeadline(proposalId),
+      true
+    );
+    l1GovernorMetadataBridge.bridgeProposalMetadata{value: cost}(proposalId);
+
+    vm.expectEmit();
+    emit ProposalCanceled(proposalId);
+
+    performDelivery();
+
+    vm.selectFork(targetFork);
+    L2GovernorMetadata.Proposal memory l2Proposal = l2GovernorMetadata.getProposal(proposalId);
+    assertEq(l2Proposal.isCanceled, true, "isCanceled is incorrect");
   }
 
   function testFork_RevertWhen_ProposalIsMissing(uint256 _proposalId) public {

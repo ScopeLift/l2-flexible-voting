@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Test} from "forge-std/Test.sol";
-
 import {L1Block} from "src/L1Block.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
+import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 
 import {TestConstants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {L2VoteAggregatorHarness} from "test/harness/L2VoteAggregatorHarness.sol";
 
-contract L2VoteAggregatorBase is Test, TestConstants {
+contract L2VoteAggregatorBase is TestConstants {
   L2VoteAggregatorHarness voteAggregator;
 
   event VoteCast(
@@ -791,5 +790,75 @@ contract Execute is L2VoteAggregatorBase {
   ) public {
     vm.expectRevert(L2VoteAggregator.UnsupportedMethod.selector);
     voteAggregator.execute(addrs, exam, te, hi);
+  }
+}
+
+contract InternalVotingPeriodEnd is L2VoteAggregatorBase {
+  function testFuzz_CorrectlyCalculateInternalVotingPeriod(
+    uint256 proposalId,
+    uint256 voteStart,
+    uint256 voteEnd,
+    bool isCanceled
+  ) public {
+    voteEnd = bound(voteEnd, voteAggregator.CAST_VOTE_WINDOW(), type(uint256).max);
+    L2GovernorMetadata.Proposal memory proposal = GovernorMetadataMock(
+      address(voteAggregator.GOVERNOR_METADATA())
+    ).createProposal(proposalId, voteStart, voteEnd, isCanceled);
+
+    uint256 lastVotingBlock = voteAggregator.internalVotingPeriodEnd(proposalId);
+    assertEq(lastVotingBlock, proposal.voteEnd - voteAggregator.CAST_VOTE_WINDOW());
+  }
+}
+
+contract ProposalVoteActive is L2VoteAggregatorBase {
+  function testFuzz_ProposalVoteIsActive(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
+    public
+  {
+    voteStart = uint64(bound(voteStart, 0, block.number));
+    voteEnd =
+      uint64(bound(voteEnd, block.number + voteAggregator.CAST_VOTE_WINDOW(), type(uint64).max));
+    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+      proposalId, voteStart, voteEnd, false
+    );
+
+    uint256 lastVotingBlock = voteAggregator.internalVotingPeriodEnd(proposalId);
+
+    vm.roll(lastVotingBlock);
+    bool active = voteAggregator.proposalVoteActive(proposalId);
+    assertEq(active, true, "Proposal is supposed to be active");
+  }
+
+  function testFuzz_ProposalVoteIsInactiveBefore(
+    uint256 proposalId,
+    uint64 voteStart,
+    uint64 voteEnd,
+    bool isCanceled
+  ) public {
+    vm.assume(voteStart > 0); // Prevent underflow because we subtract 1
+    vm.assume(voteStart > block.number); // Block number must be greater than vote start
+    vm.assume(voteEnd > voteAggregator.CAST_VOTE_WINDOW()); //  Prevent underflow
+    vm.assume(voteEnd - voteAggregator.CAST_VOTE_WINDOW() > voteStart); // Proposal must have a
+      // voting
+      // block before the cast
+    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+      proposalId, voteStart, voteEnd, isCanceled
+    );
+
+    bool active = voteAggregator.proposalVoteActive(proposalId);
+    assertFalse(active, "Proposal is supposed to be inactive");
+  }
+
+  function testFuzz_ProposalVoteIsCanceled(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
+    public
+  {
+    vm.assume(voteStart > 0); // Prevent underflow because we subtract 1
+    vm.assume(voteStart > block.number); // Block number must be greater than vote start
+    vm.assume(voteEnd > voteAggregator.CAST_VOTE_WINDOW()); // Prevent underflow
+    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+      proposalId, voteStart, voteEnd, false
+    );
+
+    bool active = voteAggregator.proposalVoteActive(proposalId);
+    assertFalse(active, "Proposal is supposed to be inactive");
   }
 }
