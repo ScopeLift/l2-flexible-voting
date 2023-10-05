@@ -157,7 +157,7 @@ contract L1VotePoolTest is TestConstants, WormholeRelayerBasicTest {
 
   event VoteCast(
     address indexed voter,
-    uint256 indexed proposalId,
+    uint256 proposalId,
     uint256 voteAgainst,
     uint256 voteFor,
     uint256 voteAbstain

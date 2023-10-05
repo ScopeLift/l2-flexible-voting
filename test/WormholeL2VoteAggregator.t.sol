@@ -33,11 +33,7 @@ contract L2VoteAggregatorTest is TestConstants, WormholeRelayerBasicTest {
   );
 
   event VoteCast(
-    address indexed voter,
-    uint256 indexed proposalId,
-    uint256 against,
-    uint256 inFavor,
-    uint256 abstain
+    address indexed voter, uint256 proposalId, uint256 against, uint256 inFavor, uint256 abstain
   );
   event VoteBridged(
     uint256 indexed proposalId, uint256 voteAgainst, uint256 voteFor, uint256 voteAbstain
