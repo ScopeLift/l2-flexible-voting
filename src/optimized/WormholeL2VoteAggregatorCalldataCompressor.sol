@@ -5,10 +5,10 @@ import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 
 contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator {
-  /// @dev Thrown when calldata is invalid for the provided function ID.
+  /// @dev Thrown when calldata is invalid for the provided function Id.
   error InvalidCalldata();
 
-  /// @dev Thrown when calldata provides a function ID that does not exist.
+  /// @dev Thrown when calldata provides a function Id that does not exist.
   error FunctionDoesNotExist();
 
   /// @dev Thrown when a function is not supported.
@@ -19,8 +19,8 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
   /// @param _governorMetadata The address of the L2 Governor Metadata contract which holds proposal
   /// state.
   /// @param _l1BlockAddress The address of the contract used to fetch the L1 block number.
-  /// @param _sourceChain The Wormhole chain ID of the source chain when sending messages.
-  /// @param _targetChain The Wormhole chain ID of the target chain when sending messages.
+  /// @param _sourceChain The Wormhole chain Id of the source chain when sending messages.
+  /// @param _targetChain The Wormhole chain Id of the target chain when sending messages.
   constructor(
     address _votingToken,
     address _relayer,
@@ -48,7 +48,7 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
   }
 
   /// @notice Casts a vote on L2 using a calldata optimized signature. Each cast vote method has a
-  /// different ID documented below.
+  /// different Id documented below.
   ///
   /// 1 corresponds to `castVote`
   /// 2 corresponds to `castVoteWithReason`
@@ -65,12 +65,12 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
   /// @param _msgData Optimized calldata for the `castVote` method. We restrict proposalId to a
   /// `uint16` rather than the default `uint256`.
   ///
-  /// bytes 0-1: method id
+  /// bytes 0-1: method Id
   /// bytes 1-3: proposal Id as a uint16
   /// bytes 3-4: voters support value as a uint8
   function _castVote(bytes calldata _msgData) internal {
     if (_msgData.length != 4) revert InvalidCalldata();
-    uint16 proposalId = uint16(bytes2(_msgData[1:3])); // Supports max id of 65,535
+    uint16 proposalId = uint16(bytes2(_msgData[1:3])); // Supports max Id of 65,535
     uint8 support = uint8(bytes1(_msgData[3:4]));
     castVote(proposalId, L2VoteAggregator.VoteType(support));
   }
@@ -79,7 +79,7 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
   /// @param _msgData Optimized calldata for the `castVoteWithReason` method. We restrict proposalId
   /// to a `uint16` rather than the default `uint256`.
   ///
-  /// bytes 0-1: method id
+  /// bytes 0-1: method Id
   /// bytes 1-3: proposal Id as a uint16
   /// bytes 3-4: voters support value as a uint8
   /// bytes 4+: reason string
@@ -95,7 +95,7 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
   /// @param _msgData Optimized calldata for the `castVoteBySig` method. We restrict proposalId to a
   /// `uint16` rather than the default `uint256`.
   ///
-  /// bytes 0-1: method id
+  /// bytes 0-1: method Id
   /// bytes 1-3: proposal Id as a uint16
   /// bytes 3-4: voters support value as a uint8
   /// bytes 4-5: the v value of the signature
