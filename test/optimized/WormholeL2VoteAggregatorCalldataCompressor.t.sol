@@ -98,6 +98,7 @@ contract WormholeL2ERC20CalldataCompressorTest is Test, TestConstants {
   }
 }
 
+/// @dev All of the internal methods are tested in this Fallback contract
 contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   function testFuzz_RevertIf_CastVoteMsgDataIsTooLong(
     uint16 _proposalId,

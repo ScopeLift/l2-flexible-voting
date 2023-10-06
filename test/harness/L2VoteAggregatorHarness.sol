@@ -11,6 +11,10 @@ contract L2VoteAggregatorHarness is L2VoteAggregator {
 
   function _bridgeVote(bytes memory) internal override {}
 
+  function exposed_bridgeVote(bytes memory proposalCalldata) public {
+    _bridgeVote(proposalCalldata);
+  }
+
   function exposed_castVote(
     uint256 proposalId,
     address voter,

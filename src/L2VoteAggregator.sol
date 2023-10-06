@@ -8,7 +8,6 @@ import {ECDSA} from "openzeppelin/utils/cryptography/ECDSA.sol";
 
 import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
-import {console2} from "forge-std/console2.sol";
 
 /// @notice A contract to collect votes on L2 to be bridged to L1.
 abstract contract L2VoteAggregator is EIP712 {
@@ -25,7 +24,7 @@ abstract contract L2VoteAggregator is EIP712 {
   L2GovernorMetadata public immutable GOVERNOR_METADATA;
 
   /// @notice The address of the bridge that receives L2 votes.
-  address L1_BRIDGE_ADDRESS;
+  address public L1_BRIDGE_ADDRESS;
 
   /// @notice The contract that handles fetch the L1 block on the L2.
   IL1Block public immutable L1_BLOCK;
@@ -238,9 +237,6 @@ abstract contract L2VoteAggregator is EIP712 {
     returns (uint256 _lastVotingBlock)
   {
     L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
-    console2.logUint(proposal.voteEnd);
-    console2.logUint(CAST_VOTE_WINDOW);
-    console2.logUint(proposalId);
     _lastVotingBlock = proposal.voteEnd - CAST_VOTE_WINDOW;
   }
 

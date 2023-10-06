@@ -8,35 +8,9 @@ import {L1Block} from "src/L1Block.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
 import {WormholeL1ERC20Bridge} from "src/WormholeL1ERC20Bridge.sol";
 import {WormholeL2ERC20} from "src/WormholeL2ERC20.sol";
+import {L1ERC20BridgeHarness} from "test/harness/L1ERC20BridgeHarness.sol";
 import {TestConstants} from "test/Constants.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
-
-contract L1ERC20BridgeHarness is WormholeL1ERC20Bridge {
-  constructor(
-    address _l1Token,
-    address _l1Relayer,
-    address _l1Governor,
-    uint16 _sourceId,
-    uint16 _targetId,
-    address _owner
-  ) WormholeL1ERC20Bridge(_l1Token, _l1Relayer, _l1Governor, _sourceId, _targetId, _owner) {}
-
-  function withdraw(address account, uint256 amount) public {
-    _withdraw(account, amount);
-  }
-
-  function receiveWithdrawalWormholeMessages(
-    bytes calldata payload,
-    bytes[] memory additionalVaas,
-    bytes32 callerAddr,
-    uint16 sourceChain,
-    bytes32 deliveryHash
-  ) public {
-    _receiveWithdrawalWormholeMessages(
-      payload, additionalVaas, callerAddr, sourceChain, deliveryHash
-    );
-  }
-}
 
 contract L1ERC20BridgeTest is TestConstants, WormholeRelayerBasicTest {
   WormholeL2ERC20 l2Erc20;
@@ -125,7 +99,7 @@ contract Deposit is L1ERC20BridgeTest {
 }
 
 // Top level receive is tested in WormholeL2ERC20 and L2VoteAggregator
-contract _ReceiveWithdrawalWormholeMessages is Test, TestConstants {
+contract _ReceiveWithdrawalWormholeMessages is TestConstants {
   event Withdraw(address indexed account, uint256 amount);
 
   function testForkFuzz_CorrectlyReceiveWithdrawal(
@@ -150,7 +124,7 @@ contract _ReceiveWithdrawalWormholeMessages is Test, TestConstants {
     bytes memory withdrawalCalldata = abi.encodePacked(_account, uint256(_amount));
     vm.expectEmit();
     emit Withdraw(_account, _amount);
-    l1Erc20Bridge.receiveWithdrawalWormholeMessages(
+    l1Erc20Bridge.exposed_receiveWithdrawalWormholeMessages(
       withdrawalCalldata, new bytes[](0), bytes32(""), uint16(0), bytes32("")
     );
     assertEq(l1Erc20.balanceOf(address(_account)), _amount, "The account balance is incorrect");
