@@ -472,4 +472,13 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     );
     assertFalse(ok, "Call did not revert as expected");
   }
+
+  function testFuzz_RevertIf_FunctionIdDoesNotExist(uint8 _funcId) public {
+    _funcId = uint8(bound(_funcId, 4, type(uint8).max));
+    vm.expectRevert(
+      abi.encode(WormholeL2VoteAggregatorCalldataCompressor.FunctionDoesNotExist.selector)
+    );
+    (bool ok,) = address(routerHarness).call(abi.encodePacked(_funcId));
+    assertFalse(ok);
+  }
 }

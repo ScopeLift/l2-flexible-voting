@@ -98,6 +98,11 @@ contract Deposit is L1ERC20BridgeTest {
   }
 }
 
+// One test should get the emit event the ther should get the VoteCast
+// contract ReceiveWormholeMessages is TestConstants {
+// 
+// }
+
 // Top level receive is tested in WormholeL2ERC20 and L2VoteAggregator
 contract _ReceiveWithdrawalWormholeMessages is TestConstants {
   event Withdraw(address indexed account, uint256 amount);
