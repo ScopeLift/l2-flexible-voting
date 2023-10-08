@@ -4,10 +4,7 @@ pragma solidity ^0.8.0;
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 
-import {IFractionalGovernor} from
-  "flexible-voting/src/interfaces/IFractionalGovernor.sol";
-
-
+import {IFractionalGovernor} from "flexible-voting/src/interfaces/IFractionalGovernor.sol";
 
 abstract contract L1VotePool {
   /// @notice The address of the L1 Governor contract.
@@ -44,7 +41,7 @@ abstract contract L1VotePool {
   /// @param _governor The address of the L1 Governor contract.
   constructor(address _governor) {
     GOVERNOR = IGovernor(_governor);
-	ERC20Votes(IFractionalGovernor(address(GOVERNOR)).token()).delegate(address(this));
+    ERC20Votes(IFractionalGovernor(address(GOVERNOR)).token()).delegate(address(this));
   }
 
   /// @notice Casts vote to the L1 Governor.

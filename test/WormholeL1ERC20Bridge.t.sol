@@ -3,10 +3,8 @@ pragma solidity ^0.8.20;
 
 import {IGovernor} from "openzeppelin/governance/Governor.sol";
 import {WormholeRelayerBasicTest} from "wormhole-solidity-sdk/testing/WormholeRelayerTest.sol";
-import {
-  ERC20VotesComp
-} from "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
-
+import {ERC20VotesComp} from
+  "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
 
 import {L1Block} from "src/L1Block.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
@@ -116,7 +114,7 @@ contract ReceiveWormholeMessages is L1ERC20BridgeTest {
     // Mint and transfer tokens to bridge
     l1Erc20.mint(address(this), type(uint96).max);
     l1Erc20.approve(address(this), type(uint96).max);
-	l1Erc20.transferFrom(address(this), address(l1Erc20Bridge), type(uint96).max);
+    l1Erc20.transferFrom(address(this), address(l1Erc20Bridge), type(uint96).max);
 
     address[] memory targets = new address[](1);
     bytes[] memory calldatas = new bytes[](1);
