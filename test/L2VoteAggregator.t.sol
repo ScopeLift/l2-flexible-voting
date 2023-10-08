@@ -697,7 +697,7 @@ contract _CastVote is L2VoteAggregatorTest {
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
     uint256 weight = voteAggregator.exposed_castVote(_proposalId, address(this), _voteType, "");
-	assertEq(weight, _amount, "Voting weight is incorrect");
+    assertEq(weight, _amount, "Voting weight is incorrect");
   }
 
   function testFuzz_RevertWhen_AfterCastWindow(
