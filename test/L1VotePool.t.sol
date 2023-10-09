@@ -13,20 +13,21 @@ import {TestConstants} from "test/Constants.sol";
 contract L1VotePoolTest is TestConstants {
   L1VotePoolHarness l1VotePool;
   FakeERC20 l1Erc20;
+  GovernorFlexibleVotingMock gov;
 
   function setUp() public {
     l1Erc20 = new FakeERC20("Hello", "WRLD");
-    GovernorFlexibleVotingMock gov =
-      new GovernorFlexibleVotingMock("Governor", ERC20VotesComp(address(l1Erc20)));
+    gov = new GovernorFlexibleVotingMock("Governor", ERC20VotesComp(address(l1Erc20)));
     l1VotePool = L1VotePoolHarness(address(gov));
   }
 }
 
 contract Constructor is L1VotePoolTest {
-  function testFuzz_CorrectlySetConstructorArgs(address _governor) public {
-    vm.assume(_governor != address(0));
-    L1VotePool pool = new L1VotePoolHarness(_governor);
-    assertEq(address(pool.GOVERNOR()), _governor, "The governor address has been set incorrectly.");
+  function testFuzz_CorrectlySetConstructorArgs() public {
+    L1VotePool pool = new L1VotePoolHarness(address(gov));
+    assertEq(
+      address(pool.GOVERNOR()), address(gov), "The governor address has been set incorrectly."
+    );
   }
 }
 
