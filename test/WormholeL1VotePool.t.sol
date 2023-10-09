@@ -21,6 +21,7 @@ contract WormholeL1VotePoolTest is TestConstants, WormholeRelayerBasicTest {
   WormholeL2VoteAggregatorHarness l2VoteAggregator;
   FakeERC20 l2Erc20;
   FakeERC20 l1Erc20;
+  GovernorFlexibleVotingMock gov;
 
   event VoteCast(
     address indexed voter,
@@ -47,8 +48,7 @@ contract WormholeL1VotePoolTest is TestConstants, WormholeRelayerBasicTest {
 
   function setUpTarget() public override {
     l1Erc20 = new FakeERC20("GovExample", "GOV");
-    GovernorFlexibleVotingMock gov =
-      new GovernorFlexibleVotingMock("Testington Dao", ERC20VotesComp(address(l1Erc20)));
+    gov = new GovernorFlexibleVotingMock("Testington Dao", ERC20VotesComp(address(l1Erc20)));
     l1VotePool = new WormholeL1VotePoolHarness(L1_CHAIN.wormholeRelayer, address(gov));
     l1VotePool.setRegisteredSender(
       L2_CHAIN.wormholeChainId, bytes32(uint256(uint160(address(l2VoteAggregator))))
@@ -76,9 +76,11 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.selectFork(targetFork);
     vm.assume(uint96(_l2Against) + _l2For + _l2Abstain != 0);
 
-    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2For + _l2Abstain);
-    l1Erc20.mint(address(this), uint96(_l2Against) + _l2For + _l2Abstain);
-    l1Erc20.delegate(address(l1VotePool));
+    uint96 totalVotes = uint96(_l2Against) + _l2For + _l2Abstain;
+
+    l1Erc20.mint(address(this), totalVotes);
+    l1Erc20.approve(address(this), totalVotes);
+    l1Erc20.transferFrom(address(this), address(l1VotePool), totalVotes);
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
@@ -107,6 +109,13 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     assertEq(l1Against, _l2Against, "Against value was not bridged correctly");
     assertEq(l1For, _l2For, "For value was not bridged correctly");
     assertEq(l1Abstain, _l2Abstain, "abstain value was not bridged correctly");
+
+    // Governor votes
+    (uint256 totalAgainstVotes, uint256 totalForVotes, uint256 totalAbstainVotes) =
+      gov.proposalVotes(_proposalId);
+    assertEq(totalAgainstVotes, _l2Against, "Against value was not bridged correctly");
+    assertEq(totalForVotes, _l2For, "For value was not bridged correctly");
+    assertEq(totalAbstainVotes, _l2Abstain, "Abstain value was not bridged correctly");
   }
 
   function testFuzz_CorrectlyBridgeVoteAggregationWithExistingVote(
@@ -122,10 +131,11 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.assume(_l2NewAbstain > _l2Abstain);
 
     vm.selectFork(targetFork);
+    uint96 totalVotes = uint96(_l2NewAgainst) + _l2NewFor + _l2NewAbstain;
 
-    l1Erc20.approve(address(l1VotePool), uint96(_l2NewAgainst) + _l2NewFor + _l2NewAbstain);
-    l1Erc20.mint(address(this), uint96(_l2NewAgainst) + _l2NewFor + _l2NewAbstain);
-    l1Erc20.delegate(address(l1VotePool));
+    l1Erc20.mint(address(this), totalVotes);
+    l1Erc20.approve(address(this), totalVotes);
+    l1Erc20.transferFrom(address(this), address(l1VotePool), totalVotes);
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
     uint256 _proposalId =
@@ -161,6 +171,13 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     assertEq(l1Against, _l2NewAgainst, "Against value was not bridged correctly");
     assertEq(l1For, _l2NewFor, "For value was not bridged correctly");
     assertEq(l1Abstain, _l2NewAbstain, "abstain value was not bridged correctly");
+
+    // Governor votes
+    (uint256 totalAgainstVotes, uint256 totalForVotes, uint256 totalAbstainVotes) =
+      gov.proposalVotes(_proposalId);
+    assertEq(totalAgainstVotes, _l2NewAgainst, "Total Against value is incorrect");
+    assertEq(totalForVotes, _l2NewFor, "Total For value is incorrect");
+    assertEq(totalAbstainVotes, _l2NewAbstain, "Total Abstain value is incorrect");
   }
 
   function testFuzz_RevertWhen_InvalidVoteHasBeenBridged(
@@ -176,10 +193,11 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.assume(_l2NewAbstain < _l2Abstain);
 
     vm.selectFork(targetFork);
+    uint96 totalVotes = uint96(_l2Against) + _l2For + _l2Abstain;
 
-    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2For + _l2Abstain + 1);
-    l1Erc20.mint(address(this), uint96(_l2Against) + _l2For + _l2Abstain + 1);
-    l1Erc20.delegate(address(l1VotePool));
+    l1Erc20.mint(address(this), totalVotes);
+    l1Erc20.approve(address(this), totalVotes);
+    l1Erc20.transferFrom(address(this), address(l1VotePool), totalVotes);
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
     uint256 _proposalId =
@@ -213,7 +231,6 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
 
     l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2For + _l2Abstain);
     l1Erc20.mint(address(this), uint96(_l2Against) + _l2For + _l2Abstain);
-    l1Erc20.delegate(address(l1VotePool));
 
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
 
@@ -245,7 +262,6 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
 
     l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2For + _l2Abstain);
     l1Erc20.mint(address(this), uint96(_l2Against) + _l2For + _l2Abstain);
-    l1Erc20.delegate(address(l1VotePool));
 
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
     l1VotePool._jumpToProposalEnd(_proposalId, 1);
@@ -275,10 +291,11 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     _l2NewAbstain = uint32(bound(_l2NewAbstain, 0, _l2Abstain));
 
     vm.selectFork(targetFork);
+    uint96 totalVotes = uint96(_l2Against) + _l2For + _l2Abstain;
 
-    l1Erc20.approve(address(l1VotePool), uint96(_l2Against) + _l2For + _l2Abstain);
-    l1Erc20.mint(address(this), uint96(_l2Against) + _l2For + _l2Abstain);
-    l1Erc20.delegate(address(l1VotePool));
+    l1Erc20.mint(address(this), totalVotes);
+    l1Erc20.approve(address(this), totalVotes);
+    l1Erc20.transferFrom(address(this), address(l1VotePool), totalVotes);
 
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));
     l1VotePool.cancel(address(l1Erc20));

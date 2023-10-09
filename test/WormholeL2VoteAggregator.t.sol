@@ -82,10 +82,11 @@ contract _bridgeVote is L2VoteAggregatorTest {
   {
     vm.selectFork(targetFork);
     vm.assume(uint96(_against) + _for + _abstain != 0);
+    uint96 totalVotes = uint96(_against) + _for + _abstain;
 
-    l1Erc20.approve(address(l1VotePool), uint96(_against) + uint96(_for) + uint96(_abstain));
-    l1Erc20.mint(address(this), uint96(_against) + uint96(_for) + uint96(_abstain));
-    l1Erc20.delegate(address(l1VotePool));
+    l1Erc20.mint(address(this), totalVotes);
+    l1Erc20.approve(address(this), totalVotes);
+    l1Erc20.transferFrom(address(this), address(l1VotePool), totalVotes);
 
     vm.roll(block.number + 1); // To checkpoint erc20 mint
     uint256 _proposalId = l1VotePool.createProposalVote(address(l1Erc20));

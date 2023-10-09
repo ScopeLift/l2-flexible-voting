@@ -94,6 +94,9 @@ contract ReceiveWormholeMessages is L2ERC20Test {
     );
     uint256 l2Amount = l2Erc20.balanceOf(account);
     assertEq(l2Amount, l1Amount, "Amount after receive is incorrect");
+
+    uint256 weight = l2Erc20.getVotes(account);
+    assertEq(weight, l1Amount, "Votes were not delegated propoerly");
   }
 
   function testFuzz_RevertIf_NotCalledByRelayer(address account, uint224 amount, address caller)
