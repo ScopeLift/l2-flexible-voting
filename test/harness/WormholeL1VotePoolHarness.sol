@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Test} from "forge-std/Test.sol";
+import {CommonBase} from "forge-std/Base.sol";
 
 import {FakeERC20} from "src/FakeERC20.sol";
 import {WormholeBase} from "src/WormholeBase.sol";
 import {WormholeL1VotePool} from "src/WormholeL1VotePool.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
-contract WormholeL1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, Test {
+contract WormholeL1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, CommonBase {
   constructor(address _relayer, address _l1Governor)
     WormholeBase(_relayer)
     WormholeL1VotePool(_l1Governor)

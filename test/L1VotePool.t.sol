@@ -15,10 +15,18 @@ contract L1VotePoolTest is TestConstants {
   FakeERC20 l1Erc20;
   GovernorFlexibleVotingMock gov;
 
+  event VoteCast(
+    address indexed voter,
+    uint256 proposalId,
+    uint256 voteAgainst,
+    uint256 voteFor,
+    uint256 voteAbstain
+  );
+
   function setUp() public {
     l1Erc20 = new FakeERC20("Hello", "WRLD");
     gov = new GovernorFlexibleVotingMock("Governor", ERC20VotesComp(address(l1Erc20)));
-    l1VotePool = L1VotePoolHarness(address(gov));
+    l1VotePool = new L1VotePoolHarness(address(gov));
   }
 }
 
@@ -31,25 +39,38 @@ contract Constructor is L1VotePoolTest {
   }
 }
 
-// This does not seem to working
-// contract _castVote is L1VotePoolTest {
-//   function testFuzz_CorrectlyCastVoteToGovernor(
-//     uint256 _proposalId,
-//     uint32 _againstVotes,
-//     uint32 _forVotes,
-//     uint32 _abstainVotes
-//   ) public {
-//     vm.assume(_proposalId != 0);
-//     vm.assume(uint128(_againstVotes) + _forVotes + _abstainVotes != 0);
-// 	// vm.assume(_forVotes + _abstainVotes <= type(uint256).max);
-// 	// vm.assume(_againstVotes + _abstainVotes <= type(uint256).max);
-//
-//     l1Erc20.approve(address(l1VotePool), uint128(_againstVotes) + _forVotes + _abstainVotes);
-// 	l1Erc20.mint(address(this), uint128(_againstVotes) + _forVotes + _abstainVotes);
-//
-//     l1VotePool.exposed_castVote(
-//       _proposalId, L1VotePool.ProposalVote(uint128(_againstVotes), uint128(_forVotes),
-// uint128(_abstainVotes))
-//     );
-//   }
-// }
+contract _castVote is L1VotePoolTest {
+  function testFuzz_CorrectlyCastVoteToGovernor(
+    uint32 _againstVotes,
+    uint32 _forVotes,
+    uint32 _abstainVotes,
+    address _token
+  ) public {
+    vm.assume(uint128(_againstVotes) + _forVotes + _abstainVotes != 0);
+
+    uint128 totalVotes = uint128(_againstVotes) + _forVotes + _abstainVotes;
+    l1Erc20.mint(address(this), totalVotes);
+    l1Erc20.approve(address(this), totalVotes);
+    l1Erc20.transferFrom(address(this), address(l1VotePool), totalVotes);
+
+    vm.roll(block.number + 1); // To checkpoint erc20 mint
+    uint256 _proposalId = l1VotePool.createProposalVote(_token);
+    l1VotePool._jumpToActiveProposal(_proposalId);
+
+    vm.expectEmit();
+    emit VoteCast(address(this), _proposalId, _againstVotes, _forVotes, _abstainVotes);
+
+    l1VotePool.exposed_castVote(
+      _proposalId,
+      L1VotePool.ProposalVote(uint128(_againstVotes), uint128(_forVotes), uint128(_abstainVotes))
+    );
+
+    // Governor votes
+    (uint256 totalAgainstVotes, uint256 totalForVotes, uint256 totalAbstainVotes) =
+      gov.proposalVotes(_proposalId);
+
+    assertEq(totalAgainstVotes, _againstVotes, "Total Against value is incorrect");
+    assertEq(totalForVotes, _forVotes, "Total For value is incorrect");
+    assertEq(totalAbstainVotes, _abstainVotes, "Total Abstain value is incorrect");
+  }
+}

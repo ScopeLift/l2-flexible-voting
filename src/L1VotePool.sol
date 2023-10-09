@@ -49,7 +49,6 @@ abstract contract L1VotePool {
   function _castVote(uint256 proposalId, ProposalVote memory vote) internal {
     bytes memory votes = abi.encodePacked(vote.againstVotes, vote.forVotes, vote.abstainVotes);
 
-    // TODO: string should probably mention chain
     GOVERNOR.castVoteWithReasonAndParams(
       proposalId, UNUSED_SUPPORT_PARAM, "rolled-up vote from governance L2 token holders", votes
     );
