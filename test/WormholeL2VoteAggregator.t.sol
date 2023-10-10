@@ -74,7 +74,7 @@ contract Constructor is L2VoteAggregatorTest {
   }
 }
 
-/// @dev Although, the bridge method is in the `L2VoteAggregator` contract we test it here because
+/// @dev Although the bridge method is in the `L2VoteAggregator` contract we test it here because
 /// it will replicate the true end to end functionality
 contract _bridgeVote is L2VoteAggregatorTest {
   function testFuzz_CorrectlyBridgeVoteAggregation(uint32 _against, uint32 _for, uint32 _abstain)

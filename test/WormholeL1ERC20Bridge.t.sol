@@ -111,11 +111,14 @@ contract Deposit is L1ERC20BridgeTest {
 contract ReceiveWormholeMessages is L1ERC20BridgeTest {
   // Single L1 Vote
   function testFuzz_CastVoteOnL1(uint32 forVotes, uint32 againstVotes, uint32 abstainVotes) public {
+    uint96 totalVotes = forVotes + againstVotes + abstainVotes + 1; // Add 1 so the user always has
+      // voting power
     // Mint and transfer tokens to bridge
-    l1Erc20.mint(address(this), type(uint96).max);
-    l1Erc20.approve(address(this), type(uint96).max);
-    l1Erc20.transferFrom(address(this), address(l1Erc20Bridge), type(uint96).max);
+    l1Erc20.mint(address(this), totalVotes);
+    l1Erc20.approve(address(this), totalVotes);
+    l1Erc20.transferFrom(address(this), address(l1Erc20Bridge), totalVotes);
 
+    vm.roll(block.number + 1);
     address[] memory targets = new address[](1);
     bytes[] memory calldatas = new bytes[](1);
     uint256[] memory values = new uint256[](1);
