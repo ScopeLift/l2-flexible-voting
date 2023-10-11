@@ -140,9 +140,9 @@ contract ReceiveWormholeMessages is L1ERC20BridgeTest {
     l1Erc20Bridge.setRegisteredSender(L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS);
 
     vm.expectEmit();
-    emit VoteCast(L2_CHAIN.wormholeRelayer, proposalId, forVotes, againstVotes, abstainVotes);
+    emit VoteCast(L1_CHAIN.wormholeRelayer, proposalId, forVotes, againstVotes, abstainVotes);
 
-    vm.prank(L2_CHAIN.wormholeRelayer);
+    vm.prank(L1_CHAIN.wormholeRelayer);
     l1Erc20Bridge.receiveWormholeMessages(
       voteCalldata,
       new bytes[](0),
