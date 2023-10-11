@@ -113,8 +113,7 @@ contract ReceiveWormholeMessages is L1ERC20BridgeTest {
   function testFuzz_CastVoteOnL1(uint32 forVotes, uint32 againstVotes, uint32 abstainVotes) public {
     abstainVotes = 0;
     uint96 totalVotes = uint96(forVotes) + againstVotes + abstainVotes; // Add 1 so the user always
-      // has
-      // voting power
+                                                                        // has voting power
     if (totalVotes == 0) ++totalVotes;
     // Mint and transfer tokens to bridge
     l1Erc20.mint(address(this), totalVotes);
@@ -140,9 +139,9 @@ contract ReceiveWormholeMessages is L1ERC20BridgeTest {
     l1Erc20Bridge.setRegisteredSender(L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS);
 
     vm.expectEmit();
-    emit VoteCast(L1_CHAIN.wormholeRelayer, proposalId, forVotes, againstVotes, abstainVotes);
+    emit VoteCast(L2_CHAIN.wormholeRelayer, proposalId, forVotes, againstVotes, abstainVotes);
 
-    vm.prank(L1_CHAIN.wormholeRelayer);
+    vm.prank(L2_CHAIN.wormholeRelayer);
     l1Erc20Bridge.receiveWormholeMessages(
       voteCalldata,
       new bytes[](0),
