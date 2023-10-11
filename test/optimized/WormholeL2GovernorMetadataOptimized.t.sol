@@ -43,18 +43,15 @@ contract _AddProposal is WormholeL2GovernorMetadataOptimizedTest {
     uint256 firstL1VoteStart,
     uint256 firstL1VoteEnd,
     bool firstIsCanceled,
-    uint256 secondProposalId,
     uint256 secondL1VoteStart,
     uint256 secondL1VoteEnd,
     bool secondIsCanceled,
-    uint256 thirdProposalId,
     uint256 thirdL1VoteStart,
     uint256 thirdL1VoteEnd,
     bool thirdIsCanceled
   ) public {
-    vm.assume(firstProposalId != secondProposalId);
-    vm.assume(thirdProposalId != secondProposalId);
-    vm.assume(thirdProposalId != firstProposalId);
+    uint256 secondProposalId = uint256(keccak256(abi.encodePacked(firstProposalId)));
+    uint256 thirdProposalId = uint256(keccak256(abi.encodePacked(secondProposalId)));
 
     l2GovernorMetadata.exposed_addProposal(
       firstProposalId, firstL1VoteStart, firstL1VoteEnd, firstIsCanceled
