@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Test} from "forge-std/Test.sol";
-
 import {L1Block} from "src/L1Block.sol";
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
+import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 
 import {TestConstants} from "test/Constants.sol";
 import {GovernorMetadataMock} from "test/mock/GovernorMetadataMock.sol";
 import {L2VoteAggregatorHarness} from "test/harness/L2VoteAggregatorHarness.sol";
 
-contract L2VoteAggregatorBase is Test, TestConstants {
+contract L2VoteAggregatorTest is TestConstants {
   L2VoteAggregatorHarness voteAggregator;
 
   event VoteCast(
     address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
+  );
+
+  event VoteBridged(
+    uint256 indexed proposalId, uint256 voteAgainst, uint256 voteFor, uint256 voteAbstain
   );
 
   FakeERC20 l2Erc20;
@@ -33,42 +36,77 @@ contract L2VoteAggregatorBase is Test, TestConstants {
   }
 }
 
-contract VotingDelay is L2VoteAggregatorBase {
+contract Constructor is TestConstants {
+  function testForkFuzz_CorrectlySetAllArgs(
+    address l2Erc20,
+    address l2GovernorMetadata,
+    address l1Block
+  ) public {
+    L2VoteAggregator aggregator = new L2VoteAggregatorHarness(l2Erc20, l2GovernorMetadata, l1Block);
+
+    assertEq(address(aggregator.VOTING_TOKEN()), l2Erc20, "L2 token is not set correctly");
+    assertEq(
+      address(aggregator.GOVERNOR_METADATA()),
+      l2GovernorMetadata,
+      "L2 governor metadata is not set correctly"
+    );
+    assertEq(address(aggregator.L1_BLOCK()), l1Block, "L1 block is not set correctly");
+  }
+}
+
+contract Initialize is L2VoteAggregatorTest {
+  function testFork_CorrectlyInitializeL1Bridge(address bridgeAddress) public {
+    voteAggregator.initialize(bridgeAddress);
+    assertEq(
+      voteAggregator.L1_BRIDGE_ADDRESS(), bridgeAddress, "L1 bridge address is not setup correctly"
+    );
+    assertTrue(voteAggregator.INITIALIZED(), "Vote aggregator isn't initialized");
+  }
+
+  function testFork_RevertWhen_AlreadyInitializedWithBridgeAddress(address bridgeAddress) public {
+    voteAggregator.initialize(bridgeAddress);
+
+    vm.expectRevert(L2VoteAggregator.AlreadyInitialized.selector);
+    voteAggregator.initialize(bridgeAddress);
+  }
+}
+
+contract VotingDelay is L2VoteAggregatorTest {
   function test_CorrectlyReturnVotingDelay() public {
     uint256 delay = voteAggregator.votingDelay();
     assertEq(delay, 0, "Delay should be 0 as we do not support this method.");
   }
 }
 
-contract VotingPeriod is L2VoteAggregatorBase {
+contract VotingPeriod is L2VoteAggregatorTest {
   function test_CorrectlyReturnVotingPeriod() public {
     uint256 period = voteAggregator.votingPeriod();
     assertEq(period, 0, "Period should be 0 as we do not support this method.");
   }
 }
 
-contract ProposalThreshold is L2VoteAggregatorBase {
+contract ProposalThreshold is L2VoteAggregatorTest {
   function test_CorrectlyReturnProposalThreshold() public {
     uint256 threshold = voteAggregator.proposalThreshold();
     assertEq(threshold, 0, "Threshold should be 0 as we do not support this method.");
   }
 }
 
-contract Quorum is L2VoteAggregatorBase {
+contract Quorum is L2VoteAggregatorTest {
   function test_CorrectlyReturnProposalThreshold() public {
     uint256 quorum = voteAggregator.quorum(1);
     assertEq(quorum, 0, "Quorum should be 0 as we do not support this method.");
   }
 }
 
-contract GetVotes is L2VoteAggregatorBase {
+contract GetVotes is L2VoteAggregatorTest {
   function test_CorrectlyReturnGetVotes(address addr, uint256 blockNumber) public {
     uint256 votes = voteAggregator.getVotes(addr, blockNumber);
     assertEq(votes, 0, "Votes should be 0 as we do not support this method.");
   }
 }
 
-contract State is L2VoteAggregatorBase {
+contract State is L2VoteAggregatorTest {
   function testFuzz_ReturnStatusBeforeVoteStart(uint256 _proposalId, uint32 _timeToProposalEnd)
     public
   {
@@ -145,7 +183,7 @@ contract State is L2VoteAggregatorBase {
   }
 }
 
-contract CastVote is L2VoteAggregatorBase {
+contract CastVote is L2VoteAggregatorTest {
   function testFuzz_RevertWhen_BeforeProposalStart(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
@@ -284,7 +322,7 @@ contract CastVote is L2VoteAggregatorBase {
   }
 }
 
-contract CastVoteWithReason is L2VoteAggregatorBase {
+contract CastVoteWithReason is L2VoteAggregatorTest {
   function testFuzz_RevertWhen_BeforeProposalStart(
     uint96 _amount,
     uint8 _support,
@@ -439,7 +477,7 @@ contract CastVoteWithReason is L2VoteAggregatorBase {
   }
 }
 
-contract CastVoteBySig is L2VoteAggregatorBase {
+contract CastVoteBySig is L2VoteAggregatorTest {
   function _signVoteMessage(uint256 _proposalId, uint8 _support)
     internal
     view
@@ -631,7 +669,7 @@ contract CastVoteBySig is L2VoteAggregatorBase {
   }
 }
 
-contract _CastVote is L2VoteAggregatorBase {
+contract _CastVote is L2VoteAggregatorTest {
   function testFuzz_RevertWhen_BeforeProposalStart(uint96 _amount, uint8 _support) public {
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
@@ -770,7 +808,7 @@ contract _CastVote is L2VoteAggregatorBase {
   }
 }
 
-contract Propose is L2VoteAggregatorBase {
+contract Propose is L2VoteAggregatorTest {
   function testFuzz_RevertIf_Called(
     address[] memory addrs,
     uint256[] memory exam,
@@ -782,7 +820,7 @@ contract Propose is L2VoteAggregatorBase {
   }
 }
 
-contract Execute is L2VoteAggregatorBase {
+contract Execute is L2VoteAggregatorTest {
   function testFuzz_RevertIf_Called(
     address[] memory addrs,
     uint256[] memory exam,
@@ -791,5 +829,88 @@ contract Execute is L2VoteAggregatorBase {
   ) public {
     vm.expectRevert(L2VoteAggregator.UnsupportedMethod.selector);
     voteAggregator.execute(addrs, exam, te, hi);
+  }
+}
+
+contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
+  function testFuzz_CorrectlyCalculateInternalVotingPeriod(
+    uint256 proposalId,
+    uint256 voteStart,
+    uint256 voteEnd,
+    bool isCanceled
+  ) public {
+    voteEnd = bound(voteEnd, voteAggregator.CAST_VOTE_WINDOW(), type(uint256).max);
+    L2GovernorMetadata.Proposal memory proposal = GovernorMetadataMock(
+      address(voteAggregator.GOVERNOR_METADATA())
+    ).createProposal(proposalId, voteStart, voteEnd, isCanceled);
+
+    uint256 lastVotingBlock = voteAggregator.internalVotingPeriodEnd(proposalId);
+    assertEq(lastVotingBlock, proposal.voteEnd - voteAggregator.CAST_VOTE_WINDOW());
+  }
+}
+
+contract ProposalVoteActive is L2VoteAggregatorTest {
+  function testFuzz_ProposalVoteIsActive(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
+    public
+  {
+    voteStart = uint64(bound(voteStart, 0, block.number));
+    voteEnd =
+      uint64(bound(voteEnd, block.number + voteAggregator.CAST_VOTE_WINDOW(), type(uint64).max));
+    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+      proposalId, voteStart, voteEnd, false
+    );
+
+    uint256 lastVotingBlock = voteAggregator.internalVotingPeriodEnd(proposalId);
+
+    vm.roll(lastVotingBlock);
+    bool active = voteAggregator.proposalVoteActive(proposalId);
+    assertEq(active, true, "Proposal is supposed to be active");
+  }
+
+  function testFuzz_ProposalVoteIsInactiveBefore(
+    uint256 proposalId,
+    uint64 voteStart,
+    uint64 voteEnd,
+    bool isCanceled
+  ) public {
+    vm.assume(voteStart > 0); // Prevent underflow because we subtract 1
+    vm.assume(voteStart > block.number); // Block number must be greater than vote start
+    vm.assume(voteEnd > voteAggregator.CAST_VOTE_WINDOW()); //  Prevent underflow
+    vm.assume(voteEnd - voteAggregator.CAST_VOTE_WINDOW() > voteStart); // Proposal must have a
+      // voting
+      // block before the cast
+    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+      proposalId, voteStart, voteEnd, isCanceled
+    );
+
+    bool active = voteAggregator.proposalVoteActive(proposalId);
+    assertFalse(active, "Proposal is supposed to be inactive");
+  }
+
+  function testFuzz_ProposalVoteIsCanceled(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
+    public
+  {
+    vm.assume(voteStart > 0); // Prevent underflow because we subtract 1
+    vm.assume(voteStart > block.number); // Block number must be greater than vote start
+    vm.assume(voteEnd > voteAggregator.CAST_VOTE_WINDOW()); // Prevent underflow
+    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+      proposalId, voteStart, voteEnd, false
+    );
+
+    bool active = voteAggregator.proposalVoteActive(proposalId);
+    assertFalse(active, "Proposal is supposed to be inactive");
+  }
+}
+
+contract BridgeVote is L2VoteAggregatorTest {
+  function testFuzz_CorrectlyBridgeVote(uint256 proposalId) public {
+    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+      proposalId, voteAggregator.CAST_VOTE_WINDOW()
+    );
+
+    vm.expectEmit();
+    emit VoteBridged(proposalId, 0, 0, 0);
+
+    voteAggregator.bridgeVote(proposalId);
   }
 }

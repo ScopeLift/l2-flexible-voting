@@ -24,7 +24,7 @@ abstract contract L2VoteAggregator is EIP712 {
   L2GovernorMetadata public immutable GOVERNOR_METADATA;
 
   /// @notice The address of the bridge that receives L2 votes.
-  address L1_BRIDGE_ADDRESS;
+  address public L1_BRIDGE_ADDRESS;
 
   /// @notice The contract that handles fetch the L1 block on the L2.
   IL1Block public immutable L1_BLOCK;

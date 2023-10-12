@@ -32,6 +32,16 @@ abstract contract GovernorMetadataMockBase is L2GovernorMetadata {
     _proposals[proposalId] = proposal;
     return proposal;
   }
+
+  function createProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled)
+    public
+    returns (Proposal memory)
+  {
+    Proposal memory proposal =
+      Proposal({voteStart: voteStart, voteEnd: voteEnd, isCanceled: isCanceled});
+    _proposals[proposalId] = proposal;
+    return proposal;
+  }
 }
 
 contract GovernorMetadataMock is GovernorMetadataMockBase, WormholeL2GovernorMetadata {

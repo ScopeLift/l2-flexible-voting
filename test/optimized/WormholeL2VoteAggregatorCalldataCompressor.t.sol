@@ -98,6 +98,7 @@ contract WormholeL2ERC20CalldataCompressorTest is Test, TestConstants {
   }
 }
 
+/// @dev All of the internal methods are tested in this Fallback contract
 contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   function testFuzz_RevertIf_CastVoteMsgDataIsTooLong(
     uint16 _proposalId,
@@ -107,7 +108,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
 
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
@@ -129,7 +130,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
 
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
@@ -149,8 +150,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
 
     vm.assume(_amount != 0);
-    vm.assume(_proposalId != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
@@ -175,7 +175,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
 
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
@@ -200,7 +200,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
 
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
@@ -227,7 +227,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   ) public {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -254,7 +254,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   ) public {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -281,7 +281,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   ) public {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -305,7 +305,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
 
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.For;
 
@@ -336,7 +336,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   ) public {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
 
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.Abstain;
 
@@ -367,7 +367,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   ) public {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
 
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.Against;
 
@@ -399,7 +399,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   ) public {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
 
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.Abstain;
 
@@ -425,7 +425,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   ) public {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
 
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.Abstain;
 
@@ -453,7 +453,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
   ) public {
     _timeToEnd = uint32(bound(_timeToEnd, 2000, type(uint32).max));
     vm.assume(_amount != 0);
-    vm.assume(_proposalId > 1);
+    vm.assume(_proposalId != 1);
 
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.Abstain;
 
@@ -471,5 +471,14 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
       abi.encodePacked(uint8(3), uint24(_proposalId), _voteType, _v, _r, _s)
     );
     assertFalse(ok, "Call did not revert as expected");
+  }
+
+  function testFuzz_RevertIf_FunctionIdDoesNotExist(uint8 _funcId) public {
+    _funcId = uint8(bound(_funcId, 4, type(uint8).max));
+    vm.expectRevert(
+      abi.encode(WormholeL2VoteAggregatorCalldataCompressor.FunctionDoesNotExist.selector)
+    );
+    (bool ok,) = address(routerHarness).call(abi.encodePacked(_funcId));
+    assertFalse(ok);
   }
 }
