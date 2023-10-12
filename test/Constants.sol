@@ -38,11 +38,17 @@ contract BaseConstants is CommonBase {
       chainId: 10,
       rpcUrl: vm.envOr("OPTIMISM_RPC_URL", string("https://optimism.publicnode.com"))
     });
-    chainInfos[42_161] = ChainConfig({
-      wormholeChainId: 23,
-      wormholeRelayer: 0x27428DD2d3DD32A4D7f7C497eAaa23130d894911,
-      chainId: 42_161,
-      rpcUrl: vm.envOr("ARBITRUM_RPC_URL", string("https://rpc.ankr.com/arbitrum"))
+    chainInfos[5] = ChainConfig({
+      wormholeChainId: 2,
+      wormholeRelayer: 0x28D8F1Be96f97C1387e94A53e00eCcFb4E75175a,
+      chainId: 5,
+      rpcUrl: vm.envOr("GOERLI_RPC_URL", string("https://rpc.ankr.com/eth_goerli"))
+    });
+    chainInfos[420] = ChainConfig({
+      wormholeChainId: 24,
+      wormholeRelayer: 0x01A957A525a5b7A72808bA9D10c389674E459891,
+      chainId: 420,
+      rpcUrl: vm.envOr("OPTIMISM_GOERLI_RPC_URL", string("https://optimism-goerli.publicnode.com"))
     });
     chainInfos[43_113] = ChainConfig({
       wormholeChainId: 6,
