@@ -109,7 +109,7 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     // Register L1 ERC20 bridge on L2 token
     vm.broadcast();
     l2Token.setRegisteredSender(
-      L2_CHAIN.wormholeChainId, _toWormholeAddress(address(l1TokenBridge))
+      L1_CHAIN.wormholeChainId, _toWormholeAddress(address(l1TokenBridge))
     );
 
     vm.broadcast();

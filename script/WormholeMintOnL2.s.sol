@@ -33,11 +33,11 @@ contract WormholeMintOnL2 is Script, ScriptConstants {
 
     // Mint some L1 token
     vm.broadcast();
-    erc20.mint(msg.sender, 100_000);
+    erc20.mint(msg.sender, 100_000e18);
 
     // Approve L1 token to be sent to the bridge
     vm.broadcast();
-    erc20.approve(address(bridge), 100_000);
+    erc20.approve(address(bridge), 100_000e18);
 
     uint256 cost = bridge.quoteDeliveryCost(L2_CHAIN.wormholeChainId);
 
