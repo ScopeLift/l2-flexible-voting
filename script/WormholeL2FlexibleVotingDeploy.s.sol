@@ -10,19 +10,20 @@ import {
   GovernorVotesComp,
   ERC20VotesComp
 } from "openzeppelin-flexible-voting/governance/extensions/GovernorVotesComp.sol";
-import {
-  GovernorVotes
-} from "openzeppelin-flexible-voting/governance/extensions/GovernorVotes.sol";
-import {
-		GovernorTimelockControl
-} from "openzeppelin-flexible-voting/governance/extensions/GovernorTimelockControl.sol";
+import {GovernorVotes} from "openzeppelin-flexible-voting/governance/extensions/GovernorVotes.sol";
+import {GovernorTimelockControl} from
+  "openzeppelin-flexible-voting/governance/extensions/GovernorTimelockControl.sol";
 import {ERC20Votes} from "openzeppelin-flexible-voting/token/ERC20/extensions/ERC20Votes.sol";
-import {Governor as FlexGovernor, Governor, IGovernor} from "openzeppelin-flexible-voting/governance/Governor.sol";
+import {
+  Governor as FlexGovernor,
+  Governor,
+  IGovernor
+} from "openzeppelin-flexible-voting/governance/Governor.sol";
 import {TimelockController} from "openzeppelin-flexible-voting/governance/TimelockController.sol";
-import {GovernorTimelockCompound} from "openzeppelin-flexible-voting/governance/extensions/GovernorTimelockCompound.sol";
+import {GovernorTimelockCompound} from
+  "openzeppelin-flexible-voting/governance/extensions/GovernorTimelockCompound.sol";
 import {ICompoundTimelock} from "openzeppelin-flexible-voting/vendor/compound/ICompoundTimelock.sol";
 import {CompTimelock} from "openzeppelin/mocks/compound/CompTimelock.sol";
-
 
 import {L1Block} from "src/L1Block.sol";
 import {FakeERC20} from "src/FakeERC20.sol";
@@ -33,7 +34,6 @@ import {ScriptConstants} from "test/Constants.sol";
 import {GovernorFlexibleVotingMock} from "test/mock/GovernorMock.sol";
 import {ERC20VotesCompMock} from "test/mock/ERC20VotesCompMock.sol";
 import {console2} from "forge-std/console2.sol";
-
 
 contract GovernorTestnetSettings {
   function quorum(uint256) public view virtual returns (uint256) {
@@ -53,10 +53,24 @@ contract GovernorTestnetSettings {
   }
 }
 
-contract GovernorCompTestnet is GovernorVotesComp, GovernorCountingFractional, GovernorTimelockCompound, GovernorTestnetSettings {
-  constructor(string memory _name, ERC20VotesComp _token, ICompoundTimelock _timelock) FlexGovernor(_name) GovernorVotesComp(_token) GovernorTimelockCompound(_timelock) {}
+contract GovernorCompTestnet is
+  GovernorVotesComp,
+  GovernorCountingFractional,
+  GovernorTimelockCompound,
+  GovernorTestnetSettings
+{
+  constructor(string memory _name, ERC20VotesComp _token, ICompoundTimelock _timelock)
+    FlexGovernor(_name)
+    GovernorVotesComp(_token)
+    GovernorTimelockCompound(_timelock)
+  {}
 
-  function quorum(uint256 blockNumber) public view override(GovernorTestnetSettings, IGovernor) returns (uint256) {
+  function quorum(uint256 blockNumber)
+    public
+    view
+    override(GovernorTestnetSettings, IGovernor)
+    returns (uint256)
+  {
     return GovernorTestnetSettings.quorum(blockNumber);
   }
 
@@ -64,11 +78,21 @@ contract GovernorCompTestnet is GovernorVotesComp, GovernorCountingFractional, G
     return GovernorTestnetSettings.votingDelay();
   }
 
-  function votingPeriod() public view override(GovernorTestnetSettings, IGovernor) returns (uint256) {
+  function votingPeriod()
+    public
+    view
+    override(GovernorTestnetSettings, IGovernor)
+    returns (uint256)
+  {
     return GovernorTestnetSettings.votingPeriod();
   }
 
-  function proposalThreshold() public view override(FlexGovernor, GovernorTestnetSettings) returns (uint256) {
+  function proposalThreshold()
+    public
+    view
+    override(FlexGovernor, GovernorTestnetSettings)
+    returns (uint256)
+  {
     return GovernorTestnetSettings.proposalThreshold();
   }
 
@@ -141,13 +165,26 @@ contract GovernorCompTestnet is GovernorVotesComp, GovernorCountingFractional, G
   {
     return GovernorTimelockCompound._executor();
   }
-
 }
 
-contract GovernorTestnet is GovernorVotes, GovernorCountingFractional, GovernorTestnetSettings, GovernorTimelockControl {
-  constructor(string memory _name, ERC20Votes _token, TimelockController _timelock) FlexGovernor(_name) GovernorVotes(_token) GovernorTimelockControl(_timelock) {}
+contract GovernorTestnet is
+  GovernorVotes,
+  GovernorCountingFractional,
+  GovernorTestnetSettings,
+  GovernorTimelockControl
+{
+  constructor(string memory _name, ERC20Votes _token, TimelockController _timelock)
+    FlexGovernor(_name)
+    GovernorVotes(_token)
+    GovernorTimelockControl(_timelock)
+  {}
 
-  function quorum(uint256 blockNumber) public view override(GovernorTestnetSettings, IGovernor) returns (uint256) {
+  function quorum(uint256 blockNumber)
+    public
+    view
+    override(GovernorTestnetSettings, IGovernor)
+    returns (uint256)
+  {
     return GovernorTestnetSettings.quorum(blockNumber);
   }
 
@@ -155,10 +192,21 @@ contract GovernorTestnet is GovernorVotes, GovernorCountingFractional, GovernorT
     return GovernorTestnetSettings.votingDelay();
   }
 
-  function votingPeriod() public view override(GovernorTestnetSettings, IGovernor) returns (uint256) {
+  function votingPeriod()
+    public
+    view
+    override(GovernorTestnetSettings, IGovernor)
+    returns (uint256)
+  {
     return GovernorTestnetSettings.votingPeriod();
   }
-  function proposalThreshold() public view override(FlexGovernor, GovernorTestnetSettings) returns (uint256) {
+
+  function proposalThreshold()
+    public
+    view
+    override(FlexGovernor, GovernorTestnetSettings)
+    returns (uint256)
+  {
     return GovernorTestnetSettings.proposalThreshold();
   }
 
@@ -175,7 +223,7 @@ contract GovernorTestnet is GovernorVotes, GovernorCountingFractional, GovernorT
       proposalId, support, reason, params, v, r, s
     );
   }
-  
+
   /// @dev We override this function to resolve ambiguity between inherited contracts.
   function supportsInterface(bytes4 interfaceId)
     public
@@ -206,8 +254,7 @@ contract GovernorTestnet is GovernorVotes, GovernorCountingFractional, GovernorT
     bytes[] memory calldatas,
     bytes32 descriptionHash
   ) internal virtual override(FlexGovernor, GovernorTimelockControl) {
-    return
-      GovernorTimelockControl._execute(proposalId, targets, values, calldatas, descriptionHash);
+    return GovernorTimelockControl._execute(proposalId, targets, values, calldatas, descriptionHash);
   }
 
   /// @dev We override this function to resolve ambiguity between inherited contracts.
@@ -236,7 +283,15 @@ contract GovernorTestnet is GovernorVotes, GovernorCountingFractional, GovernorT
 contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
   using stdJson for string;
 
-  event Configuration(address governorAddress, address l1TokenAddress, address l1BlockAddress, address contractOwner, string l2TokenName, string l2TokenSymbol, bool compToken);
+  event Configuration(
+    address governorAddress,
+    address l1TokenAddress,
+    address l1BlockAddress,
+    address contractOwner,
+    string l2TokenName,
+    string l2TokenSymbol,
+    bool compToken
+  );
 
   function run() public {
     setFallbackToDefaultRpcUrls(false);
@@ -246,13 +301,21 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     string memory l2TokenSymbol = vm.envOr("L2_TOKEN_SYMBOL", string("SCOPE"));
 
     uint256 l1ForkId = vm.createSelectFork(L1_CHAIN.rpcUrl);
-	(address governorAddress, address l1TokenAddress, bool compToken) = _setupGovernor();
+    (address governorAddress, address l1TokenAddress, bool compToken) = _setupGovernor();
 
-	emit Configuration(governorAddress, l1TokenAddress, l1BlockAddress, vm.envOr("CONTRACT_OWNER", msg.sender), l2TokenName, l2TokenSymbol, compToken);
+    emit Configuration(
+      governorAddress,
+      l1TokenAddress,
+      l1BlockAddress,
+      vm.envOr("CONTRACT_OWNER", msg.sender),
+      l2TokenName,
+      l2TokenSymbol,
+      compToken
+    );
 
     // Create L1 bridge that mints the L2 token
     vm.broadcast();
-	// For some reason the token method is not working
+    // For some reason the token method is not working
     WormholeL1ERC20Bridge l1TokenBridge =
     new WormholeL1ERC20Bridge(l1TokenAddress, L1_CHAIN.wormholeRelayer, governorAddress, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, vm.envOr("CONTRACT_OWNER", msg.sender));
 
@@ -261,9 +324,16 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     WormholeL1GovernorMetadataBridge l1MetadataBridge =
     new WormholeL1GovernorMetadataBridge(governorAddress, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
 
-
     vm.createSelectFork(L2_CHAIN.rpcUrl);
-	emit Configuration(governorAddress, l1TokenAddress, l1BlockAddress, vm.envOr("CONTRACT_OWNER", msg.sender), l2TokenName, l2TokenSymbol, compToken);
+    emit Configuration(
+      governorAddress,
+      l1TokenAddress,
+      l1BlockAddress,
+      vm.envOr("CONTRACT_OWNER", msg.sender),
+      l2TokenName,
+      l2TokenSymbol,
+      compToken
+    );
 
     if (l1BlockAddress == address(0)) {
       vm.broadcast();
@@ -274,7 +344,7 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     // Deploy the L2 metadata contract
     vm.broadcast();
     WormholeL2GovernorMetadata l2GovernorMetadata =
-      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, vm.envOr("CONTRACT_OWNER", msg.sender));
+    new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, vm.envOr("CONTRACT_OWNER", msg.sender));
 
     // Create L2 ERC20Votes token
     vm.broadcast();
@@ -331,9 +401,9 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
 
     // Deploy L1 token on is not provided
     if (l1TokenAddress == address(0)) {
-		// Create Timelock
-		// setPendingAdmin()
-		// 	__acceptAdmin()
+      // Create Timelock
+      // setPendingAdmin()
+      // 	__acceptAdmin()
       if (compToken) {
         vm.broadcast();
         ERC20VotesCompMock deployedL1Token = new ERC20VotesCompMock("GovernanceComp", "GOVc");
@@ -343,25 +413,26 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
         FakeERC20 deployedL1Token = new FakeERC20("Governance", "GOV");
         l1TokenAddress = address(deployedL1Token);
       }
-
     }
     // Deploy the L1 governor used in the L1 bridge
     if (governorAddress == address(0)) {
-	  vm.broadcast();
-      TimelockController _timelock = new TimelockController(300 , new address[](0), new address[](0), address(0));
+      vm.broadcast();
+      TimelockController _timelock =
+        new TimelockController(300 , new address[](0), new address[](0), address(0));
 
       if (compToken) {
         vm.broadcast();
-        GovernorCompTestnet gov = new GovernorCompTestnet("Dao of Tests", ERC20VotesComp(l1TokenAddress), ICompoundTimelock(payable(_timelock)));
+        GovernorCompTestnet gov =
+        new GovernorCompTestnet("Dao of Tests", ERC20VotesComp(l1TokenAddress), ICompoundTimelock(payable(_timelock)));
         ERC20Votes(gov.token()).delegate(address(this));
         governorAddress = address(gov);
-	  } else {
+      } else {
         vm.broadcast();
-        GovernorTestnet gov = new GovernorTestnet("Dao of Tests", ERC20Votes(l1TokenAddress), _timelock);
+        GovernorTestnet gov =
+          new GovernorTestnet("Dao of Tests", ERC20Votes(l1TokenAddress), _timelock);
         governorAddress = address(gov);
-	  }
+      }
     }
-	return (governorAddress, l1TokenAddress, compToken);
+    return (governorAddress, l1TokenAddress, compToken);
   }
-
 }

@@ -21,4 +21,4 @@ contract ERC20VotesCompMock is ERC20VotesComp, IERC20Mint {
     _mint(account, amount);
     delegate(account);
   }
- }
+}

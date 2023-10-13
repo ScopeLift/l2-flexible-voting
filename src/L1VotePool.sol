@@ -42,7 +42,7 @@ abstract contract L1VotePool {
   /// @param _governor The address of the L1 Governor contract.
   constructor(address _governor) {
     GOVERNOR = IGovernor(_governor);
-	console2.logAddress(address(GOVERNOR));
+    console2.logAddress(address(GOVERNOR));
     ERC20Votes(IFractionalGovernor(address(GOVERNOR)).token()).delegate(address(this));
   }
 
