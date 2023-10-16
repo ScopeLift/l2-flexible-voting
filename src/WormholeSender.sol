@@ -21,7 +21,7 @@ abstract contract WormholeSender is WormholeBase {
   }
 
   /// @param targetChain The chain id of the chain receiving the messages.
-  function quoteDeliveryCost(uint16 targetChain) public virtual returns (uint256 cost) {
+  function quoteDeliveryCost(uint16 targetChain) public view virtual returns (uint256 cost) {
     (cost,) = WORMHOLE_RELAYER.quoteEVMDeliveryPrice(targetChain, 0, GAS_LIMIT);
   }
 }
