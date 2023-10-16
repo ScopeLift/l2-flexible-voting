@@ -23,7 +23,7 @@ import {GovernorCountingFractional} from "flexible-voting/src/GovernorCountingFr
 
 contract GovernorTestnetSettings {
   function quorum(uint256) public view virtual returns (uint256) {
-    return 1_000_000;
+    return 1_000_000e18;
   }
 
   function votingDelay() public view virtual returns (uint256) {
@@ -35,7 +35,7 @@ contract GovernorTestnetSettings {
   }
 
   function proposalThreshold() public view virtual returns (uint256) {
-    return 500_000;
+    return 500_000e18;
   }
 }
 
