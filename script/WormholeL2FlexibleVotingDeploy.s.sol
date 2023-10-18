@@ -99,7 +99,7 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     // Deploy the L2 vote aggregator
     vm.broadcast();
     WormholeL2VoteAggregator voteAggregator =
-    new WormholeL2VoteAggregator(address(l2Token), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), l1BlockAddress, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregator(address(l2Token), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), l1BlockAddress, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, vm.envOr("CONTRACT_OWNER", msg.sender));
 
     vm.broadcast();
     l2GovernorMetadata.setRegisteredSender(

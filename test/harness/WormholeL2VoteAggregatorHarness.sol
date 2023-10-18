@@ -19,7 +19,8 @@ contract WormholeL2VoteAggregatorHarness is WormholeL2VoteAggregator {
       _governorMetadata,
       _l1BlockAddress,
       _sourceChain,
-      _targetChain
+      _targetChain,
+	  msg.sender
     )
   {}
 
