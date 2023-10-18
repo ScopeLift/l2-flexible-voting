@@ -31,7 +31,8 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
     address _relayer,
     address _l1BlockAddress,
     uint16 _sourceChain,
-    uint16 _targetChain
+    uint16 _targetChain,
+    address _owner
   )
     WormholeL2VoteAggregator(
       _votingToken,
@@ -39,7 +40,7 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
       _l1BlockAddress,
       _sourceChain,
       _targetChain,
-      msg.sender
+      _owner
     )
   {}
 
