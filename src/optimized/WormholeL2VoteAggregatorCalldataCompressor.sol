@@ -39,7 +39,7 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
       _l1BlockAddress,
       _sourceChain,
       _targetChain,
-	  msg.sender
+      msg.sender
     )
   {}
 
@@ -127,5 +127,4 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
       ++nextInternalProposalId;
     }
   }
-
 }

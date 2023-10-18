@@ -95,9 +95,7 @@ contract _bridgeVote is L2VoteAggregatorTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _against, _for, _abstain);
-    l2VoteAggregator.createProposal(
-      _proposalId, 3000
-    );
+    l2VoteAggregator.createProposal(_proposalId, 3000);
     vm.expectEmit();
     emit VoteBridged(_proposalId, _against, _for, _abstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);

@@ -6,7 +6,7 @@ import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {GovernorMetadataMockBase} from "test/mock/GovernorMetadataMock.sol";
 
 contract L2VoteAggregatorHarness is L2VoteAggregator, GovernorMetadataMockBase {
-  constructor(address _votingToken,  address _l1BlockAddress)
+  constructor(address _votingToken, address _l1BlockAddress)
     L2VoteAggregator(_votingToken, _l1BlockAddress)
   {}
 

@@ -91,9 +91,7 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2Against, _l2For, _l2Abstain);
-    l2VoteAggregator.createProposal(
-      _proposalId, 3000
-    );
+    l2VoteAggregator.createProposal(_proposalId, 3000);
     vm.expectEmit();
     emit VoteBridged(_proposalId, _l2Against, _l2For, _l2Abstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
@@ -147,9 +145,7 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2NewAgainst, _l2NewFor, _l2NewAbstain);
-    l2VoteAggregator.createProposal(
-      _proposalId, 3000
-    );
+    l2VoteAggregator.createProposal(_proposalId, 3000);
     vm.expectEmit();
     emit VoteBridged(_proposalId, _l2NewAgainst, _l2NewFor, _l2NewAbstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
