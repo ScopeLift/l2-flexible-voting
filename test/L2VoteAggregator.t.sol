@@ -28,28 +28,21 @@ contract L2VoteAggregatorTest is TestConstants {
 
   function setUp() public {
     (voterAddress, privateKey) = makeAddrAndKey("voter");
-    GovernorMetadataMock l2GovernorMetadata = new GovernorMetadataMock(L2_CHAIN.wormholeRelayer);
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     L1Block l1Block = new L1Block();
     voteAggregator =
-      new L2VoteAggregatorHarness(address(l2Erc20), address(l2GovernorMetadata), address(l1Block));
+      new L2VoteAggregatorHarness(address(l2Erc20), address(l1Block));
   }
 }
 
 contract Constructor is TestConstants {
   function testForkFuzz_CorrectlySetAllArgs(
     address l2Erc20,
-    address l2GovernorMetadata,
     address l1Block
   ) public {
-    L2VoteAggregator aggregator = new L2VoteAggregatorHarness(l2Erc20, l2GovernorMetadata, l1Block);
+    L2VoteAggregator aggregator = new L2VoteAggregatorHarness(l2Erc20, l1Block);
 
     assertEq(address(aggregator.VOTING_TOKEN()), l2Erc20, "L2 token is not set correctly");
-    assertEq(
-      address(aggregator.GOVERNOR_METADATA()),
-      l2GovernorMetadata,
-      "L2 governor metadata is not set correctly"
-    );
     assertEq(address(aggregator.L1_BLOCK()), l1Block, "L1 block is not set correctly");
   }
 }
@@ -114,7 +107,7 @@ contract State is L2VoteAggregatorTest {
     vm.assume(_timeToProposalEnd > voteAggregator.CAST_VOTE_WINDOW());
 
     vm.roll(block.number + 1);
-    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+    voteAggregator.createProposal(
       _proposalId, _timeToProposalEnd
     );
 
@@ -133,7 +126,7 @@ contract State is L2VoteAggregatorTest {
     vm.assume(_proposalId != 1); // Hardcoded proposal in mock
     vm.assume(_timeToProposalEnd > voteAggregator.CAST_VOTE_WINDOW());
 
-    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+    voteAggregator.createProposal(
       _proposalId, _timeToProposalEnd
     );
 
@@ -154,7 +147,7 @@ contract State is L2VoteAggregatorTest {
     _timeToProposalEnd =
       uint32(bound(_timeToProposalEnd, voteAggregator.CAST_VOTE_WINDOW(), type(uint32).max));
 
-    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+    voteAggregator.createProposal(
       _proposalId, _timeToProposalEnd, true
     );
 
@@ -171,7 +164,7 @@ contract State is L2VoteAggregatorTest {
     _timeToProposalEnd =
       uint32(bound(_timeToProposalEnd, voteAggregator.CAST_VOTE_WINDOW(), type(uint32).max));
 
-    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+    voteAggregator.createProposal(
       _proposalId, _timeToProposalEnd, false
     );
 
@@ -204,9 +197,7 @@ contract CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     // In the setup we use a mock contract rather than the actual contract
-    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
-      address(voteAggregator.GOVERNOR_METADATA())
-    ).createProposal(_proposalId, 1200, true);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(_proposalId, 1200, true);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
@@ -228,9 +219,7 @@ contract CastVote is L2VoteAggregatorTest {
     );
 
     // In the setup we use a mock contract rather than the actual contract
-    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
-      address(voteAggregator.GOVERNOR_METADATA())
-    ).createProposal(_proposalId, _proposalDuration);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(_proposalId, _proposalDuration);
 
     vm.roll(l2Proposal.voteStart - 1);
     l2Erc20.mint(address(this), _amount);
@@ -249,7 +238,7 @@ contract CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     voteAggregator.castVote(1, _voteType);
@@ -264,7 +253,7 @@ contract CastVote is L2VoteAggregatorTest {
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
@@ -276,7 +265,7 @@ contract CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -292,7 +281,7 @@ contract CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -309,7 +298,7 @@ contract CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -350,9 +339,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     // In the setup we use a mock contract rather than the actual contract
-    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
-      address(voteAggregator.GOVERNOR_METADATA())
-    ).createProposal(_proposalId, 1200, true);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(_proposalId, 1200, true);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
@@ -375,9 +362,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     );
 
     // In the setup we use a mock contract rather than the actual contract
-    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
-      address(voteAggregator.GOVERNOR_METADATA())
-    ).createProposal(_proposalId, _proposalDuration);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(_proposalId, _proposalDuration);
 
     vm.roll(l2Proposal.voteStart - 1);
     l2Erc20.mint(address(this), _amount);
@@ -400,7 +385,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     voteAggregator.castVoteWithReason(1, _voteType, reason);
@@ -419,7 +404,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
@@ -431,7 +416,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -447,7 +432,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -464,7 +449,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -520,9 +505,7 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     // In the setup we use a mock contract rather than the actual contract
-    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
-      address(voteAggregator.GOVERNOR_METADATA())
-    ).createProposal(_proposalId, 1200, true);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(_proposalId, 1200, true);
 
     (uint8 _v, bytes32 _r, bytes32 _s) = _signVoteMessage(_proposalId, _support);
 
@@ -546,9 +529,7 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     );
 
     // In the setup we use a mock contract rather than the actual contract
-    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
-      address(voteAggregator.GOVERNOR_METADATA())
-    ).createProposal(_proposalId, _proposalDuration);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(_proposalId, _proposalDuration);
 
     vm.roll(l2Proposal.voteStart - 1);
     l2Erc20.mint(address(this), _amount);
@@ -570,7 +551,7 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     l2Erc20.mint(voterAddress, _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     (uint8 _v, bytes32 _r, bytes32 _s) = _signVoteMessage(proposalId, _support);
 
@@ -588,7 +569,7 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     (uint8 _v, bytes32 _r, bytes32 _s) = _signVoteMessage(proposalId, _support);
 
@@ -605,7 +586,7 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.Against;
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
 
@@ -629,7 +610,7 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     l2Erc20.mint(voterAddress, _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(proposalId);
+      voteAggregator.getProposal(proposalId);
 
     vm.roll(l2Proposal.voteStart + 1);
 
@@ -654,7 +635,7 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     l2Erc20.mint(voterAddress, _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -690,9 +671,7 @@ contract _CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     // In the setup we use a mock contract rather than the actual contract
-    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
-      address(voteAggregator.GOVERNOR_METADATA())
-    ).createProposal(_proposalId, 1200, true);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(_proposalId, 1200, true);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
@@ -714,9 +693,7 @@ contract _CastVote is L2VoteAggregatorTest {
     );
 
     // In the setup we use a mock contract rather than the actual contract
-    L2GovernorMetadata.Proposal memory l2Proposal = GovernorMetadataMock(
-      address(voteAggregator.GOVERNOR_METADATA())
-    ).createProposal(_proposalId, _proposalDuration);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(_proposalId, _proposalDuration);
 
     vm.roll(l2Proposal.voteStart - 1);
     l2Erc20.mint(address(this), _amount);
@@ -735,7 +712,7 @@ contract _CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     voteAggregator.exposed_castVote(1, address(this), _voteType, "");
@@ -750,7 +727,7 @@ contract _CastVote is L2VoteAggregatorTest {
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
@@ -762,7 +739,7 @@ contract _CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -778,7 +755,7 @@ contract _CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -795,7 +772,7 @@ contract _CastVote is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.GOVERNOR_METADATA().getProposal(1);
+      voteAggregator.getProposal(1);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -840,9 +817,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
     bool isCanceled
   ) public {
     voteEnd = bound(voteEnd, voteAggregator.CAST_VOTE_WINDOW(), type(uint256).max);
-    L2GovernorMetadata.Proposal memory proposal = GovernorMetadataMock(
-      address(voteAggregator.GOVERNOR_METADATA())
-    ).createProposal(proposalId, voteStart, voteEnd, isCanceled);
+    L2GovernorMetadata.Proposal memory proposal = voteAggregator.createProposal(proposalId, voteStart, voteEnd, isCanceled);
 
     uint256 lastVotingBlock = voteAggregator.internalVotingPeriodEnd(proposalId);
     assertEq(lastVotingBlock, proposal.voteEnd - voteAggregator.CAST_VOTE_WINDOW());
@@ -856,7 +831,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     voteStart = uint64(bound(voteStart, 0, block.number));
     voteEnd =
       uint64(bound(voteEnd, block.number + voteAggregator.CAST_VOTE_WINDOW(), type(uint64).max));
-    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+    voteAggregator.createProposal(
       proposalId, voteStart, voteEnd, false
     );
 
@@ -879,7 +854,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     vm.assume(voteEnd - voteAggregator.CAST_VOTE_WINDOW() > voteStart); // Proposal must have a
       // voting
       // block before the cast
-    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+    voteAggregator.createProposal(
       proposalId, voteStart, voteEnd, isCanceled
     );
 
@@ -893,7 +868,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     vm.assume(voteStart > 0); // Prevent underflow because we subtract 1
     vm.assume(voteStart > block.number); // Block number must be greater than vote start
     vm.assume(voteEnd > voteAggregator.CAST_VOTE_WINDOW()); // Prevent underflow
-    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+    voteAggregator.createProposal(
       proposalId, voteStart, voteEnd, false
     );
 
@@ -904,7 +879,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
 
 contract BridgeVote is L2VoteAggregatorTest {
   function testFuzz_CorrectlyBridgeVote(uint256 proposalId) public {
-    GovernorMetadataMock(address(voteAggregator.GOVERNOR_METADATA())).createProposal(
+    voteAggregator.createProposal(
       proposalId, voteAggregator.CAST_VOTE_WINDOW()
     );
 

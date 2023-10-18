@@ -23,7 +23,6 @@ contract WormholeL2VoteAggregatorCalldataCompressorHarness is
   constructor(
     address _votingToken,
     address _relayer,
-    address _governorMetadata,
     address _l1BlockAddress,
     uint16 _sourceChain,
     uint16 _targetChain
@@ -31,7 +30,6 @@ contract WormholeL2VoteAggregatorCalldataCompressorHarness is
     WormholeL2VoteAggregatorCalldataCompressor(
       _votingToken,
       _relayer,
-      _governorMetadata,
       _l1BlockAddress,
       _sourceChain,
       _targetChain
@@ -73,12 +71,11 @@ contract WormholeL2ERC20CalldataCompressorTest is Test, TestConstants {
   function setUp() public {
     (voterAddress, privateKey) = makeAddrAndKey("voter");
     L1Block l1Block = new L1Block();
-    l2GovernorMetadataMock = new GovernorMetadataOptimizedMock(L2_CHAIN.wormholeRelayer);
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     router =
-    new WormholeL2VoteAggregatorCalldataCompressor(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadataMock), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorCalldataCompressor(address(l2Erc20), L2_CHAIN.wormholeRelayer,  address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
     routerHarness =
-    new WormholeL2VoteAggregatorCalldataCompressorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadataMock), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorCalldataCompressorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function _signVoteMessage(uint256 _proposalId, uint8 _support)

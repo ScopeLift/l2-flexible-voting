@@ -39,11 +39,10 @@ contract WormholeL1VotePoolTest is TestConstants, WormholeRelayerBasicTest {
   }
 
   function setUpSource() public override {
-    GovernorMetadataMock l2GovernorMetadata = new GovernorMetadataMock(L2_CHAIN.wormholeRelayer);
     L1Block l1Block = new L1Block();
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     l2VoteAggregator =
-    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer,  address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {
@@ -92,7 +91,7 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2Against, _l2For, _l2Abstain);
-    GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
+    l2VoteAggregator.createProposal(
       _proposalId, 3000
     );
     vm.expectEmit();
@@ -148,7 +147,7 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2NewAgainst, _l2NewFor, _l2NewAbstain);
-    GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
+    l2VoteAggregator.createProposal(
       _proposalId, 3000
     );
     vm.expectEmit();

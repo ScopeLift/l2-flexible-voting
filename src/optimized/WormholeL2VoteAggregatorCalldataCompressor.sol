@@ -22,7 +22,6 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
 
   /// @param _votingToken The address of the L2 token used for voting.
   /// @param _relayer The address of the Wormhole relayer contract.
-  /// @param _governorMetadata The address of the L2 Governor Metadata contract which holds proposal
   /// state.
   /// @param _l1BlockAddress The address of the contract used to fetch the L1 block number.
   /// @param _sourceChain The Wormhole chain Id of the source chain when sending messages.
@@ -30,7 +29,6 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
   constructor(
     address _votingToken,
     address _relayer,
-    address _governorMetadata,
     address _l1BlockAddress,
     uint16 _sourceChain,
     uint16 _targetChain
@@ -38,7 +36,6 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
     WormholeL2VoteAggregator(
       _votingToken,
       _relayer,
-      _governorMetadata,
       _l1BlockAddress,
       _sourceChain,
       _targetChain,

@@ -86,11 +86,6 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
       l1BlockAddress = address(l1Block);
     }
 
-    // Deploy the L2 metadata contract
-    vm.broadcast();
-    WormholeL2GovernorMetadata l2GovernorMetadata =
-    new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, vm.envOr("CONTRACT_OWNER", msg.sender));
-
     // Create L2 ERC20Votes token
     vm.broadcast();
     WormholeL2ERC20 l2Token =
@@ -99,10 +94,10 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     // Deploy the L2 vote aggregator
     vm.broadcast();
     WormholeL2VoteAggregator voteAggregator =
-    new WormholeL2VoteAggregator(address(l2Token), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), l1BlockAddress, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, vm.envOr("CONTRACT_OWNER", msg.sender));
+    new WormholeL2VoteAggregator(address(l2Token), L2_CHAIN.wormholeRelayer,  l1BlockAddress, L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, vm.envOr("CONTRACT_OWNER", msg.sender));
 
     vm.broadcast();
-    l2GovernorMetadata.setRegisteredSender(
+    voteAggregator.setRegisteredSender(
       L1_CHAIN.wormholeChainId, _toWormholeAddress(address(l1MetadataBridge))
     );
 
@@ -133,7 +128,7 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     );
 
     vm.broadcast();
-    l1MetadataBridge.initialize(address(l2GovernorMetadata));
+    l1MetadataBridge.initialize(address(voteAggregator));
 
     vm.broadcast();
     l1TokenBridge.initialize(address(l2Token));

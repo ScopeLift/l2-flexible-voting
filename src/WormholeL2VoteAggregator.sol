@@ -11,20 +11,18 @@ import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 contract WormholeL2VoteAggregator is WormholeSender, L2VoteAggregator, WormholeL2GovernorMetadata {
   /// @param _votingToken The token used to vote on proposals.
   /// @param _relayer The Wormhole generic relayer contract.
-  /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
   /// @param _l1BlockAddress The address of the L1Block contract.
   /// @param _sourceChain The chain sending the votes.
   /// @param _targetChain The target chain to bridge the votes to.
   constructor(
     address _votingToken,
     address _relayer,
-    address _governorMetadata,
     address _l1BlockAddress,
     uint16 _sourceChain,
     uint16 _targetChain,
 	address _owner
   )
-    L2VoteAggregator(_votingToken, _governorMetadata, _l1BlockAddress)
+    L2VoteAggregator(_votingToken,_l1BlockAddress)
     WormholeSender(_sourceChain, _targetChain)
 	WormholeL2GovernorMetadata(_relayer, _owner) // to see if it builds
   {}
