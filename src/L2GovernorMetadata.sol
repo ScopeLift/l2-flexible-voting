@@ -52,7 +52,7 @@ abstract contract L2GovernorMetadata {
         new string[](0),
         new bytes[](0),
         block.number,
-        block.number + 43_200, // 24 hours
+        block.number + 43_200,
         string.concat("Mainnet proposal ", Strings.toString(proposalId))
       );
     }
