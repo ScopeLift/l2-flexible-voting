@@ -10,7 +10,7 @@ import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {IL1Block} from "src/interfaces/IL1Block.sol";
 
 /// @notice A contract to collect votes on L2 to be bridged to L1.
-abstract contract L2VoteAggregator is EIP712 {
+abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata {
   /// @notice The number of blocks before L2 voting closes. We close voting 1200 blocks before the
   /// end of the proposal to cast the vote.
   uint32 public constant CAST_VOTE_WINDOW = 1200;
@@ -19,9 +19,6 @@ abstract contract L2VoteAggregator is EIP712 {
 
   /// @notice The token used to vote on proposals provided by the `GovernorMetadata`.
   ERC20Votes public immutable VOTING_TOKEN;
-
-  /// @notice The `GovernorMetadata` contract that provides proposal information.
-  L2GovernorMetadata public immutable GOVERNOR_METADATA;
 
   /// @notice The address of the bridge that receives L2 votes.
   address public L1_BRIDGE_ADDRESS;
@@ -95,13 +92,9 @@ abstract contract L2VoteAggregator is EIP712 {
   );
 
   /// @param _votingToken The token used to vote on proposals.
-  /// @param _governorMetadata The `GovernorMetadata` contract that provides proposal information.
   /// @param _l1BlockAddress The address of the L1Block contract.
-  constructor(address _votingToken, address _governorMetadata, address _l1BlockAddress)
-    EIP712("L2VoteAggregator", "1")
-  {
+  constructor(address _votingToken, address _l1BlockAddress) EIP712("L2VoteAggregator", "1") {
     VOTING_TOKEN = ERC20Votes(_votingToken);
-    GOVERNOR_METADATA = L2GovernorMetadata(_governorMetadata);
     L1_BLOCK = IL1Block(_l1BlockAddress);
   }
 
@@ -141,7 +134,7 @@ abstract contract L2VoteAggregator is EIP712 {
   // without it being canceled we will mark it as expired. We use expired because users can no
   // longer vote and no other L2 action can be taken on the proposal.
   function state(uint256 proposalId) external view virtual returns (ProposalState) {
-    L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
+    L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
     if (VOTING_TOKEN.clock() < proposal.voteStart) return ProposalState.Pending;
     else if (proposalVoteActive(proposalId)) return ProposalState.Active;
     else if (proposal.isCanceled) return ProposalState.Canceled;
@@ -236,7 +229,7 @@ abstract contract L2VoteAggregator is EIP712 {
     view
     returns (uint256 _lastVotingBlock)
   {
-    L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
+    L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
     _lastVotingBlock = proposal.voteEnd - CAST_VOTE_WINDOW;
   }
 
@@ -248,7 +241,7 @@ abstract contract L2VoteAggregator is EIP712 {
     if (_proposalVotersHasVoted[proposalId][voter]) revert AlreadyVoted();
     _proposalVotersHasVoted[proposalId][voter] = true;
 
-    L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
+    L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
     uint256 weight = VOTING_TOKEN.getPastVotes(voter, proposal.voteStart);
     if (weight == 0) revert NoWeight();
 
@@ -266,9 +259,8 @@ abstract contract L2VoteAggregator is EIP712 {
   }
 
   function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
-    L2GovernorMetadata.Proposal memory proposal = GOVERNOR_METADATA.getProposal(proposalId);
+    L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
 
-    // TODO: Check if this is inclusive
     return L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId)
       && L1_BLOCK.number() >= proposal.voteStart && !proposal.isCanceled;
   }

@@ -44,11 +44,10 @@ contract L2VoteAggregatorTest is TestConstants, WormholeRelayerBasicTest {
   }
 
   function setUpSource() public override {
-    l2GovernorMetadata = new GovernorMetadataMock(L2_CHAIN.wormholeRelayer);
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     l1Block = new L1Block();
     l2VoteAggregator =
-    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function setUpTarget() public override {
@@ -64,13 +63,11 @@ contract L2VoteAggregatorTest is TestConstants, WormholeRelayerBasicTest {
 contract Constructor is L2VoteAggregatorTest {
   function testFuzz_CorrectlySetsAllArgs() public {
     L1Block l1Block = new L1Block();
-    GovernorMetadataMock l2GovernorMetadata = new GovernorMetadataMock(L2_CHAIN.wormholeRelayer);
     WormholeL2VoteAggregator l2VoteAggregator =
-    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadata), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
 
     assertEq(address(l1Block), address(l2VoteAggregator.L1_BLOCK()));
     assertEq(address(address(l2Erc20)), address(l2VoteAggregator.VOTING_TOKEN()));
-    assertEq(address(address(l2GovernorMetadata)), address(l2VoteAggregator.GOVERNOR_METADATA()));
   }
 }
 
@@ -98,9 +95,7 @@ contract _bridgeVote is L2VoteAggregatorTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _against, _for, _abstain);
-    GovernorMetadataMock(address(l2VoteAggregator.GOVERNOR_METADATA())).createProposal(
-      _proposalId, 3000
-    );
+    l2VoteAggregator.createProposal(_proposalId, 3000);
     vm.expectEmit();
     emit VoteBridged(_proposalId, _against, _for, _abstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);

@@ -14,9 +14,14 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
   /// @dev Thrown when a function is not supported.
   error UnsupportedFunction();
 
+  /// @notice The internal proposal ID which is used by calldata optimized cast methods.
+  uint16 internal nextInternalProposalId = 1;
+
+  /// @notice The ID of the proposal mapped to an internal proposal ID.
+  mapping(uint256 governorProposalId => uint16) public optimizedProposalIds;
+
   /// @param _votingToken The address of the L2 token used for voting.
   /// @param _relayer The address of the Wormhole relayer contract.
-  /// @param _governorMetadata The address of the L2 Governor Metadata contract which holds proposal
   /// state.
   /// @param _l1BlockAddress The address of the contract used to fetch the L1 block number.
   /// @param _sourceChain The Wormhole chain Id of the source chain when sending messages.
@@ -24,18 +29,18 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
   constructor(
     address _votingToken,
     address _relayer,
-    address _governorMetadata,
     address _l1BlockAddress,
     uint16 _sourceChain,
-    uint16 _targetChain
+    uint16 _targetChain,
+    address _owner
   )
     WormholeL2VoteAggregator(
       _votingToken,
       _relayer,
-      _governorMetadata,
       _l1BlockAddress,
       _sourceChain,
-      _targetChain
+      _targetChain,
+      _owner
     )
   {}
 
@@ -109,5 +114,18 @@ contract WormholeL2VoteAggregatorCalldataCompressor is WormholeL2VoteAggregator 
     bytes32 r = bytes32(_msgData[5:37]);
     bytes32 s = bytes32(_msgData[37:69]);
     castVoteBySig(proposalId, L2VoteAggregator.VoteType(support), v, r, s);
+  }
+
+  function _addProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled)
+    internal
+    virtual
+    override
+  {
+    super._addProposal(proposalId, voteStart, voteEnd, isCanceled);
+    uint16 internalId = optimizedProposalIds[proposalId];
+    if (internalId == 0) {
+      optimizedProposalIds[proposalId] = nextInternalProposalId;
+      ++nextInternalProposalId;
+    }
   }
 }

@@ -15,15 +15,16 @@ import {
 import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {L2VoteAggregator} from "src/L2VoteAggregator.sol";
 import {TestConstants} from "test/Constants.sol";
+import {GovernorMetadataMockBase} from "test/mock/GovernorMetadataMock.sol";
 
 // Use this is the sig tests
 contract WormholeL2VoteAggregatorCalldataCompressorHarness is
-  WormholeL2VoteAggregatorCalldataCompressor
+  WormholeL2VoteAggregatorCalldataCompressor,
+  GovernorMetadataMockBase
 {
   constructor(
     address _votingToken,
     address _relayer,
-    address _governorMetadata,
     address _l1BlockAddress,
     uint16 _sourceChain,
     uint16 _targetChain
@@ -31,10 +32,10 @@ contract WormholeL2VoteAggregatorCalldataCompressorHarness is
     WormholeL2VoteAggregatorCalldataCompressor(
       _votingToken,
       _relayer,
-      _governorMetadata,
       _l1BlockAddress,
       _sourceChain,
-      _targetChain
+      _targetChain,
+      msg.sender
     )
   {}
 
@@ -56,12 +57,22 @@ contract WormholeL2VoteAggregatorCalldataCompressorHarness is
   function exposed_domainSeparatorV4() public view returns (bytes32) {
     return _domainSeparatorV4();
   }
+
+  /// @inheritdoc L2GovernorMetadata
+  function _addProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled)
+    internal
+    virtual
+    override(L2GovernorMetadata, WormholeL2VoteAggregatorCalldataCompressor)
+  {
+    WormholeL2VoteAggregatorCalldataCompressor._addProposal(
+      proposalId, voteStart, voteEnd, isCanceled
+    );
+  }
 }
 
 contract WormholeL2ERC20CalldataCompressorTest is Test, TestConstants {
   WormholeL2VoteAggregatorCalldataCompressor router;
   FakeERC20 l2Erc20;
-  GovernorMetadataOptimizedMock l2GovernorMetadataMock;
   address voterAddress;
   uint256 privateKey;
   WormholeL2VoteAggregatorCalldataCompressorHarness routerHarness;
@@ -73,12 +84,11 @@ contract WormholeL2ERC20CalldataCompressorTest is Test, TestConstants {
   function setUp() public {
     (voterAddress, privateKey) = makeAddrAndKey("voter");
     L1Block l1Block = new L1Block();
-    l2GovernorMetadataMock = new GovernorMetadataOptimizedMock(L2_CHAIN.wormholeRelayer);
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     router =
-    new WormholeL2VoteAggregatorCalldataCompressor(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadataMock), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorCalldataCompressor(address(l2Erc20), L2_CHAIN.wormholeRelayer,  address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, msg.sender);
     routerHarness =
-    new WormholeL2VoteAggregatorCalldataCompressorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l2GovernorMetadataMock), address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    new WormholeL2VoteAggregatorCalldataCompressorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
   }
 
   function _signVoteMessage(uint256 _proposalId, uint8 _support)
@@ -112,7 +122,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(abi.encode(WormholeL2VoteAggregatorCalldataCompressor.InvalidCalldata.selector));
@@ -134,7 +144,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(abi.encode(WormholeL2VoteAggregatorCalldataCompressor.InvalidCalldata.selector));
@@ -154,17 +164,17 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
     emit VoteCast(address(this), _proposalId, 1, _amount, "");
 
-    (bool ok,) = address(router).call(
+    (bool ok,) = address(routerHarness).call(
       abi.encodePacked(uint8(1), uint16(_proposalId), L2VoteAggregator.VoteType.For)
     );
     assertTrue(ok);
-    (, uint256 forVotes,) = router.proposalVotes(_proposalId);
+    (, uint256 forVotes,) = routerHarness.proposalVotes(_proposalId);
 
     assertEq(forVotes, _amount, "Votes for is not correct");
   }
@@ -179,17 +189,17 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
     emit VoteCast(address(this), _proposalId, 0, _amount, "");
 
-    (bool ok,) = address(router).call(
+    (bool ok,) = address(routerHarness).call(
       abi.encodePacked(uint8(1), uint16(_proposalId), L2VoteAggregator.VoteType.Against)
     );
     assertTrue(ok);
-    (uint256 againstVotes,,) = router.proposalVotes(_proposalId);
+    (uint256 againstVotes,,) = routerHarness.proposalVotes(_proposalId);
 
     assertEq(againstVotes, _amount, "Votes Against is not correct");
   }
@@ -204,17 +214,17 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
     emit VoteCast(address(this), _proposalId, 2, _amount, "");
 
-    (bool ok,) = address(router).call(
+    (bool ok,) = address(routerHarness).call(
       abi.encodePacked(uint8(1), uint16(_proposalId), L2VoteAggregator.VoteType.Abstain)
     );
     assertTrue(ok);
-    (,, uint256 abstainVotes) = router.proposalVotes(_proposalId);
+    (,, uint256 abstainVotes) = routerHarness.proposalVotes(_proposalId);
 
     assertEq(abstainVotes, _amount, "Votes abstained are not correct");
   }
@@ -232,17 +242,17 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
     emit VoteCast(address(this), _proposalId, 0, _amount, _reason);
 
-    (bool ok,) = address(router).call(
+    (bool ok,) = address(routerHarness).call(
       abi.encodePacked(uint8(2), uint16(_proposalId), L2VoteAggregator.VoteType.Against, _reason)
     );
     assertTrue(ok);
-    (uint256 against,,) = router.proposalVotes(_proposalId);
+    (uint256 against,,) = routerHarness.proposalVotes(_proposalId);
     assertEq(against, _amount, "Votes against is not correct");
   }
 
@@ -259,17 +269,17 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
     emit VoteCast(address(this), _proposalId, 2, _amount, _reason);
 
-    (bool ok,) = address(router).call(
+    (bool ok,) = address(routerHarness).call(
       abi.encodePacked(uint8(2), uint16(_proposalId), L2VoteAggregator.VoteType.Abstain, _reason)
     );
     assertTrue(ok);
-    (,, uint256 abstain) = router.proposalVotes(_proposalId);
+    (,, uint256 abstain) = routerHarness.proposalVotes(_proposalId);
     assertEq(abstain, _amount, "Votes abstain is not correct");
   }
 
@@ -286,17 +296,17 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(address(this), _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
     emit VoteCast(address(this), _proposalId, 1, _amount, _reason);
 
-    (bool ok,) = address(router).call(
+    (bool ok,) = address(routerHarness).call(
       abi.encodePacked(uint8(2), uint16(_proposalId), L2VoteAggregator.VoteType.For, _reason)
     );
     assertTrue(ok);
-    (, uint256 _for,) = router.proposalVotes(_proposalId);
+    (, uint256 _for,) = routerHarness.proposalVotes(_proposalId);
     assertEq(_for, _amount, "Votes for is not correct");
   }
 
@@ -313,7 +323,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(voterAddress, _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -344,7 +354,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(voterAddress, _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -375,7 +385,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(voterAddress, _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -407,7 +417,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(voterAddress, _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
 
@@ -433,7 +443,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(voterAddress, _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
 
@@ -461,7 +471,7 @@ contract Fallback is WormholeL2ERC20CalldataCompressorTest {
     l2Erc20.mint(voterAddress, _amount);
 
     GovernorMetadataMock.Proposal memory l2Proposal =
-      l2GovernorMetadataMock.createProposal(_proposalId, _timeToEnd);
+      routerHarness.createProposal(_proposalId, _timeToEnd);
 
     vm.roll(l2Proposal.voteStart + 1);
     (uint8 _v, bytes32 _r, bytes32 _s) = _signVoteMessage(_proposalId, uint8(_voteType));

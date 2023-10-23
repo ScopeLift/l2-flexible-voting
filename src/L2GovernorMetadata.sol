@@ -51,8 +51,8 @@ abstract contract L2GovernorMetadata {
         new uint256[](0),
         new string[](0),
         new bytes[](0),
-        voteStart,
-        voteEnd,
+        block.number,
+        block.number + 43_200,
         string.concat("Mainnet proposal ", Strings.toString(proposalId))
       );
     }
