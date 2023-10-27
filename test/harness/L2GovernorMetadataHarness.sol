@@ -5,6 +5,8 @@ import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 import {TestConstants} from "test/Constants.sol";
 
 contract L2GovernorMetadataHarness is L2GovernorMetadata {
+  constructor(address _l1BlockAddress) L2GovernorMetadata(_l1BlockAddress) {}
+
   function exposed_proposals(uint256 proposalId) public view returns (Proposal memory) {
     return _proposals[proposalId];
   }

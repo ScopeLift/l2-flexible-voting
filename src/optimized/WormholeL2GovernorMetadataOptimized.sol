@@ -11,7 +11,9 @@ contract WormholeL2GovernorMetadataOptimized is WormholeL2GovernorMetadata {
   /// @notice The ID of the proposal mapped to an internal proposal ID.
   mapping(uint256 governorProposalId => uint16) public optimizedProposalIds;
 
-  constructor(address _relayer, address _owner) WormholeL2GovernorMetadata(_relayer, _owner) {}
+  constructor(address _relayer, address _owner, address _l1BlockAddress)
+    WormholeL2GovernorMetadata(_relayer, _owner, _l1BlockAddress)
+  {}
 
   /// @inheritdoc L2GovernorMetadata
   function _addProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled)

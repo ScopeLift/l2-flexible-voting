@@ -12,6 +12,7 @@ import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {TestConstants} from "test/Constants.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {GovernorMock} from "test/mock/GovernorMock.sol";
+import {L1BlockMock} from "test/mock/L1BlockMock.sol";
 
 contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest {
   FakeERC20 l1Erc20;
@@ -52,7 +53,9 @@ contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest
   }
 
   function setUpTarget() public override {
-    l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
+    L1BlockMock _mockL1Block = new L1BlockMock();
+    l2GovernorMetadata =
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender, address(_mockL1Block));
     vm.prank(l2GovernorMetadata.owner());
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, bytes32(uint256(uint160(address(l1GovernorMetadataBridge))))

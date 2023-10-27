@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
+import {IL1Block} from "src/interfaces/IL1Block.sol";
 
 /// @notice This contract is used by an L2VoteAggregator to store proposal metadata.
 /// It expects to receive proposal metadata from a valid L1 source.
@@ -17,6 +18,26 @@ abstract contract L2GovernorMetadata {
   /// @notice The id of the proposal mapped to the proposal metadata.
   mapping(uint256 proposalId => Proposal) _proposals;
 
+  /// @notice The assumed block time of the base network
+  uint256 private L1_BLOCK_TIME = 12;
+  /// @notice The assumed block time of the aux network
+  /// @dev These are hardcoded now for Ethereum mainnet & Optimism, as these are currently
+  /// the target networks for the MVP launch. In the future, this should be generalized to work
+  /// for different network combinations. Even better, once we have better support for cross chain
+  /// voting in clients and frontend tools, this hack should removed completely.
+  uint256 private L2_BLOCK_TIME = 2;
+
+  /// @notice The contract that handles fetch the L1 block on the L2.
+  /// @dev If the block conversion hack is removed from this contract, then this storage var is
+  /// probably not needed in this contract and can probably be moved back to the L2VoteAggregator
+  IL1Block public immutable L1_BLOCK;
+
+  /// @notice The number of blocks on L1 before L2 voting closes. We close voting 1200 blocks
+  // before the end of the proposal to cast the vote.
+  /// @dev If the block conversion hack is removed from this contract, then this storage var is
+  /// probably not needed in this contract and can probably be moved back to the L2VoteAggregator
+  uint32 public constant CAST_VOTE_WINDOW = 1200;
+
   event ProposalCreated(
     uint256 proposalId,
     address proposer,
@@ -31,10 +52,15 @@ abstract contract L2GovernorMetadata {
 
   event ProposalCanceled(uint256 proposalId);
 
+  /// @param _l1BlockAddress The address of the L1Block contract.
+  constructor(address _l1BlockAddress) {
+    L1_BLOCK = IL1Block(_l1BlockAddress);
+  }
+
   /// @notice Add proposal to internal storage.
   /// @param proposalId The id of the proposal.
-  /// @param voteStart The block number or timestamp when voting starts.
-  /// @param voteEnd The block number or timestamp when voting ends.
+  /// @param voteStart The base chain block number when voting starts.
+  /// @param voteEnd The base chain block number when voting ends.
   /// @param isCanceled Whether or not the proposal has been canceled.
   function _addProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled)
     internal
@@ -52,7 +78,7 @@ abstract contract L2GovernorMetadata {
         new string[](0),
         new bytes[](0),
         block.number,
-        block.number + 43_200,
+        _l2BlockForFutureL1Block(voteEnd - CAST_VOTE_WINDOW),
         string.concat("Mainnet proposal ", Strings.toString(proposalId))
       );
     }
@@ -62,5 +88,16 @@ abstract contract L2GovernorMetadata {
   /// @param proposalId The id of the proposal.
   function getProposal(uint256 proposalId) public view virtual returns (Proposal memory) {
     return _proposals[proposalId];
+  }
+
+  /// @notice Calculate the approximate block that the L2 will be producing at the time the
+  /// L1 produces some given future block number.abi
+  /// @param _l1BlockNumber The number of a future L1 block
+  /// @return The approximate block number the L2 will be producing when L1 produces the given
+  /// block
+  function _l2BlockForFutureL1Block(uint256 _l1BlockNumber) private view returns (uint256) {
+    // We should never send an L1 block in the past. If we did, this would overflow & revert.
+    uint256 _l1BlocksUntilEnd = _l1BlockNumber - L1_BLOCK.number();
+    return (_l1BlocksUntilEnd * L1_BLOCK_TIME) / L2_BLOCK_TIME;
   }
 }

@@ -8,9 +8,11 @@ import {WormholeL2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
 import {TestConstants} from "test/Constants.sol";
 import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {L1BlockMock} from "test/mock/L1BlockMock.sol";
 
 contract L2GovernorMetadataTest is TestConstants {
   WormholeL2GovernorMetadata l2GovernorMetadata;
+  L1BlockMock mockL1Block;
 
   event ProposalCreated(
     uint256 proposalId,
@@ -27,7 +29,9 @@ contract L2GovernorMetadataTest is TestConstants {
   event ProposalCanceled(uint256 proposalId);
 
   function setUp() public {
-    l2GovernorMetadata = new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender);
+    mockL1Block = new L1BlockMock();
+    l2GovernorMetadata =
+      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender, address(mockL1Block));
     vm.prank(l2GovernorMetadata.owner());
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
@@ -36,7 +40,7 @@ contract L2GovernorMetadataTest is TestConstants {
 
   function expectProposalEvent(
     uint256 proposalId,
-    uint256 voteStart,
+    uint256, /*voteStart*/
     uint256 voteEnd,
     bool isCanceled
   ) internal {
@@ -50,7 +54,7 @@ contract L2GovernorMetadataTest is TestConstants {
         new string[](0),
         new bytes[](0),
         block.number,
-        block.number + 43_200,
+        mockL1Block.__expectedL2BlockForFutureBlock(voteEnd),
         string.concat("Mainnet proposal ", Strings.toString(proposalId))
       );
     } else {
@@ -61,7 +65,8 @@ contract L2GovernorMetadataTest is TestConstants {
 
 contract Constructor is L2GovernorMetadataTest {
   function testFuzz_CorrectlySetsAllArgs(address wormholeCore) public {
-    new WormholeL2GovernorMetadata(wormholeCore, msg.sender); // nothing to assert as there are no
+    new WormholeL2GovernorMetadata(wormholeCore, msg.sender, address(0x1b)); // nothing to assert as
+      // there are no
       // constructor args set
   }
 }
@@ -73,6 +78,8 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     uint256 l1VoteEnd,
     bool isCanceled
   ) public {
+    l1VoteEnd = mockL1Block.__boundL1VoteEnd(l1VoteEnd);
+
     bytes memory payload = abi.encode(proposalId, l1VoteStart, l1VoteEnd, isCanceled);
     expectProposalEvent(proposalId, l1VoteStart, l1VoteEnd, isCanceled);
     vm.prank(L2_CHAIN.wormholeRelayer);
@@ -100,6 +107,8 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     bool secondCanceled
   ) public {
     vm.assume(firstProposalId != secondProposalId);
+    firstVoteEnd = mockL1Block.__boundL1VoteEnd(firstVoteEnd);
+    secondVoteEnd = mockL1Block.__boundL1VoteEnd(secondVoteEnd);
 
     bytes memory firstPayload =
       abi.encode(firstProposalId, firstVoteStart, firstVoteEnd, firstCanceled);
@@ -161,6 +170,7 @@ contract ReceiveWormholeMessages is L2GovernorMetadataTest {
     uint256 voteStart,
     uint256 voteEnd
   ) public {
+    voteEnd = mockL1Block.__boundL1VoteEnd(voteEnd);
     bytes memory payload = abi.encode(proposalId, voteStart, voteEnd, false);
     vm.prank(L2_CHAIN.wormholeRelayer);
     l2GovernorMetadata.receiveWormholeMessages(
