@@ -22,9 +22,9 @@ contract WormholeL2VoteAggregator is WormholeSender, L2VoteAggregator, WormholeL
     uint16 _targetChain,
     address _owner
   )
-    L2VoteAggregator(_votingToken, _l1BlockAddress)
+    L2VoteAggregator(_votingToken)
     WormholeSender(_sourceChain, _targetChain)
-    WormholeL2GovernorMetadata(_relayer, _owner) // to see if it builds
+    WormholeL2GovernorMetadata(_relayer, _owner, _l1BlockAddress)
   {}
 
   /// @notice Wormhole-specific implementation of `_bridgeVote`.

@@ -7,14 +7,9 @@ import {EIP712} from "openzeppelin/utils/cryptography/EIP712.sol";
 import {ECDSA} from "openzeppelin/utils/cryptography/ECDSA.sol";
 
 import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
-import {IL1Block} from "src/interfaces/IL1Block.sol";
 
 /// @notice A contract to collect votes on L2 to be bridged to L1.
 abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata {
-  /// @notice The number of blocks before L2 voting closes. We close voting 1200 blocks before the
-  /// end of the proposal to cast the vote.
-  uint32 public constant CAST_VOTE_WINDOW = 1200;
-
   bytes32 public constant BALLOT_TYPEHASH = keccak256("Ballot(uint256 proposalId,uint8 support)");
 
   /// @notice The token used to vote on proposals provided by the `GovernorMetadata`.
@@ -22,9 +17,6 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata {
 
   /// @notice The address of the bridge that receives L2 votes.
   address public L1_BRIDGE_ADDRESS;
-
-  /// @notice The contract that handles fetch the L1 block on the L2.
-  IL1Block public immutable L1_BLOCK;
 
   /// @notice Used to indicate whether the contract has been initialized with the L1 bridge address.
   bool public INITIALIZED = false;
@@ -92,10 +84,8 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata {
   );
 
   /// @param _votingToken The token used to vote on proposals.
-  /// @param _l1BlockAddress The address of the L1Block contract.
-  constructor(address _votingToken, address _l1BlockAddress) EIP712("L2VoteAggregator", "1") {
+  constructor(address _votingToken) EIP712("L2VoteAggregator", "1") {
     VOTING_TOKEN = ERC20Votes(_votingToken);
-    L1_BLOCK = IL1Block(_l1BlockAddress);
   }
 
   function initialize(address l1BridgeAddress) public {

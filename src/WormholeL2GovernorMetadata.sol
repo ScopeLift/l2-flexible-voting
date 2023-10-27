@@ -9,10 +9,10 @@ import {L2GovernorMetadata} from "src/L2GovernorMetadata.sol";
 contract WormholeL2GovernorMetadata is L2GovernorMetadata, WormholeReceiver {
   /// @param _relayer The address of the WormholeL2GovernorMetadata contract.
   /// @param _owner The address that will become the contract owner.
-  constructor(address _relayer, address _owner)
+  constructor(address _relayer, address _owner, address _l1BlockAddress)
     WormholeBase(_relayer)
     WormholeReceiver(_owner)
-    L2GovernorMetadata()
+    L2GovernorMetadata(_l1BlockAddress)
   {}
 
   /// @notice Receives a message from L1 and saves the proposal metadata.
