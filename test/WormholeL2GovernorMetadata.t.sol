@@ -65,9 +65,8 @@ contract L2GovernorMetadataTest is TestConstants {
 
 contract Constructor is L2GovernorMetadataTest {
   function testFuzz_CorrectlySetsAllArgs(address wormholeCore) public {
-    new WormholeL2GovernorMetadata(wormholeCore, msg.sender, address(0x1b)); // nothing to assert as
-      // there are no
-      // constructor args set
+    new WormholeL2GovernorMetadata(wormholeCore, msg.sender, address(ARBITRARY_ADDRESS));
+    // nothing to assert as there are no constructor args set
   }
 }
 

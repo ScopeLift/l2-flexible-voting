@@ -12,8 +12,6 @@ contract L2GovernorMetadataTest is TestConstants {
   L2GovernorMetadataHarness l2GovernorMetadata;
   L1BlockMock mockL1Block;
 
-  uint64 constant MOCK_L1_BLOCK = 18_442_511;
-
   event ProposalCreated(
     uint256 proposalId,
     address proposer,

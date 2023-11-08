@@ -90,6 +90,9 @@ contract BaseConstants is CommonBase {
 contract ScriptConstants is BaseConstants {}
 
 contract TestConstants is BaseConstants, Test {
-  bytes32 MOCK_WORMHOLE_SERIALIZED_ADDRESS =
-    bytes32(uint256(uint160(0xEAC5F0d4A9a45E1f9FdD0e7e2882e9f60E301156)));
+  address constant ARBITRARY_ADDRESS = 0xEAC5F0d4A9a45E1f9FdD0e7e2882e9f60E301156;
+  bytes32 constant MOCK_WORMHOLE_SERIALIZED_ADDRESS = bytes32(uint256(uint160(ARBITRARY_ADDRESS)));
+
+  // An arbitrary, large, mainnet-block-like number for use with the mock L1 Block
+  uint64 constant MOCK_L1_BLOCK = 18_442_511;
 }
