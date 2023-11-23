@@ -35,13 +35,13 @@ contract L1BlockMock is IL1Block, TestConstants {
   }
 
   /// @dev Matches the implementation inside L2GovernorMetadata for the sake of test expectations.
-  function __expectedL2BlockForFutureBlock(uint256 _l1BlockNumber) external pure returns (uint256) {
+  function __expectedL2BlockForFutureBlock(uint256 _l1BlockNumber) external view returns (uint256) {
     require(
       _l1BlockNumber > MOCK_L1_BLOCK + 1200,
       "L1BlockMock: Bad test parameters, _l1BlockNumber must be greater than mock current block number"
     );
 
     uint256 _l1BlocksUntilEnd = _l1BlockNumber - MOCK_L1_BLOCK - 1200;
-    return (_l1BlocksUntilEnd * 12) / 2;
+    return block.number + (_l1BlocksUntilEnd * 12) / 2;
   }
 }

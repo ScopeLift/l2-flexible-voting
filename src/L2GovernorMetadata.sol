@@ -38,6 +38,8 @@ abstract contract L2GovernorMetadata {
   /// probably not needed in this contract and can probably be moved back to the `L2VoteAggregator`
   uint32 public constant CAST_VOTE_WINDOW = 1200;
 
+  error PastBlockNumber();
+
   event ProposalCreated(
     uint256 proposalId,
     address proposer,
@@ -95,9 +97,11 @@ abstract contract L2GovernorMetadata {
   /// @param _l1BlockNumber The number of a future L1 block
   /// @return The approximate block number the L2 will be producing when L1 produces the given
   /// block
-  function _l2BlockForFutureL1Block(uint256 _l1BlockNumber) private view returns (uint256) {
+  function _l2BlockForFutureL1Block(uint256 _l1BlockNumber) internal view returns (uint256) {
     // We should never send an L1 block in the past. If we did, this would overflow & revert.
+    if (_l1BlockNumber < L1_BLOCK.number()) revert PastBlockNumber();
     uint256 _l1BlocksUntilEnd = _l1BlockNumber - L1_BLOCK.number();
-    return (_l1BlocksUntilEnd * L1_BLOCK_TIME) / L2_BLOCK_TIME;
+
+    return block.number + ((_l1BlocksUntilEnd * L1_BLOCK_TIME) / L2_BLOCK_TIME);
   }
 }

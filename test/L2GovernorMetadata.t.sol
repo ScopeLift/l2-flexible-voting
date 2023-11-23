@@ -76,3 +76,17 @@ contract _addProposal is L2GovernorMetadataTest {
     assertEq(proposal.isCanceled, true, "The isCanceled has been set incorrectly");
   }
 }
+
+contract _l2BlockForFutureL1Block is L2GovernorMetadataTest {
+  function testFuzz_RevertIf_BlockNumberIsTooSmall(uint64 _blockNumber) public {
+    _blockNumber = uint64(bound(_blockNumber, 0, mockL1Block.number() - 1));
+    vm.expectRevert(L2GovernorMetadata.PastBlockNumber.selector);
+    l2GovernorMetadata.exposed_l2BlockForFutureL1Block(_blockNumber);
+  }
+
+  function testFuzz_BlockNumberGreaterThanCurrentBlock(uint256 _l1VoteEnd) public {
+    _l1VoteEnd = mockL1Block.__boundL1VoteEnd(_l1VoteEnd);
+    uint64 endBlock = uint64(l2GovernorMetadata.exposed_l2BlockForFutureL1Block(_l1VoteEnd));
+    assertGt(endBlock, block.number, "L2 vote end block is not greater than the current L1 block");
+  }
+}
