@@ -48,8 +48,12 @@ contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest
   function setUpSource() public override {
     ERC20Votes erc20 = new FakeERC20("GovExample", "GOV");
     governorMock = new GovernorMock("Testington Dao", erc20);
-    l1GovernorMetadataBridge =
-    new WormholeL1GovernorMetadataBridge(address(governorMock), L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    l1GovernorMetadataBridge = new WormholeL1GovernorMetadataBridge(
+      address(governorMock),
+      L1_CHAIN.wormholeRelayer,
+      L1_CHAIN.wormholeChainId,
+      L2_CHAIN.wormholeChainId
+    );
   }
 
   function setUpTarget() public override {
@@ -65,8 +69,9 @@ contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest
 
 contract Constructor is Test, TestConstants {
   function testFork_CorrectlySetAllArgs(address governorMock) public {
-    WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge =
-    new WormholeL1GovernorMetadataBridge(governorMock, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge = new WormholeL1GovernorMetadataBridge(
+      governorMock, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId
+    );
     assertEq(
       address(l1GovernorMetadataBridge.GOVERNOR()), governorMock, "Governor is not set correctly"
     );

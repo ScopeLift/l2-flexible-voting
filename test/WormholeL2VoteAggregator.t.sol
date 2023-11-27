@@ -46,8 +46,13 @@ contract L2VoteAggregatorTest is TestConstants, WormholeRelayerBasicTest {
   function setUpSource() public override {
     l2Erc20 = new FakeERC20("GovExample", "GOV");
     l1Block = new L1Block();
-    l2VoteAggregator =
-    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    l2VoteAggregator = new WormholeL2VoteAggregatorHarness(
+      address(l2Erc20),
+      L2_CHAIN.wormholeRelayer,
+      address(l1Block),
+      L2_CHAIN.wormholeChainId,
+      L1_CHAIN.wormholeChainId
+    );
   }
 
   function setUpTarget() public override {
@@ -63,8 +68,13 @@ contract L2VoteAggregatorTest is TestConstants, WormholeRelayerBasicTest {
 contract Constructor is L2VoteAggregatorTest {
   function testFuzz_CorrectlySetsAllArgs() public {
     L1Block l1Block = new L1Block();
-    WormholeL2VoteAggregator l2VoteAggregator =
-    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    WormholeL2VoteAggregator l2VoteAggregator = new WormholeL2VoteAggregatorHarness(
+      address(l2Erc20),
+      L2_CHAIN.wormholeRelayer,
+      address(l1Block),
+      L2_CHAIN.wormholeChainId,
+      L1_CHAIN.wormholeChainId
+    );
 
     assertEq(address(l1Block), address(l2VoteAggregator.L1_BLOCK()));
     assertEq(address(address(l2Erc20)), address(l2VoteAggregator.VOTING_TOKEN()));

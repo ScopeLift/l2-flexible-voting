@@ -43,14 +43,27 @@ contract L1ERC20BridgeTest is TestConstants, WormholeRelayerBasicTest {
   function setUpSource() public override {
     l1Erc20 = new FakeERC20("Hello", "WRLD");
     gov = new GovernorFlexibleVotingMock("Testington Dao", ERC20VotesComp(address(l1Erc20)));
-    l1Erc20Bridge =
-    new WormholeL1ERC20Bridge(address(l1Erc20), L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, msg.sender);
+    l1Erc20Bridge = new WormholeL1ERC20Bridge(
+      address(l1Erc20),
+      L1_CHAIN.wormholeRelayer,
+      address(gov),
+      L1_CHAIN.wormholeChainId,
+      L2_CHAIN.wormholeChainId,
+      msg.sender
+    );
   }
 
   function setUpTarget() public override {
     L1Block l1Block = new L1Block();
-    l2Erc20 =
-    new WormholeL2ERC20( "Hello", "WRLD", L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, msg.sender);
+    l2Erc20 = new WormholeL2ERC20(
+      "Hello",
+      "WRLD",
+      L2_CHAIN.wormholeRelayer,
+      address(l1Block),
+      L2_CHAIN.wormholeChainId,
+      L1_CHAIN.wormholeChainId,
+      msg.sender
+    );
     vm.prank(l2Erc20.owner());
     l2Erc20.setRegisteredSender(
       L1_CHAIN.wormholeChainId, bytes32(uint256(uint160(address(l1Erc20Bridge))))
@@ -60,8 +73,14 @@ contract L1ERC20BridgeTest is TestConstants, WormholeRelayerBasicTest {
 
 contract Constructor is L1ERC20BridgeTest {
   function testForkFuzz_CorrectlySetAllArgs(address l1Erc) public {
-    WormholeL1ERC20Bridge l1Erc20Bridge =
-    new WormholeL1ERC20Bridge(address(l1Erc), L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, msg.sender);
+    WormholeL1ERC20Bridge l1Erc20Bridge = new WormholeL1ERC20Bridge(
+      address(l1Erc),
+      L1_CHAIN.wormholeRelayer,
+      address(gov),
+      L1_CHAIN.wormholeChainId,
+      L2_CHAIN.wormholeChainId,
+      msg.sender
+    );
     assertEq(address(l1Erc20Bridge.L1_TOKEN()), l1Erc, "L1 token is not set correctly");
   }
 }
@@ -163,8 +182,14 @@ contract _ReceiveWithdrawalWormholeMessages is L1ERC20BridgeTest {
   ) public {
     vm.assume(_account != address(0));
     FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
-    L1ERC20BridgeHarness l1Erc20Bridge =
-    new L1ERC20BridgeHarness(address(l1Erc20), L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, msg.sender);
+    L1ERC20BridgeHarness l1Erc20Bridge = new L1ERC20BridgeHarness(
+      address(l1Erc20),
+      L1_CHAIN.wormholeRelayer,
+      address(gov),
+      L1_CHAIN.wormholeChainId,
+      L2_CHAIN.wormholeChainId,
+      msg.sender
+    );
 
     l1Erc20Bridge.initialize(address(l2Erc20));
     l1Erc20.approve(address(this), _amount);
@@ -193,8 +218,14 @@ contract _Withdraw is L1ERC20BridgeTest {
     vm.assume(_account != address(0));
 
     FakeERC20 l1Erc20 = new FakeERC20("Hello", "WRLD");
-    L1ERC20BridgeHarness l1Erc20Bridge =
-    new L1ERC20BridgeHarness(address(l1Erc20), L1_CHAIN.wormholeRelayer, address(gov), L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId, msg.sender);
+    L1ERC20BridgeHarness l1Erc20Bridge = new L1ERC20BridgeHarness(
+      address(l1Erc20),
+      L1_CHAIN.wormholeRelayer,
+      address(gov),
+      L1_CHAIN.wormholeChainId,
+      L2_CHAIN.wormholeChainId,
+      msg.sender
+    );
     l1Erc20Bridge.initialize(address(l2Erc20));
 
     l1Erc20.approve(address(this), _amount);

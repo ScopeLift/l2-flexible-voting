@@ -41,8 +41,13 @@ contract WormholeL1VotePoolTest is TestConstants, WormholeRelayerBasicTest {
   function setUpSource() public override {
     L1Block l1Block = new L1Block();
     l2Erc20 = new FakeERC20("GovExample", "GOV");
-    l2VoteAggregator =
-    new WormholeL2VoteAggregatorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer,  address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    l2VoteAggregator = new WormholeL2VoteAggregatorHarness(
+      address(l2Erc20),
+      L2_CHAIN.wormholeRelayer,
+      address(l1Block),
+      L2_CHAIN.wormholeChainId,
+      L1_CHAIN.wormholeChainId
+    );
   }
 
   function setUpTarget() public override {

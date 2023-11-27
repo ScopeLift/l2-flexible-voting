@@ -28,8 +28,9 @@ contract WormholeSenderTest is TestConstants, WormholeRelayerBasicTest {
   }
 
   function setUpSource() public override {
-    wormholeSender =
-    new WormholeSenderHarness(L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
+    wormholeSender = new WormholeSenderHarness(
+      L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId
+    );
   }
 
   function setUpTarget() public override {}
