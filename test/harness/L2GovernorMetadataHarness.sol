@@ -19,4 +19,8 @@ contract L2GovernorMetadataHarness is L2GovernorMetadata {
   ) public {
     _addProposal(proposalId, voteStart, voteEnd, isCanceled);
   }
+
+  function exposed_l2BlockForFutureL1Block(uint256 _l1BlockNumber) public view returns (uint256) {
+    return _l2BlockForFutureL1Block(_l1BlockNumber);
+  }
 }

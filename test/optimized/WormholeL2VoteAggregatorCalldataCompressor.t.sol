@@ -85,10 +85,21 @@ contract WormholeL2ERC20CalldataCompressorTest is Test, TestConstants {
     (voterAddress, privateKey) = makeAddrAndKey("voter");
     L1Block l1Block = new L1Block();
     l2Erc20 = new FakeERC20("GovExample", "GOV");
-    router =
-    new WormholeL2VoteAggregatorCalldataCompressor(address(l2Erc20), L2_CHAIN.wormholeRelayer,  address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId, msg.sender);
-    routerHarness =
-    new WormholeL2VoteAggregatorCalldataCompressorHarness(address(l2Erc20), L2_CHAIN.wormholeRelayer, address(l1Block), L2_CHAIN.wormholeChainId, L1_CHAIN.wormholeChainId);
+    router = new WormholeL2VoteAggregatorCalldataCompressor(
+      address(l2Erc20),
+      L2_CHAIN.wormholeRelayer,
+      address(l1Block),
+      L2_CHAIN.wormholeChainId,
+      L1_CHAIN.wormholeChainId,
+      msg.sender
+    );
+    routerHarness = new WormholeL2VoteAggregatorCalldataCompressorHarness(
+      address(l2Erc20),
+      L2_CHAIN.wormholeRelayer,
+      address(l1Block),
+      L2_CHAIN.wormholeChainId,
+      L1_CHAIN.wormholeChainId
+    );
   }
 
   function _signVoteMessage(uint256 _proposalId, uint8 _support)

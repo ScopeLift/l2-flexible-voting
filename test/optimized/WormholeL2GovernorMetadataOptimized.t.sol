@@ -15,8 +15,9 @@ contract WormholeL2GovernorMetadataOptimizedTest is TestConstants {
 
   function setUp() public {
     mockL1Block = new L1BlockMock();
-    l2GovernorMetadata =
-    new WormholeL2GovernorMetadataOptimizedHarness(L2_CHAIN.wormholeRelayer, msg.sender, address(mockL1Block));
+    l2GovernorMetadata = new WormholeL2GovernorMetadataOptimizedHarness(
+      L2_CHAIN.wormholeRelayer, msg.sender, address(mockL1Block)
+    );
     vm.prank(l2GovernorMetadata.owner());
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
