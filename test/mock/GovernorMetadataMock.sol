@@ -45,7 +45,7 @@ abstract contract GovernorMetadataMockBase is L2GovernorMetadata {
 }
 
 contract GovernorMetadataMock is GovernorMetadataMockBase, WormholeL2GovernorMetadata {
-  constructor(address _core) WormholeL2GovernorMetadata(_core, msg.sender, address(0x1b)) {
+  constructor(address _core) WormholeL2GovernorMetadata(_core, msg.sender, address(0x1b), 1200) {
     _proposals[1] =
       Proposal({voteStart: block.number, voteEnd: block.number + 3000, isCanceled: false});
   }
@@ -55,7 +55,9 @@ contract GovernorMetadataOptimizedMock is
   GovernorMetadataMockBase,
   WormholeL2GovernorMetadataOptimized
 {
-  constructor(address _core) WormholeL2GovernorMetadataOptimized(_core, msg.sender, address(0x1b)) {}
+  constructor(address _core)
+    WormholeL2GovernorMetadataOptimized(_core, msg.sender, address(0x1b), 1200)
+  {}
 
   function _addProposal(uint256 proposalId, uint256 voteStart, uint256 voteEnd, bool isCanceled)
     internal

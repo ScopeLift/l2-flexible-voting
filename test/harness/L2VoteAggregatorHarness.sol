@@ -8,7 +8,7 @@ import {GovernorMetadataMockBase, L2GovernorMetadata} from "test/mock/GovernorMe
 contract L2VoteAggregatorHarness is L2VoteAggregator, GovernorMetadataMockBase {
   constructor(address _votingToken, address _l1BlockAddress)
     L2VoteAggregator(_votingToken)
-    L2GovernorMetadata(_l1BlockAddress)
+    L2GovernorMetadata(_l1BlockAddress, 1200)
   {}
 
   function _bridgeVote(bytes memory) internal override {}
@@ -28,5 +28,9 @@ contract L2VoteAggregatorHarness is L2VoteAggregator, GovernorMetadataMockBase {
 
   function exposed_domainSeparatorV4() public view returns (bytes32) {
     return _domainSeparatorV4();
+  }
+
+  function workaround_setCastVoteWindow(uint32 _newWindow) public {
+    CAST_VOTE_WINDOW = _newWindow;
   }
 }

@@ -51,7 +51,8 @@ contract L2VoteAggregatorTest is TestConstants, WormholeRelayerBasicTest {
       L2_CHAIN.wormholeRelayer,
       address(l1Block),
       L2_CHAIN.wormholeChainId,
-      L1_CHAIN.wormholeChainId
+      L1_CHAIN.wormholeChainId,
+      1200
     );
   }
 
@@ -73,7 +74,8 @@ contract Constructor is L2VoteAggregatorTest {
       L2_CHAIN.wormholeRelayer,
       address(l1Block),
       L2_CHAIN.wormholeChainId,
-      L1_CHAIN.wormholeChainId
+      L1_CHAIN.wormholeChainId,
+      1200
     );
 
     assertEq(address(l1Block), address(l2VoteAggregator.L1_BLOCK()));
@@ -105,7 +107,7 @@ contract _bridgeVote is L2VoteAggregatorTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _against, _for, _abstain);
-    l2VoteAggregator.createProposal(_proposalId, 3000);
+    l2VoteAggregator.createProposal(_proposalId, uint128(l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectEmit();
     emit VoteBridged(_proposalId, _against, _for, _abstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);

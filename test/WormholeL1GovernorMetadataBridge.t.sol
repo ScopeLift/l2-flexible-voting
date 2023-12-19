@@ -58,8 +58,9 @@ contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest
 
   function setUpTarget() public override {
     L1BlockMock _mockL1Block = new L1BlockMock();
-    l2GovernorMetadata =
-      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender, address(_mockL1Block));
+    l2GovernorMetadata = new WormholeL2GovernorMetadata(
+      L2_CHAIN.wormholeRelayer, msg.sender, address(_mockL1Block), 1200
+    );
     vm.prank(l2GovernorMetadata.owner());
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, bytes32(uint256(uint160(address(l1GovernorMetadataBridge))))

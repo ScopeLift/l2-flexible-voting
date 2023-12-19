@@ -11,7 +11,8 @@ contract WormholeL2VoteAggregatorHarness is WormholeL2VoteAggregator, GovernorMe
     address _relayer,
     address _l1BlockAddress,
     uint16 _sourceChain,
-    uint16 _targetChain
+    uint16 _targetChain,
+    uint32 _castWindow
   )
     WormholeL2VoteAggregator(
       _votingToken,
@@ -19,7 +20,8 @@ contract WormholeL2VoteAggregatorHarness is WormholeL2VoteAggregator, GovernorMe
       _l1BlockAddress,
       _sourceChain,
       _targetChain,
-      msg.sender
+      msg.sender,
+      _castWindow
     )
   {}
 

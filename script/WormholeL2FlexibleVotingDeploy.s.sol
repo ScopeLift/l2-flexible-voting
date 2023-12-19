@@ -113,7 +113,8 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
       l1BlockAddress,
       L2_CHAIN.wormholeChainId,
       L1_CHAIN.wormholeChainId,
-      vm.envOr("CONTRACT_OWNER", msg.sender)
+      vm.envOr("CONTRACT_OWNER", msg.sender),
+      uint32(vm.envOr("CAST_WINDOW", uint256(1200)))
     );
 
     vm.broadcast();

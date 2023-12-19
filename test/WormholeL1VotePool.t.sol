@@ -46,7 +46,8 @@ contract WormholeL1VotePoolTest is TestConstants, WormholeRelayerBasicTest {
       L2_CHAIN.wormholeRelayer,
       address(l1Block),
       L2_CHAIN.wormholeChainId,
-      L1_CHAIN.wormholeChainId
+      L1_CHAIN.wormholeChainId,
+      1200
     );
   }
 
@@ -96,7 +97,7 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2Against, _l2For, _l2Abstain);
-    l2VoteAggregator.createProposal(_proposalId, 3000);
+    l2VoteAggregator.createProposal(_proposalId, uint128(l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectEmit();
     emit VoteBridged(_proposalId, _l2Against, _l2For, _l2Abstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
@@ -150,7 +151,7 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2NewAgainst, _l2NewFor, _l2NewAbstain);
-    l2VoteAggregator.createProposal(_proposalId, 3000);
+    l2VoteAggregator.createProposal(_proposalId, uint128(l2VoteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectEmit();
     emit VoteBridged(_proposalId, _l2NewAgainst, _l2NewFor, _l2NewAbstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);

@@ -133,7 +133,7 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, L2CountingFrac
   function state(uint256 proposalId) external view virtual returns (ProposalState) {
     L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
     if (VOTING_TOKEN.clock() < proposal.voteStart) return ProposalState.Pending;
-    else if (proposalVoteActive(proposalId)) return ProposalState.Active;
+    else if (proposalL2VoteActive(proposalId)) return ProposalState.Active;
     else if (proposal.isCanceled) return ProposalState.Canceled;
     else return ProposalState.Expired;
   }
@@ -213,7 +213,7 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, L2CountingFrac
   /// @notice Bridges a vote to the L1.
   /// @param proposalId The id of the proposal to bridge.
   function bridgeVote(uint256 proposalId) external payable {
-    if (!proposalVoteActive(proposalId)) revert ProposalInactive();
+    if (!proposalL1VoteActive(proposalId)) revert ProposalInactive();
 
     (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) = proposalVotes(proposalId);
 
@@ -253,7 +253,7 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, L2CountingFrac
     string memory reason,
     bytes memory params
   ) internal virtual returns (uint256) {
-    if (!proposalVoteActive(proposalId)) revert ProposalInactive();
+    if (!proposalL2VoteActive(proposalId)) revert ProposalInactive();
 
     L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
     uint256 weight = VOTING_TOKEN.getPastVotes(account, proposal.voteStart);
@@ -266,10 +266,17 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, L2CountingFrac
     return weight;
   }
 
-  function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
+  function proposalL2VoteActive(uint256 proposalId) public view returns (bool active) {
     L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
 
     return L1_BLOCK.number() <= internalVotingPeriodEnd(proposalId)
       && L1_BLOCK.number() >= proposal.voteStart && !proposal.isCanceled;
+  }
+
+  function proposalL1VoteActive(uint256 proposalId) public view returns (bool active) {
+    L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
+
+    return L1_BLOCK.number() <= proposal.voteEnd && L1_BLOCK.number() >= proposal.voteStart
+      && !proposal.isCanceled;
   }
 }

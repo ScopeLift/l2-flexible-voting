@@ -178,7 +178,7 @@ contract CastVote is L2VoteAggregatorTest {
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
-    voteAggregator.createProposal(1, 3000, false);
+    voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -238,7 +238,8 @@ contract CastVote is L2VoteAggregatorTest {
 
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     voteAggregator.castVote(1, _voteType);
@@ -252,7 +253,8 @@ contract CastVote is L2VoteAggregatorTest {
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
@@ -263,7 +265,8 @@ contract CastVote is L2VoteAggregatorTest {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -278,7 +281,8 @@ contract CastVote is L2VoteAggregatorTest {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -294,7 +298,8 @@ contract CastVote is L2VoteAggregatorTest {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -316,7 +321,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
-    voteAggregator.createProposal(1, 3000, false);
+    voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -329,7 +334,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     uint96 _amount,
     uint8 _support,
     uint256 _proposalId,
-    string memory reason
+    string memory _reason
   ) public {
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
@@ -337,12 +342,13 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     l2Erc20.mint(address(this), _amount);
 
     // In the setup we use a mock contract rather than the actual contract
-    L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.createProposal(_proposalId, 1200, true);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(
+      _proposalId, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, true
+    );
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
-    voteAggregator.castVoteWithReason(_proposalId, _voteType, reason);
+    voteAggregator.castVoteWithReason(_proposalId, _voteType, _reason);
   }
 
   function testFuzz_RevertWhen_AfterCastWindow(
@@ -350,9 +356,8 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     uint8 _support,
     uint256 _proposalId,
     uint64 _proposalDuration,
-    string memory reason
+    string memory _reason
   ) public {
-    vm.assume(_amount != 0);
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
@@ -370,7 +375,7 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     // Our active check is inclusive so we need to add 1
     vm.roll(l2Proposal.voteStart + (_proposalDuration - voteAggregator.CAST_VOTE_WINDOW()) + 1);
     vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
-    voteAggregator.castVoteWithReason(_proposalId, _voteType, reason);
+    voteAggregator.castVoteWithReason(_proposalId, _voteType, _reason);
   }
 
   function testFuzz_RevertWhen_VoterHasAlreadyVoted(
@@ -384,7 +389,8 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
 
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     voteAggregator.castVoteWithReason(1, _voteType, reason);
@@ -402,7 +408,8 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
@@ -413,7 +420,8 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -428,7 +436,8 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -444,7 +453,8 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -466,7 +476,7 @@ contract CastVoteWithReasonAndParams is L2VoteAggregatorTest {
   ) public {
     uint128 amount = uint128(againstVotes) + forVotes + abstainVotes;
     bytes memory voteData = abi.encodePacked(againstVotes, forVotes, abstainVotes);
-    voteAggregator.createProposal(1, 3000, false);
+    voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     l2Erc20.mint(address(this), amount);
 
@@ -533,7 +543,8 @@ contract CastVoteWithReasonAndParams is L2VoteAggregatorTest {
   ) public {
     bytes memory voteData = abi.encodePacked(againstVotes, forVotes, abstainVotes);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
@@ -555,7 +566,8 @@ contract CastVoteWithReasonAndParams is L2VoteAggregatorTest {
 
     l2Erc20.mint(address(this), amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     voteAggregator.castVoteWithReasonAndParams(1, 1, reason, firstVoteData);
@@ -587,7 +599,8 @@ contract CastVoteWithReasonAndParams is L2VoteAggregatorTest {
     vm.assume(amount != 0);
     l2Erc20.mint(address(this), amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -627,7 +640,7 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
-    voteAggregator.createProposal(1, 3000, false);
+    voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -694,7 +707,8 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     vm.prank(voterAddress);
     l2Erc20.mint(voterAddress, _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     (uint8 _v, bytes32 _r, bytes32 _s) = _signVoteMessage(proposalId, _support);
 
@@ -711,8 +725,9 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     uint256 proposalId = 1;
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
-    L2GovernorMetadata.Proposal memory l2Proposal =
-      voteAggregator.createProposal(proposalId, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(
+      proposalId, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false
+    );
 
     (uint8 _v, bytes32 _r, bytes32 _s) = _signVoteMessage(proposalId, _support);
 
@@ -728,7 +743,8 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     uint256 proposalId = 1;
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType.Against;
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
 
@@ -751,7 +767,8 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     vm.prank(voterAddress);
     l2Erc20.mint(voterAddress, _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
 
@@ -775,7 +792,8 @@ contract CastVoteBySig is L2VoteAggregatorTest {
     vm.prank(voterAddress);
     l2Erc20.mint(voterAddress, _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -791,11 +809,16 @@ contract CastVoteBySig is L2VoteAggregatorTest {
 }
 
 contract _CastVote is L2VoteAggregatorTest {
-  function testFuzz_RevertWhen_BeforeProposalStart(uint96 _amount, uint8 _support) public {
+  function testFuzz_RevertWhen_BeforeProposalStart(
+    uint96 _amount,
+    uint8 _support,
+    uint32 _castWindow
+  ) public {
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
+    voteAggregator.workaround_setCastVoteWindow(_castWindow);
 
-    voteAggregator.createProposal(1, 3000, false);
+    voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     l2Erc20.mint(address(this), _amount);
 
@@ -825,11 +848,14 @@ contract _CastVote is L2VoteAggregatorTest {
     uint96 _amount,
     uint8 _support,
     uint256 _proposalId,
-    uint64 _proposalDuration
+    uint64 _proposalDuration,
+    uint32 _castWindow
   ) public {
+    vm.assume(_castWindow != 0);
     vm.assume(_amount != 0);
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
+    voteAggregator.workaround_setCastVoteWindow(_castWindow);
 
     _proposalDuration = uint64(
       bound(_proposalDuration, voteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number)
@@ -855,7 +881,8 @@ contract _CastVote is L2VoteAggregatorTest {
 
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     voteAggregator.exposed_castVote(1, address(this), _voteType, "");
@@ -869,18 +896,21 @@ contract _CastVote is L2VoteAggregatorTest {
     vm.assume(_support < 3);
     L2VoteAggregator.VoteType _voteType = L2VoteAggregator.VoteType(_support);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectRevert(L2VoteAggregator.NoWeight.selector);
     voteAggregator.exposed_castVote(1, address(this), _voteType, "");
   }
 
-  function testFuzz_CorrectlyCastVoteAgainst(uint96 _amount) public {
+  function testFuzz_CorrectlyCastVoteAgainst(uint96 _amount, uint32 _castWindow) public {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
+    voteAggregator.workaround_setCastVoteWindow(_castWindow);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -895,7 +925,8 @@ contract _CastVote is L2VoteAggregatorTest {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -911,7 +942,8 @@ contract _CastVote is L2VoteAggregatorTest {
     vm.assume(_amount != 0);
     l2Erc20.mint(address(this), _amount);
 
-    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(1, uint128(voteAggregator.CAST_VOTE_WINDOW()) + 1, false);
 
     vm.roll(l2Proposal.voteStart + 1);
     vm.expectEmit();
@@ -964,7 +996,7 @@ contract InternalVotingPeriodEnd is L2VoteAggregatorTest {
   }
 }
 
-contract ProposalVoteActive is L2VoteAggregatorTest {
+contract ProposalL2VoteActive is L2VoteAggregatorTest {
   function testFuzz_ProposalVoteIsActive(uint256 proposalId, uint64 voteStart, uint64 voteEnd)
     public
   {
@@ -976,7 +1008,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     uint256 lastVotingBlock = voteAggregator.internalVotingPeriodEnd(proposalId);
 
     vm.roll(lastVotingBlock);
-    bool active = voteAggregator.proposalVoteActive(proposalId);
+    bool active = voteAggregator.proposalL2VoteActive(proposalId);
     assertEq(active, true, "Proposal is supposed to be active");
   }
 
@@ -994,7 +1026,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
       // block before the cast
     voteAggregator.createProposal(proposalId, voteStart, voteEnd, isCanceled);
 
-    bool active = voteAggregator.proposalVoteActive(proposalId);
+    bool active = voteAggregator.proposalL2VoteActive(proposalId);
     assertFalse(active, "Proposal is supposed to be inactive");
   }
 
@@ -1006,7 +1038,7 @@ contract ProposalVoteActive is L2VoteAggregatorTest {
     vm.assume(voteEnd > voteAggregator.CAST_VOTE_WINDOW()); // Prevent underflow
     voteAggregator.createProposal(proposalId, voteStart, voteEnd, false);
 
-    bool active = voteAggregator.proposalVoteActive(proposalId);
+    bool active = voteAggregator.proposalL2VoteActive(proposalId);
     assertFalse(active, "Proposal is supposed to be inactive");
   }
 }
