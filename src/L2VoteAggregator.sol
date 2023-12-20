@@ -7,10 +7,10 @@ import {EIP712} from "openzeppelin/utils/cryptography/EIP712.sol";
 import {ECDSA} from "openzeppelin/utils/cryptography/ECDSA.sol";
 
 import {L2GovernorMetadata} from "src/WormholeL2GovernorMetadata.sol";
-import {GovernorCountingFractional} from "src/L2CountingFractional.sol";
+import {L2CountingFractional} from "src/L2CountingFractional.sol";
 
 /// @notice A contract to collect votes on L2 to be bridged to L1.
-abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, GovernorCountingFractional {
+abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, L2CountingFractional {
   bytes32 public constant BALLOT_TYPEHASH = keccak256("Ballot(uint256 proposalId,uint8 support)");
 
   /// @notice The token used to vote on proposals provided by the `GovernorMetadata`.
@@ -80,22 +80,22 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, GovernorCounti
     address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
   );
 
-   /**
-    * @dev Emitted when a vote is cast with params.
-    *
-    * Note: `support` values should be seen as buckets. Their interpretation depends on the voting module used.
-    * `params` are additional encoded parameters. Their interpepretation also depends on the voting module used.
-    */
-   event VoteCastWithParams(
-       address indexed voter,
-       uint256 proposalId,
-       uint8 support,
-       uint256 weight,
-       string reason,
-       bytes params
-   );
-
-
+  /**
+   * @dev Emitted when a vote is cast with params.
+   *
+   * Note: `support` values should be seen as buckets. Their interpretation depends on the voting
+   * module used.
+   * `params` are additional encoded parameters. Their interpepretation also depends on the voting
+   * module used.
+   */
+  event VoteCastWithParams(
+    address indexed voter,
+    uint256 proposalId,
+    uint8 support,
+    uint256 weight,
+    string reason,
+    bytes params
+  );
 
   event VoteBridged(
     uint256 indexed proposalId, uint256 voteAgainst, uint256 voteFor, uint256 voteAbstain
@@ -198,15 +198,13 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, GovernorCounti
   }
 
   function castVoteWithReasonAndParams(
-      uint256 proposalId,
-      uint8 support,
-      string calldata reason,
-      bytes memory params
+    uint256 proposalId,
+    uint8 support,
+    string calldata reason,
+    bytes memory params
   ) public virtual returns (uint256) {
-      return _castVote(proposalId, msg.sender, support, reason, params);
+    return _castVote(proposalId, msg.sender, support, reason, params);
   }
-
-
 
   /// @notice Where a user can express their vote based on their L2 token voting power using  a
   /// signature.
@@ -228,10 +226,9 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, GovernorCounti
   function bridgeVote(uint256 proposalId) external payable {
     if (!proposalVoteActive(proposalId)) revert ProposalInactive();
 
-	 (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) = proposalVotes(proposalId);
+    (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) = proposalVotes(proposalId);
 
-    bytes memory proposalCalldata =
-      abi.encode(proposalId, againstVotes, forVotes, abstainVotes);
+    bytes memory proposalCalldata = abi.encode(proposalId, againstVotes, forVotes, abstainVotes);
     _bridgeVote(proposalCalldata);
     emit VoteBridged(proposalId, againstVotes, forVotes, abstainVotes);
   }
@@ -277,50 +274,47 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, GovernorCounti
   //   return weight;
   // }
   /**
-   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
-   * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function. Uses the _defaultParams().
+   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast
+   * yet, retrieve
+   * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function. Uses the
+   * _defaultParams().
    *
    * Emits a {IGovernor-VoteCast} event.
    */
-  function _castVote(
-      uint256 proposalId,
-      address account,
-      uint8 support,
-      string memory reason
-  ) internal virtual returns (uint256) {
-      return _castVote(proposalId, account, support, reason, "");
+  function _castVote(uint256 proposalId, address account, uint8 support, string memory reason)
+    internal
+    virtual
+    returns (uint256)
+  {
+    return _castVote(proposalId, account, support, reason, "");
   }
 
   /**
-   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
+   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast
+   * yet, retrieve
    * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function.
    *
    * Emits a {IGovernor-VoteCast} event.
    */
   function _castVote(
-      uint256 proposalId,
-      address account,
-      uint8 support,
-      string memory reason,
-      bytes memory params
+    uint256 proposalId,
+    address account,
+    uint8 support,
+    string memory reason,
+    bytes memory params
   ) internal virtual returns (uint256) {
-      if (!proposalVoteActive(proposalId)) revert ProposalInactive();
+    if (!proposalVoteActive(proposalId)) revert ProposalInactive();
 
-      L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
-      uint256 weight = VOTING_TOKEN.getPastVotes(account, proposal.voteStart);
-      if (weight == 0) revert NoWeight();
-      _countVote(proposalId, account, support, weight, params);
+    L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
+    uint256 weight = VOTING_TOKEN.getPastVotes(account, proposal.voteStart);
+    if (weight == 0) revert NoWeight();
+    _countVote(proposalId, account, support, weight, params);
 
-      if (params.length == 0) {
-          emit VoteCast(account, proposalId, support, weight, reason);
-      } else {
-          emit VoteCastWithParams(account, proposalId, support, weight, reason, params);
-      }
+    if (params.length == 0) emit VoteCast(account, proposalId, support, weight, reason);
+    else emit VoteCastWithParams(account, proposalId, support, weight, reason, params);
 
-      return weight;
+    return weight;
   }
-
-
 
   function proposalVoteActive(uint256 proposalId) public view returns (bool active) {
     L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
