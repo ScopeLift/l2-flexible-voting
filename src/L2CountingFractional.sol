@@ -73,15 +73,6 @@ abstract contract L2CountingFractional {
   }
 
   /**
-   * @dev See {Governor-_voteSucceeded}. In this module, forVotes must be > againstVotes.
-   */
-  // function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool) {
-  //     ProposalVote storage proposalVote = _proposalVotes[proposalId];
-
-  //     return proposalVote.forVotes > proposalVote.againstVotes;
-  // }
-
-  /**
    * @notice See {Governor-_countVote}.
    *
    * @dev Function that records the delegate's votes.

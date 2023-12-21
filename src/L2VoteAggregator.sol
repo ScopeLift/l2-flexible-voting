@@ -59,21 +59,10 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, L2CountingFrac
     INVALID_Executed
   }
 
-  /// @dev Data structure to store vote preferences expressed by depositors.
-  // TODO: Does it matter if we use a uint128 vs a uint256?
-  // struct ProposalVote {
-  //   uint128 againstVotes;
-  //   uint128 forVotes;
-  //   uint128 abstainVotes;
-  // }
-
   /// @notice A mapping of proposal to a mapping of voter address to boolean indicating whether a
   /// voter has voted or not.
   mapping(uint256 proposalId => mapping(address voterAddress => bool)) private
     _proposalVotersHasVoted;
-
-  /// @notice A mapping of proposal id to proposal vote totals.
-  // mapping(uint256 proposalId => ProposalVote) public proposalVotes;
 
   /// @dev Emitted when a vote is cast on L2.
   event VoteCast(
@@ -249,38 +238,6 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, L2CountingFrac
     _lastVotingBlock = proposal.voteEnd - CAST_VOTE_WINDOW;
   }
 
-  // function _castVote(uint256 proposalId, address voter, VoteType support, string memory reason)
-  //   internal
-  //   returns (uint256)
-  // {
-  //   if (!proposalVoteActive(proposalId)) revert ProposalInactive();
-  //   if (_proposalVotersHasVoted[proposalId][voter]) revert AlreadyVoted();
-  //   _proposalVotersHasVoted[proposalId][voter] = true;
-
-  //   L2GovernorMetadata.Proposal memory proposal = getProposal(proposalId);
-  //   uint256 weight = VOTING_TOKEN.getPastVotes(voter, proposal.voteStart);
-  //   if (weight == 0) revert NoWeight();
-
-  //   if (support == VoteType.Against) {
-  //     proposalVotes[proposalId].againstVotes += SafeCast.toUint128(weight);
-  //   } else if (support == VoteType.For) {
-  //     proposalVotes[proposalId].forVotes += SafeCast.toUint128(weight);
-  //   } else if (support == VoteType.Abstain) {
-  //     proposalVotes[proposalId].abstainVotes += SafeCast.toUint128(weight);
-  //   } else {
-  //     revert InvalidVoteType();
-  //   }
-  //   emit VoteCast(voter, proposalId, support, weight, reason);
-  //   return weight;
-  // }
-  /**
-   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast
-   * yet, retrieve
-   * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function. Uses the
-   * _defaultParams().
-   *
-   * Emits a {IGovernor-VoteCast} event.
-   */
   function _castVote(uint256 proposalId, address account, uint8 support, string memory reason)
     internal
     virtual
@@ -289,13 +246,6 @@ abstract contract L2VoteAggregator is EIP712, L2GovernorMetadata, L2CountingFrac
     return _castVote(proposalId, account, support, reason, "");
   }
 
-  /**
-   * @dev Internal vote casting mechanism: Check that the vote is pending, that it has not been cast
-   * yet, retrieve
-   * voting weight using {IGovernor-getVotes} and call the {_countVote} internal function.
-   *
-   * Emits a {IGovernor-VoteCast} event.
-   */
   function _castVote(
     uint256 proposalId,
     address account,
