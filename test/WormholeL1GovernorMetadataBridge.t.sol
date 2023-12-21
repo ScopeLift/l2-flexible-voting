@@ -69,7 +69,8 @@ contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest
 
 contract Constructor is Test, TestConstants {
   function testFork_CorrectlySetAllArgs(address governorMock) public {
-    WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge = new WormholeL1GovernorMetadataBridge(
+    WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge =
+    new WormholeL1GovernorMetadataBridge(
       governorMock, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId
     );
     assertEq(
