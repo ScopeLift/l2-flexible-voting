@@ -73,7 +73,11 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
     // Create L1 metadata bridge that sends proposal metadata to L2
     vm.broadcast();
     WormholeL1GovernorMetadataBridge l1MetadataBridge = new WormholeL1GovernorMetadataBridge(
-      governorAddress, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId
+      governorAddress,
+      L1_CHAIN.wormholeRelayer,
+      L1_CHAIN.wormholeChainId,
+      L2_CHAIN.wormholeChainId,
+      vm.envOr("CONTRACT_OWNER", msg.sender)
     );
 
     vm.createSelectFork(L2_CHAIN.rpcUrl);

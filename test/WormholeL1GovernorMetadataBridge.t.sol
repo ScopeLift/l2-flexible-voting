@@ -52,7 +52,8 @@ contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest
       address(governorMock),
       L1_CHAIN.wormholeRelayer,
       L1_CHAIN.wormholeChainId,
-      L2_CHAIN.wormholeChainId
+      L2_CHAIN.wormholeChainId,
+      msg.sender
     );
   }
 
@@ -71,7 +72,11 @@ contract L1GovernorMetadataBridgeTest is TestConstants, WormholeRelayerBasicTest
 contract Constructor is Test, TestConstants {
   function testFork_CorrectlySetAllArgs(address governorMock) public {
     WormholeL1GovernorMetadataBridge l1GovernorMetadataBridge = new WormholeL1GovernorMetadataBridge(
-      governorMock, L1_CHAIN.wormholeRelayer, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId
+      governorMock,
+      L1_CHAIN.wormholeRelayer,
+      L1_CHAIN.wormholeChainId,
+      L2_CHAIN.wormholeChainId,
+      msg.sender
     );
     assertEq(
       address(l1GovernorMetadataBridge.GOVERNOR()), governorMock, "Governor is not set correctly"

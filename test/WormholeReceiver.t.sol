@@ -8,7 +8,7 @@ import {WormholeReceiver} from "src/WormholeReceiver.sol";
 import {TestConstants} from "test/Constants.sol";
 
 contract WormholeReceiverTestHarness is WormholeReceiver {
-  constructor(address _relayer, address _owner) WormholeBase(_relayer) WormholeReceiver(_owner) {}
+  constructor(address _relayer, address _owner) WormholeBase(_relayer, _owner) {}
   function receiveWormholeMessages(
     bytes calldata payload,
     bytes[] memory additionalVaas,

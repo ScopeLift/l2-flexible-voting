@@ -50,9 +50,8 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
     address _owner
   )
     WormholeL1VotePool(_governor)
-    WormholeBase(_relayer)
+    WormholeBase(_relayer, _owner)
     WormholeSender(_sourceChain, _targetChain)
-    WormholeReceiver(_owner)
   {
     L1_TOKEN = ERC20Votes(l1TokenAddress);
   }
@@ -84,7 +83,7 @@ contract WormholeL1ERC20Bridge is WormholeL1VotePool, WormholeSender, WormholeRe
       L2_TOKEN_ADDRESS,
       mintCalldata,
       0, // no receiver value needed since we're just passing a message
-      GAS_LIMIT,
+      gasLimit,
       REFUND_CHAIN,
       msg.sender
     );

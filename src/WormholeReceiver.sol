@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Ownable} from "openzeppelin/access/Ownable.sol";
-
 import {WormholeBase} from "src/WormholeBase.sol";
 
-abstract contract WormholeReceiver is Ownable, WormholeBase {
+abstract contract WormholeReceiver is WormholeBase {
   /// @dev Function called with an address that isn't a relayer.
   error OnlyRelayerAllowed();
 
@@ -25,10 +23,6 @@ abstract contract WormholeReceiver is Ownable, WormholeBase {
   event RegisteredSenderSet(
     address indexed owner, uint16 indexed sourceChain, bytes32 indexed sourceAddress
   );
-
-  constructor(address owner) Ownable() {
-    transferOwnership(owner);
-  }
 
   /// @notice The function the wormhole relayer calls when the DeliveryProvider competes a delivery.
   /// @dev Implementation should emit `WormholeMessageReceived`.

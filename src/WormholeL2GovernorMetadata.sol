@@ -10,8 +10,8 @@ contract WormholeL2GovernorMetadata is L2GovernorMetadata, WormholeReceiver {
   /// @param _relayer The address of the WormholeL2GovernorMetadata contract.
   /// @param _owner The address that will become the contract owner.
   constructor(address _relayer, address _owner, address _l1BlockAddress, uint32 _castWindow)
-    WormholeBase(_relayer)
-    WormholeReceiver(_owner)
+    WormholeBase(_relayer, _owner)
+    WormholeReceiver()
     L2GovernorMetadata(_l1BlockAddress, _castWindow)
   {}
 

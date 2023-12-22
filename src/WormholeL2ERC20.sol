@@ -47,11 +47,10 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
     uint16 _targetChain,
     address _owner
   )
-    WormholeBase(_relayer)
+    WormholeBase(_relayer, _owner)
     ERC20(_name, _symbol)
     ERC20Permit(_name)
     WormholeSender(_sourceChain, _targetChain)
-    WormholeReceiver(_owner)
   {
     L1_BLOCK = IL1Block(_l1Block);
   }
@@ -107,7 +106,7 @@ contract WormholeL2ERC20 is ERC20Votes, WormholeReceiver, WormholeSender {
       L1_BRIDGE_ADDRESS,
       withdrawCalldata,
       0, // no receiver value needed since we're just passing a message
-      GAS_LIMIT,
+      gasLimit,
       REFUND_CHAIN,
       msg.sender
     );
