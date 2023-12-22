@@ -32,6 +32,10 @@ contract L2CountingFractionalHarness is L2CountingFractional {
     return _countVoteFractional(proposalId, account, totalWeight, voteData);
   }
 
+  function exposed_decodePackedVotes(bytes memory voteData) public pure returns (uint128 againstVotes, uint128 forVotes, uint128 abstainVotes) {
+		  return _decodePackedVotes(voteData);
+  }
+
   function workaround_createProposalVote(
     uint256 proposalId,
     uint128 againstVotes,
