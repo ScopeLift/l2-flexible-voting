@@ -240,12 +240,17 @@ contract _CountVoteFractional is L2CountingFractionalTest {
   }
 }
 
-contract _DecodePackedVotes is  L2CountingFractionalTest {
-		function testFuzz_CorrectlyDecodePackedVotes(uint128 againstVotes, uint128 forVotes, uint128 abstainVotes) public {
+contract _DecodePackedVotes is L2CountingFractionalTest {
+  function testFuzz_CorrectlyDecodePackedVotes(
+    uint128 againstVotes,
+    uint128 forVotes,
+    uint128 abstainVotes
+  ) public {
     bytes memory voteData = abi.encodePacked(againstVotes, forVotes, abstainVotes);
-				(uint128 decodedAgainst, uint128 decodedFor, uint128 decodedAbstain) = countingFractional.exposed_decodePackedVotes(voteData);
-				assertEq(decodedAgainst, againstVotes, "Decoded against is incorrect");
-				assertEq(decodedFor, forVotes, "Decoded for is incorrect");
-				assertEq(decodedAbstain, abstainVotes, "Decoded abstain is incorrect");
-		}
+    (uint128 decodedAgainst, uint128 decodedFor, uint128 decodedAbstain) =
+      countingFractional.exposed_decodePackedVotes(voteData);
+    assertEq(decodedAgainst, againstVotes, "Decoded against is incorrect");
+    assertEq(decodedFor, forVotes, "Decoded for is incorrect");
+    assertEq(decodedAbstain, abstainVotes, "Decoded abstain is incorrect");
+  }
 }

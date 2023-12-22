@@ -18,6 +18,15 @@ contract L2VoteAggregatorTest is TestConstants {
     address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
   );
 
+  event VoteCastWithParams(
+    address indexed voter,
+    uint256 proposalId,
+    uint8 support,
+    uint256 weight,
+    string reason,
+    bytes params
+  );
+
   event VoteBridged(
     uint256 indexed proposalId, uint256 voteAgainst, uint256 voteFor, uint256 voteAbstain
   );
@@ -445,6 +454,149 @@ contract CastVoteWithReason is L2VoteAggregatorTest {
     (, uint256 forVotes,) = voteAggregator.proposalVotes(1);
 
     assertEq(forVotes, _amount, "Votes for is not correct");
+  }
+}
+
+contract CastVoteWithReasonAndParams is L2VoteAggregatorTest {
+  function testFuzz_RevertWhen_BeforeProposalStart(
+    uint40 againstVotes,
+    uint40 forVotes,
+    uint40 abstainVotes,
+    string memory reason
+  ) public {
+    uint128 amount = uint128(againstVotes) + forVotes + abstainVotes;
+    bytes memory voteData = abi.encodePacked(againstVotes, forVotes, abstainVotes);
+    voteAggregator.createProposal(1, 3000, false);
+
+    l2Erc20.mint(address(this), amount);
+
+    vm.roll(block.number - 1);
+    vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
+    voteAggregator.castVoteWithReasonAndParams(1, 1, reason, voteData);
+  }
+
+  function testFuzz_RevertWhen_ProposalCanceled(
+    uint256 _proposalId,
+    uint40 againstVotes,
+    uint40 forVotes,
+    uint40 abstainVotes,
+    string memory reason
+  ) public {
+    uint128 amount = uint128(againstVotes) + forVotes + abstainVotes;
+    bytes memory voteData = abi.encodePacked(againstVotes, forVotes, abstainVotes);
+
+    vm.assume(amount != 0);
+    l2Erc20.mint(address(this), amount);
+
+    // In the setup we use a mock contract rather than the actual contract
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(_proposalId, 1200, true);
+
+    vm.roll(l2Proposal.voteStart + 1);
+    vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
+    voteAggregator.castVoteWithReasonAndParams(_proposalId, 1, reason, voteData);
+  }
+
+  function testFuzz_RevertWhen_AfterCastWindow(
+    uint256 _proposalId,
+    uint64 _proposalDuration,
+    uint40 againstVotes,
+    uint40 forVotes,
+    uint40 abstainVotes,
+    string memory reason
+  ) public {
+    uint128 amount = uint128(againstVotes) + forVotes + abstainVotes;
+    bytes memory voteData = abi.encodePacked(againstVotes, forVotes, abstainVotes);
+
+    _proposalDuration = uint64(
+      bound(_proposalDuration, voteAggregator.CAST_VOTE_WINDOW(), type(uint64).max - block.number)
+    );
+
+    // In the setup we use a mock contract rather than the actual contract
+    L2GovernorMetadata.Proposal memory l2Proposal =
+      voteAggregator.createProposal(_proposalId, _proposalDuration);
+
+    vm.roll(l2Proposal.voteStart - 1);
+    l2Erc20.mint(address(this), amount);
+
+    // Our active check is inclusive so we need to add 1
+    vm.roll(l2Proposal.voteStart + (_proposalDuration - voteAggregator.CAST_VOTE_WINDOW()) + 1);
+    vm.expectRevert(L2VoteAggregator.ProposalInactive.selector);
+    voteAggregator.castVoteWithReasonAndParams(_proposalId, 1, reason, voteData);
+  }
+
+  function testFuzz_RevertWhen_VoterHasNoWeight(
+    uint40 againstVotes,
+    uint40 forVotes,
+    uint40 abstainVotes,
+    string memory reason
+  ) public {
+    bytes memory voteData = abi.encodePacked(againstVotes, forVotes, abstainVotes);
+
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+
+    vm.roll(l2Proposal.voteStart + 1);
+    vm.expectRevert(L2VoteAggregator.NoWeight.selector);
+    voteAggregator.castVoteWithReasonAndParams(1, 1, reason, voteData);
+  }
+
+  // function testFuzz_CorrectlyVoteAgain(
+  //   uint40 againstVotes,
+  //   uint40 forVotes,
+  //   uint40 abstainVotes,
+  //   string memory reason
+  // ) public {
+  //   uint128 amount = uint128(againstVotes) + forVotes + abstainVotes;
+  //   bytes memory firstVoteData = abi.encodePacked(againstVotes, forVotes, uint128(0));
+  //   bytes memory secondVoteData = abi.encodePacked(uint128(0), uint128(0), abstainVotes);
+
+  //   l2Erc20.mint(address(this), amount);
+
+  //   L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000,
+  // false);
+
+  //   vm.roll(l2Proposal.voteStart + 1);
+  //   voteAggregator.castVoteWithReasonAndParams(1, 1, reason, firstVoteData);
+
+  //   (uint256 againstFirst, uint256 inFavorFirst, uint256 abstainFirst) =
+  // voteAggregator.proposalVotes(1);
+  //   assertEq(againstFirst, againstVotes, "First against votes for is not correct");
+  //   assertEq(inFavorFirst, forVotes, "First inFavor votes for is not correct");
+  //   assertEq(abstainFirst,0, "First abstain votes for is not correct");
+
+  //   voteAggregator.castVoteWithReasonAndParams(1, 1, reason, secondVoteData);
+
+  //   (uint256 againstSecond, uint256 inFavorSecond, uint256 abstainSecond) =
+  // voteAggregator.proposalVotes(1);
+  //   assertEq(againstSecond, againstVotes, "Second against votes for is not correct");
+  //   assertEq(inFavorSecond, forVotes, "Second inFavor votes for is not correct");
+  //   assertEq(abstainSecond,abstainVotes, "Second abstain votes for is not correct");
+  // }
+
+  function testFuzz_CorrectlyCastVote(
+    uint40 againstVotes,
+    uint40 forVotes,
+    uint40 abstainVotes,
+    string memory reason
+  ) public {
+    uint128 amount = uint128(againstVotes) + forVotes + abstainVotes;
+    bytes memory voteData =
+      abi.encodePacked(uint128(againstVotes), uint128(forVotes), uint128(abstainVotes));
+    vm.assume(amount != 0);
+    l2Erc20.mint(address(this), amount);
+
+    L2GovernorMetadata.Proposal memory l2Proposal = voteAggregator.createProposal(1, 3000, false);
+
+    vm.roll(l2Proposal.voteStart + 1);
+    vm.expectEmit();
+    emit VoteCastWithParams(address(this), 1, 1, amount, reason, voteData);
+
+    voteAggregator.castVoteWithReasonAndParams(1, 1, reason, voteData);
+    (uint256 against, uint256 inFavor, uint256 abstain) = voteAggregator.proposalVotes(1);
+
+    assertEq(against, againstVotes, "Against votes for is not correct");
+    assertEq(inFavor, forVotes, "inFavor votes for is not correct");
+    assertEq(abstain, abstainVotes, "Abstain votes for is not correct");
   }
 }
 
