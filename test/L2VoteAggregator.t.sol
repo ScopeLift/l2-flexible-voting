@@ -549,7 +549,8 @@ contract CastVoteWithReasonAndParams is L2VoteAggregatorTest {
     uint128 amount = uint128(againstVotes) + forVotes + abstainVotes;
     vm.assume(againstVotes != 0);
     vm.assume(abstainVotes != 0);
-    bytes memory firstVoteData = abi.encodePacked(uint128(againstVotes), uint128(forVotes), uint128(0));
+    bytes memory firstVoteData =
+      abi.encodePacked(uint128(againstVotes), uint128(forVotes), uint128(0));
     bytes memory secondVoteData = abi.encodePacked(uint128(0), uint128(0), uint128(abstainVotes));
 
     l2Erc20.mint(address(this), amount);
