@@ -28,14 +28,6 @@ abstract contract L2CountingFractional {
   mapping(uint256 => mapping(address => uint128)) internal _proposalVotersWeightCast;
 
   /**
-   * @dev Mapping from voter address to signature-based vote nonce. The
-   * voter's nonce increments each time a signature-based vote is cast with
-   * fractional voting params and must be included in the `params` as the last
-   * 16 bytes when signing for a fractional vote.
-   */
-  mapping(address => uint128) public fractionalVoteNonce;
-
-  /**
    * @dev See {IGovernor-COUNTING_MODE}.
    */
   // solhint-disable-next-line func-name-mixedcase
@@ -99,9 +91,9 @@ abstract contract L2CountingFractional {
     uint256 totalWeight,
     bytes memory voteData
   ) internal virtual {
-    require(totalWeight > 0, "GovernorCountingFractional: no weight");
+    require(totalWeight > 0, "L2CountingFractional: no weight");
     if (_proposalVotersWeightCast[proposalId][account] >= totalWeight) {
-      revert("GovernorCountingFractional: all weight cast");
+      revert("L2CountingFractional: all weight cast");
     }
 
     uint128 safeTotalWeight = SafeCast.toUint128(totalWeight);
@@ -125,7 +117,7 @@ abstract contract L2CountingFractional {
   ) internal {
     require(
       _proposalVotersWeightCast[proposalId][account] == 0,
-      "GovernorCountingFractional: vote would exceed weight"
+      "L2CountingFractional: vote would exceed weight"
     );
 
     _proposalVotersWeightCast[proposalId][account] = totalWeight;
@@ -137,7 +129,7 @@ abstract contract L2CountingFractional {
     } else if (support == uint8(GovernorCompatibilityBravo.VoteType.Abstain)) {
       _proposalVotes[proposalId].abstainVotes += totalWeight;
     } else {
-      revert("GovernorCountingFractional: invalid support value, must be included in VoteType enum");
+      revert("L2CountingFractional: invalid support value, must be included in VoteType enum");
     }
   }
 
@@ -168,14 +160,14 @@ abstract contract L2CountingFractional {
     uint128 totalWeight,
     bytes memory voteData
   ) internal {
-    require(voteData.length == 48, "GovernorCountingFractional: invalid voteData");
+    require(voteData.length == 48, "L2CountingFractional: invalid voteData");
 
     (uint128 _againstVotes, uint128 _forVotes, uint128 _abstainVotes) = _decodePackedVotes(voteData);
 
     uint128 _existingWeight = _proposalVotersWeightCast[proposalId][account];
     uint256 _newWeight = uint256(_againstVotes) + _forVotes + _abstainVotes + _existingWeight;
 
-    require(_newWeight <= totalWeight, "GovernorCountingFractional: vote would exceed weight");
+    require(_newWeight <= totalWeight, "L2CountingFractional: vote would exceed weight");
 
     // It's safe to downcast here because we've just confirmed that
     // _newWeight <= totalWeight, and totalWeight is a uint128.
