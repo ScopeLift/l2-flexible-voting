@@ -88,7 +88,7 @@ contract _CountVote is L2CountingFractionalTest {
     bytes memory voteData
   ) public {
     support = uint8(bound(support, 0, 2));
-    vm.expectRevert("GovernorCountingFractional: no weight");
+    vm.expectRevert("L2CountingFractional: no weight");
     countingFractional.exposed_countVote(proposalId, account, support, 0, voteData);
   }
 
@@ -118,7 +118,7 @@ contract _CountVote is L2CountingFractionalTest {
     support = uint8(bound(support, 0, 2));
 
     countingFractional.workaround_createProposalVoterWeightCast(proposalId, account, totalWeight);
-    vm.expectRevert("GovernorCountingFractional: all weight cast");
+    vm.expectRevert("L2CountingFractional: all weight cast");
     countingFractional.exposed_countVote(proposalId, account, support, 1, "");
   }
 }
@@ -168,14 +168,14 @@ contract _CountVoteNominal is L2CountingFractionalTest {
     support = uint8(bound(support, 3, type(uint8).max));
 
     vm.expectRevert(
-      "GovernorCountingFractional: invalid support value, must be included in VoteType enum"
+      "L2CountingFractional: invalid support value, must be included in VoteType enum"
     );
     countingFractional.exposed_countVoteNominal(proposalId, account, totalWeight, support);
   }
 
   function testFuzz_RevertIf_VoteExceedsWeight(uint256 proposalId, address account) public {
     countingFractional.exposed_countVoteNominal(proposalId, account, 1, 0);
-    vm.expectRevert("GovernorCountingFractional: vote would exceed weight");
+    vm.expectRevert("L2CountingFractional: vote would exceed weight");
     countingFractional.exposed_countVoteNominal(proposalId, account, 0, 0);
   }
 }
@@ -206,7 +206,7 @@ contract _CountVoteFractional is L2CountingFractionalTest {
     vm.assume(totalWeight != 0);
     bytes memory voteData = abi.encodePacked(uint120(against), uint128(inFavor), uint128(abstain));
 
-    vm.expectRevert("GovernorCountingFractional: invalid voteData");
+    vm.expectRevert("L2CountingFractional: invalid voteData");
     countingFractional.exposed_countVoteFractional(proposalId, account, totalWeight, voteData);
   }
 
@@ -221,7 +221,7 @@ contract _CountVoteFractional is L2CountingFractionalTest {
     vm.assume(totalWeight != 0);
     bytes memory voteData = abi.encodePacked(uint136(against), uint128(inFavor), uint128(abstain));
 
-    vm.expectRevert("GovernorCountingFractional: invalid voteData");
+    vm.expectRevert("L2CountingFractional: invalid voteData");
     countingFractional.exposed_countVoteFractional(proposalId, account, totalWeight, voteData);
   }
 
@@ -235,7 +235,7 @@ contract _CountVoteFractional is L2CountingFractionalTest {
     uint128 totalWeight = 0;
     bytes memory voteData = abi.encodePacked(uint128(against), uint128(inFavor), uint128(abstain));
 
-    vm.expectRevert("GovernorCountingFractional: vote would exceed weight");
+    vm.expectRevert("L2CountingFractional: vote would exceed weight");
     countingFractional.exposed_countVoteFractional(proposalId, account, totalWeight, voteData);
   }
 }
