@@ -23,7 +23,7 @@ contract L2VoteAggregatorHarness is L2VoteAggregator, GovernorMetadataMockBase {
     VoteType support,
     string memory reason
   ) public returns (uint256) {
-    return _castVote(proposalId, voter, support, reason);
+    return _castVote(proposalId, voter, uint8(support), reason);
   }
 
   function exposed_domainSeparatorV4() public view returns (bytes32) {

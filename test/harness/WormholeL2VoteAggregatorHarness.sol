@@ -26,7 +26,7 @@ contract WormholeL2VoteAggregatorHarness is WormholeL2VoteAggregator, GovernorMe
   function createProposalVote(uint256 _proposalId, uint128 _against, uint128 _for, uint128 _abstain)
     public
   {
-    proposalVotes[_proposalId] = ProposalVote(_against, _for, _abstain);
+    _proposalVotes[_proposalId] = ProposalVote(_against, _for, _abstain);
   }
 
   function exposed_castVote(
@@ -35,7 +35,7 @@ contract WormholeL2VoteAggregatorHarness is WormholeL2VoteAggregator, GovernorMe
     VoteType support,
     string memory reason
   ) public returns (uint256) {
-    return _castVote(proposalId, voter, support, reason);
+    return _castVote(proposalId, voter, uint8(support), reason);
   }
 
   function exposed_domainSeparatorV4() public view returns (bytes32) {
