@@ -36,7 +36,7 @@ abstract contract L2GovernorMetadata {
   // before the end of the proposal to cast the vote.
   /// @dev If the block conversion hack is removed from this contract, then this storage var is
   /// probably not needed in this contract and can probably be moved back to the `L2VoteAggregator`
-  uint32 public CAST_VOTE_WINDOW = 1200;
+  uint32 public immutable CAST_VOTE_WINDOW;
 
   error PastBlockNumber();
 

@@ -6,9 +6,9 @@ import {WormholeL2VoteAggregator} from "src/WormholeL2VoteAggregator.sol";
 import {GovernorMetadataMockBase, L2GovernorMetadata} from "test/mock/GovernorMetadataMock.sol";
 
 contract L2VoteAggregatorHarness is L2VoteAggregator, GovernorMetadataMockBase {
-  constructor(address _votingToken, address _l1BlockAddress)
+  constructor(address _votingToken, address _l1BlockAddress, uint32 _castVoteWindow)
     L2VoteAggregator(_votingToken)
-    L2GovernorMetadata(_l1BlockAddress, 1200)
+    L2GovernorMetadata(_l1BlockAddress, _castVoteWindow)
   {}
 
   function _bridgeVote(bytes memory) internal override {}
@@ -28,9 +28,5 @@ contract L2VoteAggregatorHarness is L2VoteAggregator, GovernorMetadataMockBase {
 
   function exposed_domainSeparatorV4() public view returns (bytes32) {
     return _domainSeparatorV4();
-  }
-
-  function workaround_setCastVoteWindow(uint32 _newWindow) public {
-    CAST_VOTE_WINDOW = _newWindow;
   }
 }
