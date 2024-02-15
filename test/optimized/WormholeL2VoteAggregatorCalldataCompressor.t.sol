@@ -27,7 +27,8 @@ contract WormholeL2VoteAggregatorCalldataCompressorHarness is
     address _relayer,
     address _l1BlockAddress,
     uint16 _sourceChain,
-    uint16 _targetChain
+    uint16 _targetChain,
+    uint32 _castWindow
   )
     WormholeL2VoteAggregatorCalldataCompressor(
       _votingToken,
@@ -35,7 +36,8 @@ contract WormholeL2VoteAggregatorCalldataCompressorHarness is
       _l1BlockAddress,
       _sourceChain,
       _targetChain,
-      msg.sender
+      msg.sender,
+      _castWindow
     )
   {}
 
@@ -91,14 +93,16 @@ contract WormholeL2ERC20CalldataCompressorTest is Test, TestConstants {
       address(l1Block),
       L2_CHAIN.wormholeChainId,
       L1_CHAIN.wormholeChainId,
-      msg.sender
+      msg.sender,
+      1200
     );
     routerHarness = new WormholeL2VoteAggregatorCalldataCompressorHarness(
       address(l2Erc20),
       L2_CHAIN.wormholeRelayer,
       address(l1Block),
       L2_CHAIN.wormholeChainId,
-      L1_CHAIN.wormholeChainId
+      L1_CHAIN.wormholeChainId,
+      1200
     );
   }
 

@@ -36,7 +36,7 @@ abstract contract L2GovernorMetadata {
   // before the end of the proposal to cast the vote.
   /// @dev If the block conversion hack is removed from this contract, then this storage var is
   /// probably not needed in this contract and can probably be moved back to the `L2VoteAggregator`
-  uint32 public constant CAST_VOTE_WINDOW = 1200;
+  uint32 public immutable CAST_VOTE_WINDOW;
 
   error PastBlockNumber();
 
@@ -55,8 +55,9 @@ abstract contract L2GovernorMetadata {
   event ProposalCanceled(uint256 proposalId);
 
   /// @param _l1BlockAddress The address of the L1Block contract.
-  constructor(address _l1BlockAddress) {
+  constructor(address _l1BlockAddress, uint32 _castWindow) {
     L1_BLOCK = IL1Block(_l1BlockAddress);
+    CAST_VOTE_WINDOW = _castWindow;
   }
 
   /// @notice Add proposal to internal storage.

@@ -6,7 +6,7 @@ import {WormholeL2GovernorMetadataOptimized} from
 
 contract WormholeL2GovernorMetadataOptimizedHarness is WormholeL2GovernorMetadataOptimized {
   constructor(address _core, address _owner, address _l1BlockAddress)
-    WormholeL2GovernorMetadataOptimized(_core, _owner, _l1BlockAddress)
+    WormholeL2GovernorMetadataOptimized(_core, _owner, _l1BlockAddress, 1200)
   {}
 
   function exposed_addProposal(

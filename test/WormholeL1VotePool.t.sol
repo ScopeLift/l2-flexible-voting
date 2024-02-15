@@ -22,6 +22,7 @@ contract WormholeL1VotePoolTest is TestConstants, WormholeRelayerBasicTest {
   FakeERC20 l2Erc20;
   FakeERC20 l1Erc20;
   GovernorFlexibleVotingMock gov;
+  uint128 DEFAULT_VOTE_END;
 
   event VoteCast(
     address indexed voter,
@@ -46,8 +47,10 @@ contract WormholeL1VotePoolTest is TestConstants, WormholeRelayerBasicTest {
       L2_CHAIN.wormholeRelayer,
       address(l1Block),
       L2_CHAIN.wormholeChainId,
-      L1_CHAIN.wormholeChainId
+      L1_CHAIN.wormholeChainId,
+      1200
     );
+    DEFAULT_VOTE_END = uint128(l2VoteAggregator.CAST_VOTE_WINDOW()) + 1;
   }
 
   function setUpTarget() public override {
@@ -96,7 +99,7 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2Against, _l2For, _l2Abstain);
-    l2VoteAggregator.createProposal(_proposalId, 3000);
+    l2VoteAggregator.createProposal(_proposalId, DEFAULT_VOTE_END);
     vm.expectEmit();
     emit VoteBridged(_proposalId, _l2Against, _l2For, _l2Abstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);
@@ -150,7 +153,7 @@ contract _ReceiveCastVoteWormholeMessages is WormholeL1VotePoolTest {
     vm.deal(address(this), 10 ether);
 
     l2VoteAggregator.createProposalVote(_proposalId, _l2NewAgainst, _l2NewFor, _l2NewAbstain);
-    l2VoteAggregator.createProposal(_proposalId, 3000);
+    l2VoteAggregator.createProposal(_proposalId, DEFAULT_VOTE_END);
     vm.expectEmit();
     emit VoteBridged(_proposalId, _l2NewAgainst, _l2NewFor, _l2NewAbstain);
     l2VoteAggregator.bridgeVote{value: cost}(_proposalId);

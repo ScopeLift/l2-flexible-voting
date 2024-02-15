@@ -30,8 +30,9 @@ contract L2GovernorMetadataTest is TestConstants {
 
   function setUp() public {
     mockL1Block = new L1BlockMock();
-    l2GovernorMetadata =
-      new WormholeL2GovernorMetadata(L2_CHAIN.wormholeRelayer, msg.sender, address(mockL1Block));
+    l2GovernorMetadata = new WormholeL2GovernorMetadata(
+      L2_CHAIN.wormholeRelayer, msg.sender, address(mockL1Block), 1200
+    );
     vm.prank(l2GovernorMetadata.owner());
     l2GovernorMetadata.setRegisteredSender(
       L1_CHAIN.wormholeChainId, MOCK_WORMHOLE_SERIALIZED_ADDRESS
@@ -65,7 +66,7 @@ contract L2GovernorMetadataTest is TestConstants {
 
 contract Constructor is L2GovernorMetadataTest {
   function testFuzz_CorrectlySetsAllArgs(address wormholeCore) public {
-    new WormholeL2GovernorMetadata(wormholeCore, msg.sender, address(ARBITRARY_ADDRESS));
+    new WormholeL2GovernorMetadata(wormholeCore, msg.sender, address(ARBITRARY_ADDRESS), 1200);
     // nothing to assert as there are no constructor args set
   }
 }
