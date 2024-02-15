@@ -233,6 +233,7 @@ contract _CountVoteFractional is L2CountingFractionalTest {
     uint40 abstain
   ) public {
     uint128 totalWeight = 0;
+	vm.assume(against + inFavor + abstain != 0);
     bytes memory voteData = abi.encodePacked(uint128(against), uint128(inFavor), uint128(abstain));
 
     vm.expectRevert("L2CountingFractional: vote would exceed weight");
