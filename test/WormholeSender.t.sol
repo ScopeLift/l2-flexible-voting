@@ -11,7 +11,7 @@ import {TestConstants} from "test/Constants.sol";
 
 contract WormholeSenderHarness is WormholeSender {
   constructor(address _relayer, uint16 _sourceChain, uint16 _targetChain)
-    WormholeBase(_relayer)
+    WormholeBase(_relayer, msg.sender)
     WormholeSender(_sourceChain, _targetChain)
   {}
 
@@ -22,6 +22,8 @@ contract WormholeSenderHarness is WormholeSender {
 
 contract WormholeSenderTest is TestConstants, WormholeRelayerBasicTest {
   WormholeSender wormholeSender;
+
+  event GasLimitUpdate(uint256 oldValue, uint256 newValue, address caller);
 
   constructor() {
     setForkChains(TESTNET, L1_CHAIN.wormholeChainId, L2_CHAIN.wormholeChainId);
@@ -59,5 +61,21 @@ contract QuoteDeliveryCost is WormholeSenderTest {
   function testFork_QuoteForDeliveryCostReturned() public {
     uint256 cost = wormholeSender.quoteDeliveryCost(L2_CHAIN.wormholeChainId);
     assertGt(cost, 0, "No cost was quoted");
+  }
+}
+
+contract UpdateGasLimit is WormholeSenderTest {
+  function testFuzz_CorrectlyUpdateGasLimit(uint256 gasLimit) public {
+    vm.expectEmit();
+    emit GasLimitUpdate(wormholeSender.gasLimit(), gasLimit, address(this));
+
+    wormholeSender.updateGasLimit(gasLimit);
+    assertEq(wormholeSender.gasLimit(), gasLimit, "The gas limit is incorrect");
+  }
+
+  function testFuzz_RevertIf_CalledByNonOwner(address owner, uint256 gasLimit) public {
+    vm.expectRevert("Ownable: caller is not the owner");
+    vm.prank(owner);
+    wormholeSender.updateGasLimit(gasLimit);
   }
 }

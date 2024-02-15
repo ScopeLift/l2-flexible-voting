@@ -10,9 +10,8 @@ import {WormholeReceiver} from "src/WormholeReceiver.sol";
 
 contract WormholeL1VotePoolHarness is WormholeL1VotePool, WormholeReceiver, CommonBase {
   constructor(address _relayer, address _l1Governor)
-    WormholeBase(_relayer)
+    WormholeBase(_relayer, msg.sender)
     WormholeL1VotePool(_l1Governor)
-    WormholeReceiver(msg.sender)
   {}
 
   function receiveWormholeMessages(

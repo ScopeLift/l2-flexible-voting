@@ -37,10 +37,13 @@ contract WormholeL1GovernorMetadataBridge is WormholeSender {
   /// @param _relayer The address of the L1 Wormhole relayer contract.
   /// @param _sourceChain The chain id sending the wormhole messages.
   /// @param _targetChain The chain id receiving the wormhole messages.
-  constructor(address _governor, address _relayer, uint16 _sourceChain, uint16 _targetChain)
-    WormholeBase(_relayer)
-    WormholeSender(_sourceChain, _targetChain)
-  {
+  constructor(
+    address _governor,
+    address _relayer,
+    uint16 _sourceChain,
+    uint16 _targetChain,
+    address _owner
+  ) WormholeBase(_relayer, _owner) WormholeSender(_sourceChain, _targetChain) {
     GOVERNOR = IGovernor(_governor);
   }
 
@@ -69,7 +72,7 @@ contract WormholeL1GovernorMetadataBridge is WormholeSender {
       L2_GOVERNOR_ADDRESS,
       proposalCalldata,
       0, // no receiver value needed since we're just passing a message
-      GAS_LIMIT,
+      gasLimit,
       REFUND_CHAIN,
       msg.sender
     );

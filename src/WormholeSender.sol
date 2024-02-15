@@ -11,7 +11,13 @@ abstract contract WormholeSender is WormholeBase {
   uint16 public immutable REFUND_CHAIN;
 
   /// @notice The gas limit for cross chain transactions.
-  uint256 constant GAS_LIMIT = 500_000;
+  uint256 public gasLimit = 200_000;
+
+  /// @notice Emitted when the gas limit has been updated
+  /// @param oldValue The old gas limit value.
+  /// @param newValue The new gas limit value.
+  /// @param caller The address changing the gas limit.
+  event GasLimitUpdate(uint256 oldValue, uint256 newValue, address caller);
 
   /// @param _refundChain The chain id of the chain sending the messages.
   /// @param _targetChain The chain id of the chain receiving the messages.
@@ -22,6 +28,13 @@ abstract contract WormholeSender is WormholeBase {
 
   /// @param targetChain The chain id of the chain receiving the messages.
   function quoteDeliveryCost(uint16 targetChain) public view virtual returns (uint256 cost) {
-    (cost,) = WORMHOLE_RELAYER.quoteEVMDeliveryPrice(targetChain, 0, GAS_LIMIT);
+    (cost,) = WORMHOLE_RELAYER.quoteEVMDeliveryPrice(targetChain, 0, gasLimit);
+  }
+
+  /// @param _gasLimit The new gas limit value which is used to estimate the delivery cost for
+  /// sending messages cross chain.
+  function updateGasLimit(uint256 _gasLimit) public onlyOwner {
+    emit GasLimitUpdate(gasLimit, _gasLimit, msg.sender);
+    gasLimit = _gasLimit;
   }
 }
