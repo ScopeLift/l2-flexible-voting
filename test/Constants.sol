@@ -55,7 +55,7 @@ contract BaseConstants is CommonBase {
         rpcUrl: vm.envOr("POLYGON_MUMBAI_RPC_URL", string("https://rpc.ankr.com/polygon_mumbai"))
       });
       chainInfos[11_155_111] = ChainConfig({
-        wormholeChainId: 10002,
+        wormholeChainId: 10_002,
         wormholeRelayer: 0x7B1bD7a6b4E61c2a123AC6BC2cbfC614437D0470,
         chainId: 11_155_111,
         rpcUrl: vm.envOr("SEPOLIA_RPC_URL", string("https://sepolia.optimism.io"))
