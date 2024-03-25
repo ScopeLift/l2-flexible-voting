@@ -70,6 +70,11 @@ contract WormholeL2FlexibleVotingDeploy is Script, ScriptConstants {
       vm.envOr("CONTRACT_OWNER", msg.sender)
     );
 
+    vm.broadcast();
+    // Through trial and error we determined this was the lowest gas limit
+    // for the L1 token bridge.
+    l1TokenBridge.updateGasLimit(500_000);
+
     // Create L1 metadata bridge that sends proposal metadata to L2
     vm.broadcast();
     WormholeL1GovernorMetadataBridge l1MetadataBridge = new WormholeL1GovernorMetadataBridge(

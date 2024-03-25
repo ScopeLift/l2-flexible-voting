@@ -54,6 +54,18 @@ contract BaseConstants is CommonBase {
         chainId: 80_001,
         rpcUrl: vm.envOr("POLYGON_MUMBAI_RPC_URL", string("https://rpc.ankr.com/polygon_mumbai"))
       });
+      chainInfos[11_155_111] = ChainConfig({
+        wormholeChainId: 10_002,
+        wormholeRelayer: 0x7B1bD7a6b4E61c2a123AC6BC2cbfC614437D0470,
+        chainId: 11_155_111,
+        rpcUrl: vm.envOr("SEPOLIA_RPC_URL", string("https://sepolia.optimism.io"))
+      });
+      chainInfos[11_155_420] = ChainConfig({
+        wormholeChainId: 10_005,
+        wormholeRelayer: 0x93BAD53DDfB6132b0aC8E37f6029163E63372cEE,
+        chainId: 11_155_420,
+        rpcUrl: vm.envOr("OPTIMISM_SEPOLIA_RPC_URL", string("https://1rpc.io/sepolia"))
+      });
       return;
     }
     chainInfos[1] = ChainConfig({
